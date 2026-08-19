@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: sqlite:///./data/ci.db
+      SECRET_KEY: ci-secret-key
+      ENVIRONMENT: test
+      REDIS_URL: redis://localhost:6379/0
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install uv
+          uv sync --frozen --extra dev
+
+      - name: Verify backend and migrations
+        run: |
+          mkdir -p data
+          uv run python -m compileall -q src/backend evaluation tests
+          uv run alembic upgrade head
+          uv run alembic check
+          uv pip check
+
+      - name: Run backend tests
+        run: uv run python -m pytest -q
+
+      - name: Validate evaluation and public release artifacts
+        run: |
+          uv run python evaluation/scripts/run_evaluation.py
+          uv run python evaluation/scripts/evaluate_retrieval.py
+          uv run python evaluation/scripts/validate_artifacts.py
+          uv run python scripts/public_release_audit.py
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/frontend
+    env:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: src/frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Lint frontend
+        run: npm run lint
+
+      - name: Typecheck frontend
+        run: npm run typecheck
+
+      - name: Build frontend
+        run: npm run build
+
+  docker:
+    runs-on: ubuntu-latest
+    needs:
+      - backend
+      - frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -f Dockerfile.backend -t lecturebridge-backend:ci .
+
+      - name: Build frontend image
+        run: docker build -f src/frontend/Dockerfile -t lecturebridge-frontend:ci src/frontend

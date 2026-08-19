@@ -1,0 +1,23 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is git-ignored — NEVER commit real secrets.
+
+aws_region   = "ap-southeast-1"   # Singapore — closest to Vietnam
+environment  = "prod"
+project_name = "lecturebridge"
+
+# Find your current public IP: curl ifconfig.me
+your_ip_cidr = "YOUR_PUBLIC_IP/32"
+
+# Create key pair in AWS Console → EC2 → Key Pairs, download the .pem file
+ec2_key_pair_name = "lecturebridge-keypair"
+
+# Database credentials (use a strong password — no @ or / chars)
+db_username = "lecturebridge_user"
+db_password = "CHANGE_ME_strong_password_here"
+db_name     = "lecturebridge"
+
+# GitHub settings
+github_repo         = "owner/LectureBridge"
+github_branch       = "main"
+# Generate at: https://github.com/settings/tokens (repo scope)
+github_access_token = "replace-with-your-github-token"

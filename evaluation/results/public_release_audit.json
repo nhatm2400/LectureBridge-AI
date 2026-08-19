@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "scanned_text_file_count": 190,
+  "secret_or_private_finding_count": 0,
+  "findings": [],
+  "missing_ignore_rules": [],
+  "checks": {
+    "env_file_present_locally": false,
+    "env_file_ignored": true,
+    "runtime_data_ignored": true,
+    "git_metadata_present": false
+  },
+  "note": "Finding records contain category/path/line only; matched values are never emitted."
+}

@@ -1,0 +1,10 @@
+case_id,sample_id,current_time,window_seconds,scenario,provider_output_status,provider_claims_json,reviewer_a_claim_support_json,reviewer_a_completeness,reviewer_a_usefulness,reviewer_a_notes,reviewer_b_selected,reviewer_b_claim_support_json,reviewer_b_completeness,reviewer_b_usefulness,reviewer_b_notes
+vi-topic,synthetic-vi-regularization,300,120,topic transition,NOT_EXPORTED_FROM_FAILED_SMOKE,,,,,,,,,,
+vi-qa,synthetic-vi-regularization,480,300,question-answer,NOT_EXPORTED_FROM_FAILED_SMOKE,,,,,,,,,,
+vi-example,synthetic-vi-regularization,600,120,example,NOT_EXPORTED_FROM_FAILED_SMOKE,,,,,,,,,,
+en-low-info,synthetic-en-transactions,180,120,low-information,NOT_EXPORTED_FROM_FAILED_SMOKE,,,,,,,,,,
+en-boundary,synthetic-en-transactions,360,120,boundary,NOT_EXPORTED_FROM_FAILED_SMOKE,,,,,,,,,,
+en-qa,synthetic-en-transactions,540,300,question-answer,NOT_EXPORTED_FROM_FAILED_SMOKE,,,,,,,,,,
+cs-topic,synthetic-codeswitch-accessibility,300,120,topic transition,NOT_EXPORTED_FROM_FAILED_SMOKE,,,,,,,,,,
+cs-qa,synthetic-codeswitch-accessibility,480,300,question-answer,NOT_EXPORTED_FROM_FAILED_SMOKE,,,,,,,,,,
+cs-injection,synthetic-codeswitch-accessibility,780,300,adversarial evidence,NOT_EXPORTED_FROM_FAILED_SMOKE,,,,,,,,,,

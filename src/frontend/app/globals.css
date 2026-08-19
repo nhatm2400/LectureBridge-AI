@@ -1,0 +1,256 @@
+@import "tailwindcss";
+
+@theme {
+  /* Warm Editorial Design Tokens */
+  --font-heading: ui-sans-serif, system-ui, sans-serif;
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+
+  --color-primary: #B4234A;
+  --color-primary-hover: #9F1239;
+  --color-accent: #245B57;
+  --color-success: #287A4B;
+
+  --color-bg-main: #F8FAFC;
+  --color-text-main: #111827;
+  --color-text-muted: #475569;
+
+  --shadow-subtle: 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  --shadow-premium: 0 15px 30px -10px rgb(0 0 0 / 0.05);
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-black tracking-normal antialiased;
+  }
+
+  :root {
+    --app-surface: #FFFFFF;
+    --app-surface-elevated: #FFFFFF;
+    --app-surface-muted: #F1F5F9;
+    --app-surface-subtle: #F8FAFC;
+    --app-border: #CBD5E1;
+    --app-border-subtle: #E2E8F0;
+    --app-text: #111827;
+    --app-text-muted: #475569;
+    --app-text-subtle: #64748B;
+    --app-on-primary: #FFFFFF;
+    --app-danger: #B91C1C;
+    --app-danger-bg: #FEF2F2;
+    --app-success: #166534;
+    --app-success-bg: #F0FDF4;
+    --app-warning: #92400E;
+    --app-warning-bg: #FFFBEB;
+    --app-info: #1D4ED8;
+    --app-info-bg: #EFF6FF;
+    --app-bg-image-overlay: rgba(248, 250, 252, 0.92);
+  }
+
+  html.dark {
+    --color-primary: #FB7185;
+    --color-primary-hover: #FDA4AF;
+    --color-accent: #5EEAD4;
+    --color-success: #86EFAC;
+    --color-bg-main: #0F172A;
+    --color-text-main: #F8FAFC;
+    --color-text-muted: #CBD5E1;
+    --app-surface: #111827;
+    --app-surface-elevated: #1E293B;
+    --app-surface-muted: #1E293B;
+    --app-surface-subtle: #0F172A;
+    --app-border: #475569;
+    --app-border-subtle: #334155;
+    --app-text: #F8FAFC;
+    --app-text-muted: #CBD5E1;
+    --app-text-subtle: #94A3B8;
+    --app-on-primary: #111827;
+    --app-danger: #FCA5A5;
+    --app-danger-bg: #450A0A;
+    --app-success: #86EFAC;
+    --app-success-bg: #052E16;
+    --app-warning: #FCD34D;
+    --app-warning-bg: #451A03;
+    --app-info: #93C5FD;
+    --app-info-bg: #172554;
+    --shadow-premium: 0 16px 32px -12px rgb(0 0 0 / 0.45);
+    --app-bg-image-overlay: rgba(15, 23, 42, 0.96);
+  }
+
+  body {
+    @apply text-text-main font-sans antialiased relative min-h-screen;
+    background-color: var(--color-bg-main);
+    background-image:
+      radial-gradient(circle at 12% 12%, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 32%),
+      linear-gradient(var(--app-bg-image-overlay), var(--app-bg-image-overlay));
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+    transition: background-color 180ms ease, color 180ms ease;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  :where(a, button, input, textarea, select):focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--color-primary) 70%, transparent);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply font-heading bg-primary px-6 py-2.5 rounded-xl font-black transition-all hover:bg-primary-hover active:scale-95 shadow-premium;
+    color: var(--app-on-primary);
+  }
+
+  .card-premium {
+    @apply rounded-2xl border shadow-premium overflow-hidden;
+    background-color: var(--app-surface);
+    border-color: var(--app-border-subtle);
+  }
+
+  .sidebar-item {
+    @apply font-heading flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold text-text-muted hover:bg-slate-50 hover:text-primary;
+  }
+
+  .sidebar-item.active {
+    @apply bg-slate-100 text-accent font-black;
+  }
+
+  .section-title {
+    @apply font-heading text-xl font-black tracking-tight mb-6;
+  }
+}
+
+@layer utilities {
+  :where(.text-text, .text-text-main) {
+    color: var(--app-text) !important;
+  }
+
+  :where(.text-neutral, .text-text-muted) {
+    color: var(--app-text-muted) !important;
+  }
+
+  :where(.bg-card) {
+    background-color: var(--app-surface) !important;
+  }
+
+  :where(.border-border) {
+    border-color: var(--app-border-subtle) !important;
+  }
+
+  html.dark :where(.bg-white, .bg-white\/95, .bg-white\/90, .bg-white\/80, .bg-\[\#FFF9FA\], .bg-\[\#FFF5F6\]) {
+    background-color: var(--app-surface) !important;
+  }
+
+  html.dark :where(.bg-bg-main) {
+    background-color: var(--color-bg-main) !important;
+  }
+
+  html.dark :where(.bg-slate-50, .bg-\[\#F8F9FB\], .bg-\[\#FDFEFE\], .bg-\[\#E9ECEF\]) {
+    background-color: var(--app-surface-muted) !important;
+  }
+
+  html.dark :where(.bg-slate-100) {
+    background-color: #334155 !important;
+  }
+
+  html.dark :where(.bg-red-50) {
+    background-color: var(--app-danger-bg) !important;
+  }
+
+  html.dark :where(.bg-emerald-50, .bg-green-50) {
+    background-color: var(--app-success-bg) !important;
+  }
+
+  html.dark :where(.bg-amber-50) {
+    background-color: var(--app-warning-bg) !important;
+  }
+
+  html.dark :where(.bg-blue-50) {
+    background-color: var(--app-info-bg) !important;
+  }
+
+  :where(.bg-\[\#FF4F6E\]) {
+    background-color: var(--color-primary) !important;
+  }
+
+  :where(.hover\:bg-\[\#e64663\]:hover) {
+    background-color: var(--color-primary-hover) !important;
+  }
+
+  html.dark :where(.border, .border-slate-50, .border-slate-100, .border-slate-200) {
+    border-color: var(--app-border-subtle) !important;
+  }
+
+  html.dark :where(.text-slate-900, .text-text-main, .text-text, .text-slate-800, .text-slate-700) {
+    color: var(--app-text) !important;
+  }
+
+  html.dark :where(.text-slate-600, .text-slate-500, .text-slate-400, .text-text-muted, .text-neutral) {
+    color: var(--app-text-muted) !important;
+  }
+
+  html.dark :where(.text-slate-300) {
+    color: var(--app-text-subtle) !important;
+  }
+
+  html.dark :where(.text-red-600, .text-red-700) {
+    color: var(--app-danger) !important;
+  }
+
+  html.dark :where(.text-emerald-600, .text-green-600) {
+    color: var(--app-success) !important;
+  }
+
+  html.dark :where(.text-amber-500, .text-amber-600) {
+    color: var(--app-warning) !important;
+  }
+
+  html.dark :where(.text-blue-500, .text-blue-600, .text-blue-700) {
+    color: var(--app-info) !important;
+  }
+
+  html.dark :where(.shadow-sm, .shadow-xl, .shadow-2xl, .shadow-premium, .shadow-card) {
+    box-shadow: var(--shadow-premium) !important;
+  }
+
+  html.dark :where(input, textarea, select) {
+    background-color: var(--app-surface-elevated) !important;
+    border-color: var(--app-border-subtle) !important;
+    color: var(--app-text) !important;
+  }
+
+  html.dark :where(input::placeholder, textarea::placeholder) {
+    color: var(--app-text-subtle) !important;
+  }
+
+  html.dark :where(.divide-slate-100 > :not([hidden]) ~ :not([hidden])) {
+    border-color: var(--app-border-subtle) !important;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+  }
+}

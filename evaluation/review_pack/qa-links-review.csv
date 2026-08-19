@@ -1,0 +1,5 @@
+sample_id,question_event_id,draft_correct_answer_event_ids,provider_predicted_answer_event_ids,provider_prediction_status,reviewer_a_correct_answer_event_ids,reviewer_a_pairing_correct,reviewer_a_notes,reviewer_b_selected,reviewer_b_pairing_correct,reviewer_b_notes
+synthetic-vi-regularization,vi-question-dropout,vi-answer-dropout,,NOT_EXPORTED_FROM_FAILED_SMOKE,,,,,,
+synthetic-en-transactions,en-question-dirty-read,en-answer-dirty-read,,NOT_EXPORTED_FROM_FAILED_SMOKE,,,,,,
+synthetic-codeswitch-accessibility,cs-question-live,cs-answer-live,,NOT_EXPORTED_FROM_FAILED_SMOKE,,,,,,
+synthetic-vi-regularization,no-answer-control,,,NOT_EXPORTED_FROM_FAILED_SMOKE,,,,,,

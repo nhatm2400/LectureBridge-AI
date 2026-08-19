@@ -1,0 +1,38 @@
+{
+  "source_language": "vi",
+  "available_languages": ["vi"],
+  "segments_by_language": {
+    "vi": [
+      {"index": 0, "start": 0.0, "end": 20.0, "text": "Hôm nay chúng ta học ba phần: mạng nơ-ron, regularization và cách đánh giá mô hình."},
+      {"index": 1, "start": 20.0, "end": 40.0, "text": "Trước hết, một neuron nhận đầu vào, nhân với trọng số rồi cộng bias."},
+      {"index": 2, "start": 40.0, "end": 60.0, "text": "Hàm kích hoạt tạo ra tính phi tuyến để mạng học được quan hệ phức tạp."},
+      {"index": 3, "start": 60.0, "end": 80.0, "text": "Câu hỏi là vì sao ta không chỉ xếp nhiều lớp tuyến tính với nhau?"},
+      {"index": 4, "start": 80.0, "end": 100.0, "text": "Vì nhiều phép biến đổi tuyến tính liên tiếp vẫn tương đương một phép biến đổi tuyến tính duy nhất."},
+      {"index": 5, "start": 100.0, "end": 120.0, "text": "Ví dụ, trong phân loại ảnh, lớp đầu có thể nhận biết cạnh còn lớp sau kết hợp cạnh thành hình dạng."},
+      {"index": 6, "start": 120.0, "end": 140.0, "text": "Forward pass tạo dự đoán, còn loss đo khoảng cách giữa dự đoán và nhãn đúng."},
+      {"index": 7, "start": 140.0, "end": 160.0, "text": "Backpropagation dùng chain rule để tính gradient từ loss về từng trọng số."},
+      {"index": 8, "start": 160.0, "end": 180.0, "text": "Điểm rất quan trọng: learning rate quá lớn có thể làm quá trình học dao động hoặc phân kỳ."},
+      {"index": 9, "start": 180.0, "end": 200.0, "text": "In practice, we inspect both training loss and validation loss after every epoch."},
+      {"index": 10, "start": 200.0, "end": 220.0, "text": "Bây giờ ta chuyển sang chủ đề thứ hai là overfitting và regularization."},
+      {"index": 11, "start": 220.0, "end": 240.0, "text": "Overfitting xảy ra khi mô hình ghi nhớ dữ liệu huấn luyện nhưng tổng quát hóa kém."},
+      {"index": 12, "start": 240.0, "end": 260.0, "text": "L2 regularization thêm một khoản phạt theo độ lớn của trọng số vào hàm loss."},
+      {"index": 13, "start": 260.0, "end": 280.0, "text": "Tại sao dropout chỉ tắt ngẫu nhiên neuron trong lúc training mà không làm vậy khi inference?"},
+      {"index": 14, "start": 280.0, "end": 300.0, "text": "Trong training, dropout ngăn các neuron phụ thuộc quá mức vào nhau; khi inference ta dùng toàn bộ mạng với tỉ lệ đã được hiệu chỉnh."},
+      {"index": 15, "start": 300.0, "end": 320.0, "text": "Một ví dụ là mô hình có training accuracy 99 phần trăm nhưng validation accuracy chỉ 72 phần trăm."},
+      {"index": 16, "start": 320.0, "end": 340.0, "text": "Khi đó ta có thể giảm độ phức tạp, thêm dữ liệu hoặc tăng regularization."},
+      {"index": 17, "start": 340.0, "end": 360.0, "text": "Các em cần đặc biệt nhớ rằng validation set không được dùng để cập nhật trọng số."},
+      {"index": 18, "start": 360.0, "end": 380.0, "text": "Early stopping dừng huấn luyện khi validation loss không còn cải thiện trong một số epoch."},
+      {"index": 19, "start": 380.0, "end": 400.0, "text": "This is a model-selection decision, not a replacement for an untouched test set."},
+      {"index": 20, "start": 400.0, "end": 420.0, "text": "Ta sang phần cuối: đánh giá mô hình và lựa chọn metric phù hợp."},
+      {"index": 21, "start": 420.0, "end": 440.0, "text": "Accuracy dễ hiểu nhưng có thể đánh lừa khi dữ liệu mất cân bằng."},
+      {"index": 22, "start": 440.0, "end": 460.0, "text": "Ví dụ, nếu 99 trong 100 email là bình thường, mô hình luôn đoán bình thường vẫn đạt accuracy 99 phần trăm."},
+      {"index": 23, "start": 460.0, "end": 480.0, "text": "Precision cho biết bao nhiêu dự đoán dương là đúng, còn recall cho biết ta tìm được bao nhiêu trường hợp dương thật."},
+      {"index": 24, "start": 480.0, "end": 500.0, "text": "Trong sàng lọc bệnh, bỏ sót ca bệnh thường đắt hơn cảnh báo nhầm nên recall có thể được ưu tiên."},
+      {"index": 25, "start": 500.0, "end": 520.0, "text": "Điểm mấu chốt là metric phải phản ánh chi phí sai lầm của bài toán thực tế."},
+      {"index": 26, "start": 520.0, "end": 540.0, "text": "For deployment, monitor data drift because production inputs may change over time."},
+      {"index": 27, "start": 540.0, "end": 560.0, "text": "Bài tập về nhà là so sánh accuracy, precision, recall và F1 trên cùng confusion matrix."},
+      {"index": 28, "start": 560.0, "end": 580.0, "text": "Hạn nộp bài là 23 giờ 59 phút thứ Sáu tuần này trên hệ thống lớp học."},
+      {"index": 29, "start": 580.0, "end": 600.0, "text": "Tóm lại, hãy nối kiến trúc, cách chống overfitting và metric với mục tiêu thật của bài toán."}
+    ]
+  }
+}

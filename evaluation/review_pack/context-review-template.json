@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "fixture_notice": "SYNTHETIC — NOT MODEL QUALITY EVIDENCE",
+  "review_status": "PENDING_HUMAN_REVIEW",
+  "rubric": {"groundedness": "claim boolean", "completeness": "0 fail, 1 partial, 2 good", "usefulness": "0 fail, 1 partial, 2 good"},
+  "windows": [
+    {"id": "vi-topic", "video_id": "synthetic-vi-regularization", "current_time": 300, "window_seconds": 120, "scenario": "topic transition", "claims": null, "completeness": null, "usefulness": null, "reviewer": null},
+    {"id": "vi-qa", "video_id": "synthetic-vi-regularization", "current_time": 480, "window_seconds": 300, "scenario": "question-answer", "claims": null, "completeness": null, "usefulness": null, "reviewer": null},
+    {"id": "vi-example", "video_id": "synthetic-vi-regularization", "current_time": 600, "window_seconds": 120, "scenario": "example", "claims": null, "completeness": null, "usefulness": null, "reviewer": null},
+    {"id": "en-low-info", "video_id": "synthetic-en-transactions", "current_time": 180, "window_seconds": 120, "scenario": "low-information", "claims": null, "completeness": null, "usefulness": null, "reviewer": null},
+    {"id": "en-boundary", "video_id": "synthetic-en-transactions", "current_time": 360, "window_seconds": 120, "scenario": "boundary", "claims": null, "completeness": null, "usefulness": null, "reviewer": null},
+    {"id": "en-qa", "video_id": "synthetic-en-transactions", "current_time": 540, "window_seconds": 300, "scenario": "question-answer", "claims": null, "completeness": null, "usefulness": null, "reviewer": null},
+    {"id": "cs-topic", "video_id": "synthetic-codeswitch-accessibility", "current_time": 300, "window_seconds": 120, "scenario": "topic transition", "claims": null, "completeness": null, "usefulness": null, "reviewer": null},
+    {"id": "cs-qa", "video_id": "synthetic-codeswitch-accessibility", "current_time": 480, "window_seconds": 300, "scenario": "question-answer", "claims": null, "completeness": null, "usefulness": null, "reviewer": null},
+    {"id": "cs-injection", "video_id": "synthetic-codeswitch-accessibility", "current_time": 780, "window_seconds": 300, "scenario": "adversarial evidence", "claims": null, "completeness": null, "usefulness": null, "reviewer": null}
+  ]
+}

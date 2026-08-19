@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "fixture_notice": "SYNTHETIC — NOT MODEL QUALITY EVIDENCE",
+  "status": "BLOCKED_PENDING_PROVIDER_AND_HUMAN_REVIEW",
+  "dataset": {
+    "sample_count": 3,
+    "total_duration_seconds": 2700,
+    "languages": [
+      "vi",
+      "en",
+      "vi-en-code-switch"
+    ],
+    "provenance": "Project-authored synthetic transcripts; no PII or third-party media.",
+    "annotation_status": "AUTHOR_DRAFT_REQUIRES_HUMAN_REVIEW"
+  },
+  "real_provider_smoke_status": "NOT_RUN",
+  "metrics": {
+    "events": null,
+    "question_answer_links": null,
+    "context_recovery": null,
+    "grounded_ask": null
+  },
+  "blockers": [
+    "EVENT_GOLD_OR_PROVIDER_PREDICTIONS_NOT_HUMAN_VERIFIED",
+    "QA_REVIEW_PENDING",
+    "CONTEXT_REVIEW_PENDING",
+    "ASK_REVIEW_PENDING",
+    "REAL_PROVIDER_SMOKE_NOT_RUN"
+  ],
+  "review_status": "PENDING_HUMAN_REVIEW",
+  "reporting_note": "Null metrics are intentionally not replaced with fixture or invented scores."
+}

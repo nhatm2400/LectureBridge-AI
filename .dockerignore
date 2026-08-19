@@ -1,0 +1,13 @@
+.git
+.github
+.pytest_cache
+__pycache__
+*.pyc
+.venv
+venv
+src/frontend/node_modules
+src/frontend/.next
+data
+provider-cache
+manual-review-output
+*.log

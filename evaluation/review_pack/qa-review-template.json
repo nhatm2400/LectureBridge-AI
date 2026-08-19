@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "fixture_notice": "SYNTHETIC — NOT MODEL QUALITY EVIDENCE",
+  "review_status": "PENDING_HUMAN_REVIEW",
+  "items": [
+    {"video_id": "synthetic-vi-regularization", "question_event_id": "vi-question-dropout", "correct_answer_event_ids": ["vi-answer-dropout"], "predicted_answer_event_ids": null, "reviewer": null},
+    {"video_id": "synthetic-en-transactions", "question_event_id": "en-question-dirty-read", "correct_answer_event_ids": ["en-answer-dirty-read"], "predicted_answer_event_ids": null, "reviewer": null},
+    {"video_id": "synthetic-codeswitch-accessibility", "question_event_id": "cs-question-live", "correct_answer_event_ids": ["cs-answer-live"], "predicted_answer_event_ids": null, "reviewer": null},
+    {"video_id": "synthetic-vi-regularization", "question_event_id": "no-answer-control", "correct_answer_event_ids": [], "predicted_answer_event_ids": null, "reviewer": null}
+  ]
+}

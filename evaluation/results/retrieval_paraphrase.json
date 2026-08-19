@@ -1,0 +1,214 @@
+{
+  "status": "ENGINEERING_DIAGNOSTIC_NOT_HUMAN_GOLD",
+  "question_count": 15,
+  "supported_question_count": 10,
+  "supported_retrieval_hit_rate": 1.0,
+  "paraphrase_question_count": 3,
+  "paraphrase_retrieval_hit_rate": 1.0,
+  "results": [
+    {
+      "id": "vi-supported",
+      "category": "supported",
+      "supported": true,
+      "retrieval_hit": true,
+      "retrieved_unit_count": 8,
+      "retrieved_source_segment_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        8,
+        11
+      ]
+    },
+    {
+      "id": "vi-paraphrase",
+      "category": "paraphrased",
+      "supported": true,
+      "retrieval_hit": true,
+      "retrieved_unit_count": 8,
+      "retrieved_source_segment_ids": [
+        0,
+        1,
+        3,
+        4,
+        5,
+        7,
+        13,
+        14
+      ]
+    },
+    {
+      "id": "vi-unsupported",
+      "category": "unsupported",
+      "supported": false,
+      "retrieval_hit": null,
+      "retrieved_unit_count": 8,
+      "retrieved_source_segment_ids": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        11,
+        13
+      ]
+    },
+    {
+      "id": "vi-supported-l2",
+      "category": "supported",
+      "supported": true,
+      "retrieval_hit": true,
+      "retrieved_unit_count": 5,
+      "retrieved_source_segment_ids": [
+        9,
+        10,
+        11,
+        13,
+        14
+      ]
+    },
+    {
+      "id": "vi-unsupported-weather",
+      "category": "unsupported",
+      "supported": false,
+      "retrieval_hit": null,
+      "retrieved_unit_count": 6,
+      "retrieved_source_segment_ids": [
+        5,
+        6,
+        7,
+        8,
+        10,
+        11
+      ]
+    },
+    {
+      "id": "en-supported",
+      "category": "supported",
+      "supported": true,
+      "retrieval_hit": true,
+      "retrieved_unit_count": 4,
+      "retrieved_source_segment_ids": [
+        5,
+        6,
+        9,
+        10
+      ]
+    },
+    {
+      "id": "en-paraphrase",
+      "category": "paraphrased",
+      "supported": true,
+      "retrieval_hit": true,
+      "retrieved_unit_count": 4,
+      "retrieved_source_segment_ids": [
+        3,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "id": "en-unsupported",
+      "category": "unsupported",
+      "supported": false,
+      "retrieval_hit": null,
+      "retrieved_unit_count": 8,
+      "retrieved_source_segment_ids": [
+        0,
+        2,
+        3,
+        4,
+        10,
+        11,
+        12,
+        13
+      ]
+    },
+    {
+      "id": "en-supported-atomicity",
+      "category": "supported",
+      "supported": true,
+      "retrieval_hit": true,
+      "retrieved_unit_count": 1,
+      "retrieved_source_segment_ids": [
+        1
+      ]
+    },
+    {
+      "id": "en-unsupported-release",
+      "category": "unsupported",
+      "supported": false,
+      "retrieval_hit": null,
+      "retrieved_unit_count": 0,
+      "retrieved_source_segment_ids": []
+    },
+    {
+      "id": "cs-supported-vi",
+      "category": "cross-language",
+      "supported": true,
+      "retrieval_hit": true,
+      "retrieved_unit_count": 8,
+      "retrieved_source_segment_ids": [
+        1,
+        2,
+        4,
+        6,
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "id": "cs-supported-en",
+      "category": "cross-language",
+      "supported": true,
+      "retrieval_hit": true,
+      "retrieved_unit_count": 3,
+      "retrieved_source_segment_ids": [
+        6,
+        8,
+        10
+      ]
+    },
+    {
+      "id": "cs-injection",
+      "category": "prompt-injection",
+      "supported": true,
+      "retrieval_hit": true,
+      "retrieved_unit_count": 3,
+      "retrieved_source_segment_ids": [
+        2,
+        8,
+        11
+      ]
+    },
+    {
+      "id": "cs-unsupported",
+      "category": "unsupported",
+      "supported": false,
+      "retrieval_hit": null,
+      "retrieved_unit_count": 2,
+      "retrieved_source_segment_ids": [
+        5,
+        14
+      ]
+    },
+    {
+      "id": "cs-paraphrase",
+      "category": "paraphrased",
+      "supported": true,
+      "retrieval_hit": true,
+      "retrieved_unit_count": 2,
+      "retrieved_source_segment_ids": [
+        6,
+        8
+      ]
+    }
+  ]
+}

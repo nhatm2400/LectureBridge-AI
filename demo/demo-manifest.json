@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "fixture_notice": "SYNTHETIC — NOT MODEL QUALITY EVIDENCE",
+  "primary_demo_id": "synthetic-lecture-en-demo",
+  "source_transcript": "evaluation/data/transcripts/synthetic-en-transactions.json",
+  "runtime_video": "data/demo/synthetic-lecture-en/lecturebridge-demo.mp4",
+  "runtime_transcript": "data/demo/synthetic-lecture-en/transcript.json",
+  "generator": "scripts/generate_demo_lecture.ps1",
+  "provenance": "Project-authored synthetic lecture; no PII or third-party media."
+}

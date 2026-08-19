@@ -1,0 +1,55 @@
+# Environment and credentials
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coverage/
+.coverage
+
+# Frontend
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+.pnp
+.pnp.*
+.yarn/
+.vercel/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime and private output
+data/
+temp/
+provider-cache/
+manual-review-output/
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# Terraform local state and secrets
+infra/terraform/terraform.tfvars
+infra/terraform/.terraform/
+infra/terraform/.terraform.lock.hcl
+infra/terraform/terraform.tfstate
+infra/terraform/terraform.tfstate.backup
+
+# Operating system
+.DS_Store
+Thumbs.db
