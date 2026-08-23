@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import shutil
@@ -43,6 +44,7 @@ from src.backend.services.storage_service import (
     download_from_s3,
     generate_presigned_upload_url,
     generate_presigned_url,
+    get_upload_capabilities,
     s3_object_exists,
 )
 from src.backend.services.video_service import VideoService
@@ -391,6 +393,7 @@ async def _create_lesson_and_enqueue(
         max_size_bytes=max_upload_size_bytes,
     )
     VideoService.validate_video_duration(video_path)
+    await asyncio.to_thread(VideoService.normalize_mp4_for_browser, video_path)
 
     target_module = _ensure_teacher_module(module_id, current_user, session)
     module = target_module or await get_or_create_default_hierarchy(session, current_user)
@@ -436,6 +439,16 @@ async def _create_lesson_and_enqueue(
         "filename": file.filename,
     }
 
+
+@router.get("/upload-capabilities")
+async def upload_capabilities(
+    current_user: User = Depends(get_current_user),
+):
+    """Return the authenticated browser upload mode selected by backend config."""
+    del current_user
+    return get_upload_capabilities()
+
+
 @router.post("/presign-upload")
 async def presign_upload(
     data: dict,
@@ -460,7 +473,13 @@ async def presign_upload(
 
     upload_url = generate_presigned_upload_url(s3_key, content_type)
     if not upload_url:
-        raise HTTPException(status_code=503, detail="S3 not configured. Use /upload instead.")
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Direct object storage upload is unavailable. "
+                "Contact an administrator to check the storage configuration."
+            ),
+        )
 
     target_module = _ensure_teacher_module(module_id, current_user, session)
     module = target_module or await get_or_create_default_hierarchy(session, current_user)
@@ -522,6 +541,7 @@ async def confirm_upload(
         raise HTTPException(status_code=502, detail="Failed to download video from S3.")
 
     VideoService.validate_video_duration(local_path)
+    await asyncio.to_thread(VideoService.normalize_mp4_for_browser, local_path)
 
     duration_seconds = VideoService.get_video_duration_seconds(local_path)
     if duration_seconds:

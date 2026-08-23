@@ -1,7 +1,9 @@
 import uuid
 
+import httpx
 import pytest
 from fastapi.testclient import TestClient
+from openai import APIConnectionError
 from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel, Session, create_engine
 
@@ -61,6 +63,10 @@ class GroundingProvider:
 
     async def answer_question(self, question, units, output_language, *, corrective_instruction=None):
         self.ask_calls += 1
+        if self.ask_mode == "connection_error":
+            raise APIConnectionError(
+                request=httpx.Request("POST", "https://provider.invalid")
+            )
         if self.ask_mode == "unsupported":
             return {"answer": "", "used_evidence_ids": [], "supported": False}
         if self.ask_mode == "invalid_id":
@@ -318,6 +324,21 @@ def test_ask_irrelevant_question_abstains_before_provider(grounding_env):
     assert response.status_code == 200
     assert response.json()["supported"] is False
     assert provider.ask_calls == 0
+
+
+def test_ask_provider_connection_error_is_bounded_and_abstains(grounding_env):
+    client, provider, values = grounding_env
+    provider.ask_mode = "connection_error"
+    response = client.post(
+        f"/api/videos/{values['lesson_id']}/ask",
+        headers=_auth(values["student_token"]),
+        json={"question": "Explain batch normalization", "output_language": "en"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["supported"] is False
+    assert response.json()["citations"] == []
+    assert provider.ask_calls == 2
 
 
 @pytest.mark.parametrize("mode", ["invalid_id", "no_evidence", "unsupported"])

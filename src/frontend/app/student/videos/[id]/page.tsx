@@ -461,14 +461,24 @@ export default function VideoLessonPage() {
   }, []);
 
   // Video Control Handlers
+  const playVideo = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || videoBroken) return;
+
+    void video.play().catch(() => {
+      setIsPlaying(false);
+      if (video.error) setVideoBroken(true);
+    });
+  }, [videoBroken]);
+
   const togglePlay = useCallback(() => {
     if (!videoRef.current) return;
     if (isPlaying) {
       videoRef.current.pause();
     } else {
-      videoRef.current.play();
+      playVideo();
     }
-  }, [isPlaying]);
+  }, [isPlaying, playVideo]);
 
   const toggleMute = useCallback(() => {
     if (!videoRef.current) return;
@@ -684,7 +694,7 @@ export default function VideoLessonPage() {
     const totalSeconds = m * 60 + s;
     if (videoRef.current) {
       videoRef.current.currentTime = totalSeconds;
-      videoRef.current.play();
+      playVideo();
     }
   };
 
@@ -801,7 +811,11 @@ export default function VideoLessonPage() {
                 preload="metadata"
                 playsInline
                 aria-label="Video bài học"
-                onError={() => setVideoBroken(true)}
+                onCanPlay={() => setVideoBroken(false)}
+                onError={() => {
+                  setIsPlaying(false);
+                  setVideoBroken(true);
+                }}
               />
 
               {/* Big Center Play Button (only when paused or hovering) */}
@@ -1034,7 +1048,7 @@ export default function VideoLessonPage() {
               >
                 <Film size={64} className="mb-6 opacity-30" />
                 <p className="font-extrabold tracking-[0.2em] uppercase text-sm">Không thể phát video</p>
-                <p className="text-[11px] mt-3 max-w-xs text-center opacity-60 font-bold">Tệp video có thể bị lỗi hoặc không tồn tại.</p>
+                <p className="text-[11px] mt-3 max-w-xs text-center opacity-60 font-bold">Không tải được nguồn video đã xác thực. Hãy đăng nhập lại hoặc kiểm tra tệp video.</p>
               </div>
 
               {/* Visual Sound Pulse REMOVED per user request */}

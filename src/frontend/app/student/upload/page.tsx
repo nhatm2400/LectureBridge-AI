@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api, type MyVideo } from '@/lib/api';
+import { selectUploadStrategy } from '@/lib/upload-strategy.mjs';
 
 function getVideoDisplayState(video: MyVideo) {
   const status = (video.status || '').toLowerCase();
@@ -77,6 +78,7 @@ export default function UploadVideo() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [errorMsg, setErrorMsg] = useState('');
+  const [uploadStatusText, setUploadStatusText] = useState('');
   const [myVideos, setMyVideos] = useState<MyVideo[]>([]);
   const [videoTitle, setVideoTitle] = useState('');
 
@@ -115,7 +117,7 @@ export default function UploadVideo() {
     fileInputRef.current?.click();
   };
 
-  const uploadToS3 = (url: string, file: File, contentType: string): Promise<void> => {
+  const uploadToObjectStorage = (url: string, file: File, contentType: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.upload.onprogress = (e) => {
@@ -127,10 +129,10 @@ export default function UploadVideo() {
         if (xhr.status >= 200 && xhr.status < 300) {
           resolve();
         } else {
-          reject(new Error(`Upload S3 thất bại (HTTP ${xhr.status}). Liên hệ admin.`));
+          reject(new Error(`Tải video lên kho lưu trữ thất bại (HTTP ${xhr.status}). Liên hệ quản trị viên.`));
         }
       };
-      xhr.onerror = () => reject(new Error('Lỗi mạng khi upload lên S3 (CORS hoặc network). Mở DevTools > Network để xem chi tiết.'));
+      xhr.onerror = () => reject(new Error('Không thể kết nối tới kho lưu trữ video. Vui lòng kiểm tra mạng hoặc liên hệ quản trị viên.'));
       xhr.open('PUT', url);
       xhr.setRequestHeader('Content-Type', contentType);
       xhr.send(file);
@@ -143,23 +145,37 @@ export default function UploadVideo() {
     setIsUploading(true);
     setErrorMsg('');
     setUploadProgress(0);
+    setUploadStatusText('Đang kiểm tra cấu hình lưu trữ...');
 
     try {
-      // Step 1: Get presigned URL from backend
-      const contentType = selectedFile.type || 'video/mp4';
-      const { video_id, upload_url, s3_key } = await api.videos.presignUpload({
-        filename: selectedFile.name,
-        content_type: contentType,
-        video_title: videoTitle,
-      });
+      const capabilities = await api.videos.getUploadCapabilities();
+      const strategy = selectUploadStrategy(capabilities);
+      let video_id: string;
 
-      // Step 2: Upload directly to S3 (bypasses Amplify proxy — no size limit)
-      await uploadToS3(upload_url, selectedFile, contentType);
-      setUploadProgress(85);
+      if (strategy === 'direct_object_storage') {
+        setUploadStatusText('Đang tải video trực tiếp lên kho lưu trữ...');
+        const contentType = selectedFile.type || 'video/mp4';
+        const presigned = await api.videos.presignUpload({
+          filename: selectedFile.name,
+          content_type: contentType,
+          video_title: videoTitle,
+        });
+        video_id = presigned.video_id;
+        await uploadToObjectStorage(presigned.upload_url, selectedFile, contentType);
+        setUploadProgress(85);
+        setUploadStatusText('Đang đăng ký video và khởi tạo xử lý...');
+        await api.videos.confirmUpload(video_id, presigned.s3_key);
+      } else {
+        setUploadStatusText('Đang tải video lên máy chủ cục bộ...');
+        const uploaded = await api.videos.uploadLocal(selectedFile, {
+          video_title: videoTitle,
+          onProgress: (percent) => setUploadProgress(Math.min(90, percent * 0.9)),
+        });
+        video_id = uploaded.video_id;
+      }
 
-      // Step 3: Notify backend to process
-      await api.videos.confirmUpload(video_id, s3_key);
       setUploadProgress(100);
+      setUploadStatusText('Đã tải lên và chuyển sang hàng đợi xử lý!');
 
       await loadMyVideos();
       setSelectedFile(null);
@@ -172,6 +188,7 @@ export default function UploadVideo() {
       setErrorMsg(message);
       setIsUploading(false);
       setUploadProgress(0);
+      setUploadStatusText('');
     }
   };
 
@@ -263,7 +280,7 @@ export default function UploadVideo() {
                   </div>
                   
                   <h3 className="text-xl font-extrabold text-slate-900 mb-2">
-                    {uploadProgress >= 100 ? 'Phân tích hoàn tất!' : 'AI đang xử lý...'}
+                    {uploadStatusText || 'Hệ thống đang xử lý...'}
                   </h3>
                   
                   <div className="w-full max-w-xs bg-slate-100 rounded-full h-3 mb-4 overflow-hidden">

@@ -16,6 +16,26 @@ from src.backend import config
 logger = logging.getLogger(__name__)
 
 
+def get_upload_capabilities() -> dict[str, str | bool]:
+    """Describe the browser upload path without exposing storage credentials."""
+    direct_object_upload_available = bool(config.AWS_S3_BUCKET)
+    local_upload_available = (
+        not direct_object_upload_available
+        and config.ENVIRONMENT not in {"production", "prod"}
+    )
+    if direct_object_upload_available:
+        upload_mode = "direct_object_storage"
+    elif local_upload_available:
+        upload_mode = "local_filesystem"
+    else:
+        upload_mode = "unavailable"
+    return {
+        "upload_mode": upload_mode,
+        "direct_object_upload_available": direct_object_upload_available,
+        "local_upload_available": local_upload_available,
+    }
+
+
 def _s3():
     import boto3
     from botocore.config import Config

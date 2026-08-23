@@ -7,6 +7,7 @@ import uuid
 from collections import Counter
 from typing import Any
 
+from openai import OpenAIError
 from pydantic import ValidationError
 from sqlmodel import Session
 
@@ -278,7 +279,14 @@ async def recover_lecture_context(
             if diagnostics is not None:
                 diagnostics["provider_response_parse_status"] = "PASS"
             break
-        except (ValidationError, TypeError, ValueError, json.JSONDecodeError, RuntimeError) as exc:
+        except (
+            ValidationError,
+            TypeError,
+            ValueError,
+            json.JSONDecodeError,
+            RuntimeError,
+            OpenAIError,
+        ) as exc:
             if diagnostics is not None:
                 diagnostics["provider_response_parse_status"] = "FAIL"
                 diagnostics["provider_error_codes"].append(type(exc).__name__)
@@ -636,7 +644,14 @@ async def ask_lecture(
             if diagnostics is not None:
                 diagnostics["provider_parse_status"] = "PASS"
             break
-        except (ValidationError, TypeError, ValueError, json.JSONDecodeError, RuntimeError) as exc:
+        except (
+            ValidationError,
+            TypeError,
+            ValueError,
+            json.JSONDecodeError,
+            RuntimeError,
+            OpenAIError,
+        ) as exc:
             if diagnostics is not None:
                 diagnostics["provider_parse_status"] = "FAIL"
                 diagnostics["provider_error_codes"].append(type(exc).__name__)

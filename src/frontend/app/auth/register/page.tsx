@@ -220,7 +220,7 @@ export default function RegisterPage() {
               className="mt-1 w-4 h-4 rounded border-slate-200 text-[#FF4F6E] focus:ring-[#FF4F6E]"
             />
             <label htmlFor="terms" className="text-xs font-bold text-slate-500 leading-relaxed cursor-pointer">
-              Tôi đồng ý với <Link href="#" className="text-slate-900 hover:underline">Điều khoản dịch vụ</Link> và <Link href="#" className="text-slate-900 hover:underline">Chính sách bảo mật</Link>
+              Tôi đồng ý với <span className="text-slate-900">Điều khoản dịch vụ</span> và <span className="text-slate-900">Chính sách bảo mật</span>
             </label>
           </div>
           {fieldErrors.terms && <p className="text-xs font-bold text-red-600">{fieldErrors.terms}</p>}

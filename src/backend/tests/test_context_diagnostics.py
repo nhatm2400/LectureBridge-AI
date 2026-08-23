@@ -3,6 +3,8 @@ import json
 import uuid
 from pathlib import Path
 
+import httpx
+from openai import APIConnectionError
 from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel, Session, create_engine
 
@@ -35,6 +37,10 @@ class ContextProvider:
         corrective_instruction=None,
     ):
         self.calls += 1
+        if self.mode == "connection_error":
+            raise APIConnectionError(
+                request=httpx.Request("POST", "https://provider.invalid")
+            )
         event_unit = next(unit for unit in evidence_units if unit.kind == "event")
         item = {
             "type": "IMPORTANT",
@@ -210,6 +216,26 @@ def test_context_provider_invented_timestamp_is_rejected_by_strict_schema():
     assert provider.calls == 2
     assert diagnostics["failure_class"] == "MALFORMED_PROVIDER_RESPONSE"
     assert diagnostics["provider_response_parse_status"] == "FAIL"
+
+
+def test_context_provider_connection_error_is_bounded_and_abstains():
+    session, video_id = _context_session()
+    provider = ContextProvider("connection_error")
+    diagnostics = {}
+    try:
+        result = _recover(session, video_id, provider, diagnostics)
+    finally:
+        session.close()
+
+    assert result.supported is False
+    assert provider.calls == 2
+    assert diagnostics["provider_attempt_count"] == 2
+    assert diagnostics["provider_response_parse_status"] == "FAIL"
+    assert diagnostics["provider_error_codes"] == [
+        "APIConnectionError",
+        "APIConnectionError",
+    ]
+    assert diagnostics["failure_class"] == "PROVIDER_ERROR"
 
 
 def test_context_diagnostics_capture_type_contract_metadata_only():

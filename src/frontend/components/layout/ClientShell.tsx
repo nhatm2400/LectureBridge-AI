@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { AppSidebar } from './AppSidebar';
 import { TopBar } from './TopBar';
@@ -16,15 +16,23 @@ const Footer = dynamic(
 
 export function ClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const login = useAppStore((state) => state.login);
   const logout = useAppStore((state) => state.logout);
+  const [sessionCheck, setSessionCheck] = React.useState({
+    pathname: '',
+    authenticated: false,
+  });
   const isLandingPage = pathname === '/';
   const isAuthPage = pathname.startsWith('/auth/');
+  const isPublicPage = isLandingPage || isAuthPage;
   const isAdminPage = pathname.startsWith('/admin');
   const isVideoProcessingPage =
     pathname.startsWith('/student/videos/') && pathname.includes('/processing');
 
   React.useEffect(() => {
+    if (isPublicPage) return;
+
     let cancelled = false;
     api.auth.me()
       .then((me) => {
@@ -35,15 +43,36 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
           email: me.email,
           role: me.role,
         });
+        setSessionCheck({ pathname, authenticated: true });
       })
       .catch(() => {
-        if (!cancelled) logout();
+        if (cancelled) return;
+        logout();
+        setSessionCheck({ pathname, authenticated: false });
+        if (!isPublicPage) {
+          router.replace('/auth/login');
+        }
       });
 
     return () => {
       cancelled = true;
     };
-  }, [login, logout]);
+  }, [isPublicPage, login, logout, pathname, router]);
+
+  if (
+    !isPublicPage &&
+    (sessionCheck.pathname !== pathname || !sessionCheck.authenticated)
+  ) {
+    return (
+      <div
+        className="flex min-h-screen items-center justify-center bg-slate-50 text-sm font-bold text-slate-500"
+        role="status"
+        aria-live="polite"
+      >
+        Đang xác thực phiên…
+      </div>
+    );
+  }
 
   if (isLandingPage || isAuthPage) {
     return (

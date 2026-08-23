@@ -1,4 +1,10 @@
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { resolveBrowserApiBaseUrl } from "./api-base-url.mjs";
+
+const CONFIGURED_API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+export const API_BASE_URL = resolveBrowserApiBaseUrl(
+  CONFIGURED_API_BASE_URL,
+  typeof window === "undefined" ? undefined : window.location.hostname,
+);
 
 export interface AuthUser {
   name: string;
@@ -420,6 +426,20 @@ export interface BatchUploadResponse {
   items: BatchUploadItem[];
 }
 
+export interface UploadCapabilities {
+  upload_mode: "direct_object_storage" | "local_filesystem" | "unavailable";
+  direct_object_upload_available: boolean;
+  local_upload_available: boolean;
+}
+
+export interface UploadStartResponse {
+  video_id: string;
+  status: string;
+  queue_mode: string;
+  message: string;
+  filename: string;
+}
+
 const buildHeaders = (isMultipart = false): HeadersInit => {
   const headers: HeadersInit = {};
   if (!isMultipart) headers["Content-Type"] = "application/json";
@@ -683,6 +703,55 @@ export const api = {
       });
       if (!res.ok) throw new Error("Failed to delete video.");
       return res.json();
+    },
+    async getUploadCapabilities(): Promise<UploadCapabilities> {
+      const res = await apiFetch("/api/videos/upload-capabilities", {
+        headers: buildHeaders(),
+      });
+      if (!res.ok) {
+        throw new Error("Unable to determine the configured video storage mode.");
+      }
+      return res.json();
+    },
+    async uploadLocal(
+      file: File,
+      params: {
+        video_title?: string;
+        module_id?: string;
+        onProgress?: (percent: number) => void;
+      } = {},
+    ): Promise<UploadStartResponse> {
+      const formData = new FormData();
+      formData.append("file", file);
+      if (params.video_title) formData.append("video_title", params.video_title);
+      if (params.module_id) formData.append("module_id", params.module_id);
+
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable && params.onProgress) {
+            params.onProgress((event.loaded / event.total) * 100);
+          }
+        };
+        xhr.onload = () => {
+          let body: Record<string, unknown> = {};
+          try {
+            body = JSON.parse(xhr.responseText || "{}");
+          } catch {
+            // The status-specific fallback below remains safe for non-JSON errors.
+          }
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(body as unknown as UploadStartResponse);
+            return;
+          }
+          const detail = typeof body.detail === "string" ? body.detail : null;
+          reject(new Error(detail || `Local video upload failed (HTTP ${xhr.status}).`));
+        };
+        xhr.onerror = () => reject(new Error("Local video upload failed because the backend is unreachable."));
+        xhr.open("POST", `${API_BASE_URL}/api/videos/upload`);
+        xhr.send(formData);
+      });
     },
     async presignUpload(params: {
       filename: string;

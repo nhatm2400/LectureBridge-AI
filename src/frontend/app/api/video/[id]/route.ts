@@ -34,6 +34,7 @@ export async function GET(
         headers: upstreamHeaders,
         cache: 'no-store',
         redirect: 'follow',
+        signal: request.signal,
       }
     );
 

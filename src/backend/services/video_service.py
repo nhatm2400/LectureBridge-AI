@@ -121,6 +121,88 @@ class VideoService:
             return None
 
     @classmethod
+    def is_fragmented_mp4(cls, video_path: Path) -> bool:
+        """Return True when an MP4 contains top-level movie fragments."""
+        if video_path.suffix.lower() != ".mp4" or not video_path.is_file():
+            return False
+
+        file_size = video_path.stat().st_size
+        offset = 0
+        with video_path.open("rb") as source:
+            while offset + 8 <= file_size:
+                source.seek(offset)
+                header = source.read(8)
+                if len(header) != 8:
+                    return False
+
+                box_size = int.from_bytes(header[:4], "big")
+                box_type = header[4:8]
+                header_size = 8
+                if box_size == 1:
+                    extended_size = source.read(8)
+                    if len(extended_size) != 8:
+                        return False
+                    box_size = int.from_bytes(extended_size, "big")
+                    header_size = 16
+                elif box_size == 0:
+                    box_size = file_size - offset
+
+                if box_size < header_size or offset + box_size > file_size:
+                    return False
+                if box_type == b"moof":
+                    return True
+                offset += box_size
+
+        return False
+
+    @classmethod
+    def normalize_mp4_for_browser(cls, video_path: Path) -> bool:
+        """Remux fragmented MP4 into a seekable browser-friendly MP4."""
+        if not cls.is_fragmented_mp4(video_path):
+            return False
+
+        temp_path = video_path.with_name(f".{video_path.stem}.browser-ready.mp4")
+        command = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-y",
+            "-i",
+            str(video_path),
+            "-map",
+            "0:v?",
+            "-map",
+            "0:a?",
+            "-c",
+            "copy",
+            "-movflags",
+            "+faststart",
+            str(temp_path),
+        ]
+        env = os.environ.copy()
+        env["LD_LIBRARY_PATH"] = "/usr/lib/x86_64-linux-gnu"
+
+        try:
+            subprocess.run(command, capture_output=True, text=True, check=True, env=env)
+            if not temp_path.is_file() or temp_path.stat().st_size == 0:
+                raise ValueError("FFmpeg produced no browser-compatible video output.")
+            if cls.get_video_duration_seconds(temp_path) is None:
+                raise ValueError("Browser-compatible video output failed duration validation.")
+            os.replace(temp_path, video_path)
+            logger.info("Normalized fragmented MP4 for browser playback: %s", video_path.name)
+            return True
+        except FileNotFoundError as exc:
+            raise ValueError("FFmpeg is required to normalize fragmented MP4 uploads.") from exc
+        except subprocess.CalledProcessError as exc:
+            logger.warning("Fragmented MP4 normalization failed for %s", video_path.name)
+            raise ValueError(
+                "Uploaded MP4 container could not be prepared for browser playback."
+            ) from exc
+        finally:
+            temp_path.unlink(missing_ok=True)
+
+    @classmethod
     async def download_video(cls, url: str, video_id: str) -> Path:
         """
         Tải video từ URL sử dụng yt-dlp.

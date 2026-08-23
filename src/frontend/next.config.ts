@@ -24,7 +24,8 @@ const nextConfig: NextConfig = {
     const backendUrl = process.env.BACKEND_API_URL || "http://localhost:8000";
     return [
       {
-        source: "/api/:path*",
+        // Keep the protected media/VTT route handlers local to Next.js.
+        source: "/api/:path((?!video(?:/|$)).*)",
         destination: `${backendUrl}/api/:path*`,
       },
     ];

@@ -7,6 +7,7 @@ from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel, Session, create_engine, select
 
 from src.backend.api import videos_router
+from src.backend import config
 from src.backend.auth import create_access_token, get_password_hash
 from src.backend.database import get_session
 from src.backend.main import app
@@ -246,6 +247,76 @@ def test_presigned_s3_key_is_server_issued_for_user_and_video(
     assert body["s3_key"] == (
         f"uploads/users/{media_env['owner_id']}/videos/{body['video_id']}.mp4"
     )
+
+
+def test_upload_capabilities_select_local_filesystem_in_development(
+    media_env, monkeypatch: pytest.MonkeyPatch
+):
+    monkeypatch.setattr(config, "ENVIRONMENT", "development")
+    monkeypatch.setattr(config, "AWS_S3_BUCKET", "")
+
+    response = media_env["owner"].get("/api/videos/upload-capabilities")
+    anonymous = media_env["anonymous"].get("/api/videos/upload-capabilities")
+
+    assert response.status_code == 200
+    assert anonymous.status_code == 401
+    assert response.json() == {
+        "upload_mode": "local_filesystem",
+        "direct_object_upload_available": False,
+        "local_upload_available": True,
+    }
+
+
+def test_upload_capabilities_select_direct_object_storage_when_configured(
+    media_env, monkeypatch: pytest.MonkeyPatch
+):
+    monkeypatch.setattr(config, "ENVIRONMENT", "production")
+    monkeypatch.setattr(config, "AWS_S3_BUCKET", "private-lecture-media")
+
+    response = media_env["owner"].get("/api/videos/upload-capabilities")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "upload_mode": "direct_object_storage",
+        "direct_object_upload_available": True,
+        "local_upload_available": False,
+    }
+
+
+def test_upload_capabilities_report_unavailable_for_production_without_storage(
+    media_env, monkeypatch: pytest.MonkeyPatch
+):
+    monkeypatch.setattr(config, "ENVIRONMENT", "production")
+    monkeypatch.setattr(config, "AWS_S3_BUCKET", "")
+
+    response = media_env["owner"].get("/api/videos/upload-capabilities")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "upload_mode": "unavailable",
+        "direct_object_upload_available": False,
+        "local_upload_available": False,
+    }
+
+
+def test_misconfigured_direct_storage_returns_clear_presign_error(
+    media_env, monkeypatch: pytest.MonkeyPatch
+):
+    monkeypatch.setattr(config, "AWS_S3_BUCKET", "private-lecture-media")
+    monkeypatch.setattr(
+        videos_router,
+        "generate_presigned_upload_url",
+        lambda _key, _content_type: None,
+    )
+
+    response = media_env["owner"].post(
+        "/api/videos/presign-upload",
+        json={"filename": "synthetic.mp4", "content_type": "video/mp4"},
+    )
+
+    assert response.status_code == 503
+    assert "storage configuration" in response.json()["detail"]
+    assert "Use /upload" not in response.json()["detail"]
 
 
 def test_delete_removes_database_and_local_artifacts_idempotently(
