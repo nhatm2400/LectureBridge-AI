@@ -1,0 +1,1189 @@
+{
+  "status": "PASS",
+  "generated_at": "2026-08-20T14:37:00.476465+00:00",
+  "provider": "gemini-openai-compatible",
+  "provider_model": "gemini-3.5-flash-lite",
+  "credential_value_logged": false,
+  "model_check": {
+    "status": "SKIPPED_AFTER_VERIFIED_DISCOVERY",
+    "configured_model": "gemini-3.5-flash-lite",
+    "configured_model_available": true,
+    "available_model_count": null,
+    "available_models": []
+  },
+  "model_discovery_telemetry": {
+    "max_provider_calls_per_stage": 3,
+    "stages": {},
+    "total_provider_call_count": 0,
+    "total_rate_limit_count": 0
+  },
+  "limits": {
+    "max_real_provider_samples": 3,
+    "max_ask_queries_per_sample": 5,
+    "max_context_calls_per_sample": 3,
+    "max_provider_calls_per_stage": 3,
+    "theoretical_max_sample_provider_calls": 30,
+    "theoretical_max_invocation_provider_calls": 33
+  },
+  "sample_count_available": 3,
+  "sample_count_executed": 1,
+  "selected_sample_id": "synthetic-vi-regularization",
+  "stop_after": "full",
+  "samples": [
+    {
+      "status": "PASS",
+      "sample_id": "synthetic-vi-regularization",
+      "language": "vi",
+      "duration_seconds": 900,
+      "provider": "gemini-openai-compatible",
+      "model": "gemini-3.5-flash-lite",
+      "event_count": 7,
+      "failed_chunks": 0,
+      "relation_count": 1,
+      "failed_questions": 0,
+      "structured_parse_status": "PASS",
+      "context_status": "PASS",
+      "supported_ask_status": "PASS",
+      "unsupported_abstention": true,
+      "citation_count": 6,
+      "source_id_validation": "PASS",
+      "timestamps_backend_derived": true,
+      "stop_after": "full",
+      "fixture_transcript_path": "evaluation/data/transcripts/synthetic-vi-regularization.json",
+      "prediction_status": "REAL_PROVIDER_COMPLETE",
+      "predictions": {
+        "events": [
+          {
+            "prediction_id": "493f4261-800c-4ce8-a257-b75e863e663d",
+            "event_type": "TOPIC_CHANGE",
+            "explicit_or_inferred": "INFERRED",
+            "source_segment_ids": [
+              3
+            ],
+            "backend_start_time": 180.0,
+            "backend_end_time": 240.0,
+            "title": "Chuyển sang kỹ thuật dropout",
+            "description": "Giảng viên chuyển chủ đề sang kỹ thuật dropout trong học máy.",
+            "confidence": 0.95,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          },
+          {
+            "prediction_id": "e4242b15-5645-472a-9ed7-9711d3a1c69d",
+            "event_type": "QUESTION",
+            "explicit_or_inferred": "EXPLICIT",
+            "source_segment_ids": [
+              5
+            ],
+            "backend_start_time": 300.0,
+            "backend_end_time": 360.0,
+            "title": "Câu hỏi về dropout khi suy luận",
+            "description": "Sinh viên đặt câu hỏi về việc dropout có được bật khi mô hình chạy suy luận không.",
+            "confidence": 0.95,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          },
+          {
+            "prediction_id": "3700475d-ee47-4e68-ac92-226f1cc848d8",
+            "event_type": "ANSWER",
+            "explicit_or_inferred": "EXPLICIT",
+            "source_segment_ids": [
+              6
+            ],
+            "backend_start_time": 360.0,
+            "backend_end_time": 420.0,
+            "title": "Trả lời về dropout khi suy luận",
+            "description": "Giảng viên giải thích rằng khi suy luận dropout được tắt và đầu ra được dùng theo quy tắc scaling.",
+            "confidence": 0.95,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          },
+          {
+            "prediction_id": "e6fa232b-e4c1-46f4-a698-c6f1cbe9c744",
+            "event_type": "EXAMPLE",
+            "explicit_or_inferred": "EXPLICIT",
+            "source_segment_ids": [
+              8
+            ],
+            "backend_start_time": 480.0,
+            "backend_end_time": 540.0,
+            "title": "Ví dụ về dropout",
+            "description": "Minh họa hoạt động của dropout với một lớp có một trăm neuron và tỷ lệ 0.2.",
+            "confidence": 0.95,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          },
+          {
+            "prediction_id": "869da234-687a-47cb-afa0-d5f227ff644f",
+            "event_type": "TOPIC_CHANGE",
+            "explicit_or_inferred": "INFERRED",
+            "source_segment_ids": [
+              9
+            ],
+            "backend_start_time": 540.0,
+            "backend_end_time": 600.0,
+            "title": "Chuyển sang L2 regularization",
+            "description": "Giảng viên chuyển sang giới thiệu phương pháp L2 regularization.",
+            "confidence": 0.95,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          },
+          {
+            "prediction_id": "998bb9aa-59cd-46e4-864f-c30bd8fde600",
+            "event_type": "IMPORTANT",
+            "explicit_or_inferred": "INFERRED",
+            "source_segment_ids": [
+              12
+            ],
+            "backend_start_time": 720.0,
+            "backend_end_time": 780.0,
+            "title": "Điểm quan trọng về chọn regularization",
+            "description": "Nhấn mạnh việc chọn regularization dựa trên khoảng cách giữa training và validation performance.",
+            "confidence": 0.9,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          },
+          {
+            "prediction_id": "9d928004-e6f9-4d10-a9ac-1dc42e2d1d64",
+            "event_type": "ACTION",
+            "explicit_or_inferred": "EXPLICIT",
+            "source_segment_ids": [
+              13
+            ],
+            "backend_start_time": 780.0,
+            "backend_end_time": 840.0,
+            "title": "Bài thực hành so sánh",
+            "description": "Yêu cầu sinh viên so sánh baseline, dropout và L2 trong bài thực hành.",
+            "confidence": 0.9,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          }
+        ],
+        "question_answer_links": [
+          {
+            "prediction_id": "33e0fda4-9334-4d11-87ca-792c78e68b56",
+            "question_event_id": "e4242b15-5645-472a-9ed7-9711d3a1c69d",
+            "answer_event_id": "3700475d-ee47-4e68-ac92-226f1cc848d8",
+            "relation_type": "QUESTION_ANSWER",
+            "relation_status": "UNREVIEWED",
+            "confidence": 1.0,
+            "source_event_ids": [
+              "e4242b15-5645-472a-9ed7-9711d3a1c69d",
+              "3700475d-ee47-4e68-ac92-226f1cc848d8"
+            ],
+            "source_segment_ids": [
+              5,
+              6
+            ],
+            "backend_start_time": 300.0,
+            "backend_end_time": 420.0
+          }
+        ],
+        "context_recovery": [
+          {
+            "case_id": "vi-topic",
+            "scenario": "topic transition",
+            "window": {
+              "current_time": 300.0,
+              "window_seconds": 120,
+              "start_time": 180.0,
+              "end_time": 300.0
+            },
+            "supported": true,
+            "summary": "Tóm tắt nội dung bài giảng về dấu hiệu overfitting và kỹ thuật dropout trong học máy, bao gồm việc tắt ngẫu nhiên các neuron khi huấn luyện, hiệu ứng của dropout và giải đáp thắc mắc về việc sử dụng dropout khi suy luận.",
+            "items": [
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "Một dấu hiệu là training loss tiếp tục giảm trong khi validation loss bắt đầu tăng.",
+                "canonical_evidence_ids": [
+                  "segment:2"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  2
+                ],
+                "backend_start_time": 120.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TOPIC_CHANGE",
+                "text": "Chuyển sang kỹ thuật dropout Giảng viên chuyển chủ đề sang kỹ thuật dropout trong học máy. Bây giờ chúng ta chuyển sang kỹ thuật dropout, một cách ngẫu nhiên tắt một phần neuron khi huấn luyện.",
+                "canonical_evidence_ids": [
+                  "event:493f4261-800c-4ce8-a257-b75e863e663d",
+                  "segment:3"
+                ],
+                "source_event_ids": [
+                  "493f4261-800c-4ce8-a257-b75e863e663d"
+                ],
+                "source_segment_ids": [
+                  3
+                ],
+                "backend_start_time": 180.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "Dropout làm giảm sự phụ thuộc quá mức giữa các neuron và tạo hiệu ứng giống như kết hợp nhiều mạng con.",
+                "canonical_evidence_ids": [
+                  "segment:4"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  4
+                ],
+                "backend_start_time": 240.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "QUESTION",
+                "text": "Câu hỏi về dropout khi suy luận Sinh viên đặt câu hỏi về việc dropout có được bật khi mô hình chạy suy luận không. Một sinh viên hỏi: dropout có được bật khi mô hình chạy suy luận hay không?",
+                "canonical_evidence_ids": [
+                  "event:e4242b15-5645-472a-9ed7-9711d3a1c69d",
+                  "segment:5"
+                ],
+                "source_event_ids": [
+                  "e4242b15-5645-472a-9ed7-9711d3a1c69d"
+                ],
+                "source_segment_ids": [
+                  5
+                ],
+                "backend_start_time": 300.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "QUESTION_ANSWER",
+                "text": "Question: Câu hỏi về dropout khi suy luận Sinh viên đặt câu hỏi về việc dropout có được bật khi mô hình chạy suy luận không. Một sinh viên hỏi: dropout có được bật khi mô hình chạy suy luận hay không? Answer: Trả lời về dropout khi suy luận Giảng viên giải thích rằng khi suy luận dropout được tắt và đầu ra được dùng theo quy tắc scaling. Giảng viên trả lời: không, khi suy luận dropout được tắt và đầu ra được dùng theo quy tắc scaling của framework.",
+                "canonical_evidence_ids": [
+                  "event:e4242b15-5645-472a-9ed7-9711d3a1c69d",
+                  "event:3700475d-ee47-4e68-ac92-226f1cc848d8",
+                  "segment:5",
+                  "segment:6"
+                ],
+                "source_event_ids": [
+                  "e4242b15-5645-472a-9ed7-9711d3a1c69d",
+                  "3700475d-ee47-4e68-ac92-226f1cc848d8"
+                ],
+                "source_segment_ids": [
+                  5,
+                  6
+                ],
+                "backend_start_time": 300.0,
+                "backend_end_time": null
+              }
+            ]
+          },
+          {
+            "case_id": "vi-qa",
+            "scenario": "question-answer",
+            "window": {
+              "current_time": 480.0,
+              "window_seconds": 300,
+              "start_time": 180.0,
+              "end_time": 480.0
+            },
+            "supported": true,
+            "summary": "Tóm tắt nội dung bài giảng về kỹ thuật dropout trong học máy, bao gồm cách hoạt động, câu hỏi về quá trình suy luận, ví dụ minh họa và các đặc điểm của siêu tham số tỷ lệ dropout.",
+            "items": [
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "Một dấu hiệu là training loss tiếp tục giảm trong khi validation loss bắt đầu tăng.",
+                "canonical_evidence_ids": [
+                  "segment:2"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  2
+                ],
+                "backend_start_time": 120.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TOPIC_CHANGE",
+                "text": "Chuyển sang kỹ thuật dropout Giảng viên chuyển chủ đề sang kỹ thuật dropout trong học máy. Bây giờ chúng ta chuyển sang kỹ thuật dropout, một cách ngẫu nhiên tắt một phần neuron khi huấn luyện.",
+                "canonical_evidence_ids": [
+                  "event:493f4261-800c-4ce8-a257-b75e863e663d",
+                  "segment:3"
+                ],
+                "source_event_ids": [
+                  "493f4261-800c-4ce8-a257-b75e863e663d"
+                ],
+                "source_segment_ids": [
+                  3
+                ],
+                "backend_start_time": 180.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "Dropout làm giảm sự phụ thuộc quá mức giữa các neuron và tạo hiệu ứng giống như kết hợp nhiều mạng con.",
+                "canonical_evidence_ids": [
+                  "segment:4"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  4
+                ],
+                "backend_start_time": 240.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "QUESTION",
+                "text": "Câu hỏi về dropout khi suy luận Sinh viên đặt câu hỏi về việc dropout có được bật khi mô hình chạy suy luận không. Một sinh viên hỏi: dropout có được bật khi mô hình chạy suy luận hay không?",
+                "canonical_evidence_ids": [
+                  "event:e4242b15-5645-472a-9ed7-9711d3a1c69d",
+                  "segment:5"
+                ],
+                "source_event_ids": [
+                  "e4242b15-5645-472a-9ed7-9711d3a1c69d"
+                ],
+                "source_segment_ids": [
+                  5
+                ],
+                "backend_start_time": 300.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "QUESTION_ANSWER",
+                "text": "Question: Câu hỏi về dropout khi suy luận Sinh viên đặt câu hỏi về việc dropout có được bật khi mô hình chạy suy luận không. Một sinh viên hỏi: dropout có được bật khi mô hình chạy suy luận hay không? Answer: Trả lời về dropout khi suy luận Giảng viên giải thích rằng khi suy luận dropout được tắt và đầu ra được dùng theo quy tắc scaling. Giảng viên trả lời: không, khi suy luận dropout được tắt và đầu ra được dùng theo quy tắc scaling của framework.",
+                "canonical_evidence_ids": [
+                  "event:e4242b15-5645-472a-9ed7-9711d3a1c69d",
+                  "event:3700475d-ee47-4e68-ac92-226f1cc848d8",
+                  "segment:5",
+                  "segment:6"
+                ],
+                "source_event_ids": [
+                  "e4242b15-5645-472a-9ed7-9711d3a1c69d",
+                  "3700475d-ee47-4e68-ac92-226f1cc848d8"
+                ],
+                "source_segment_ids": [
+                  5,
+                  6
+                ],
+                "backend_start_time": 300.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "ANSWER",
+                "text": "Trả lời về dropout khi suy luận Giảng viên giải thích rằng khi suy luận dropout được tắt và đầu ra được dùng theo quy tắc scaling. Giảng viên trả lời: không, khi suy luận dropout được tắt và đầu ra được dùng theo quy tắc scaling của framework.",
+                "canonical_evidence_ids": [
+                  "event:3700475d-ee47-4e68-ac92-226f1cc848d8",
+                  "segment:6"
+                ],
+                "source_event_ids": [
+                  "3700475d-ee47-4e68-ac92-226f1cc848d8"
+                ],
+                "source_segment_ids": [
+                  6
+                ],
+                "backend_start_time": 360.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "Tỷ lệ dropout là siêu tham số; tỷ lệ quá cao có thể làm mô hình học không đủ.",
+                "canonical_evidence_ids": [
+                  "segment:7"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  7
+                ],
+                "backend_start_time": 420.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "EXAMPLE",
+                "text": "Ví dụ về dropout Minh họa hoạt động của dropout với một lớp có một trăm neuron và tỷ lệ 0.2. Ví dụ, với một lớp có một trăm neuron và dropout 0.2, khoảng hai mươi neuron bị tắt ngẫu nhiên trong một bước huấn luyện.",
+                "canonical_evidence_ids": [
+                  "event:e6fa232b-e4c1-46f4-a698-c6f1cbe9c744",
+                  "segment:8"
+                ],
+                "source_event_ids": [
+                  "e6fa232b-e4c1-46f4-a698-c6f1cbe9c744"
+                ],
+                "source_segment_ids": [
+                  8
+                ],
+                "backend_start_time": 480.0,
+                "backend_end_time": null
+              }
+            ]
+          },
+          {
+            "case_id": "vi-example",
+            "scenario": "example",
+            "window": {
+              "current_time": 600.0,
+              "window_seconds": 120,
+              "start_time": 480.0,
+              "end_time": 600.0
+            },
+            "supported": true,
+            "summary": "Tóm tắt nội dung bài giảng về dropout và L2 regularization dựa trên các đoạn bằng chứng được cung cấp.",
+            "items": [
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "Tỷ lệ dropout là siêu tham số; tỷ lệ quá cao có thể làm mô hình học không đủ.",
+                "canonical_evidence_ids": [
+                  "segment:7"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  7
+                ],
+                "backend_start_time": 420.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "EXAMPLE",
+                "text": "Ví dụ về dropout Minh họa hoạt động của dropout với một lớp có một trăm neuron và tỷ lệ 0.2. Ví dụ, với một lớp có một trăm neuron và dropout 0.2, khoảng hai mươi neuron bị tắt ngẫu nhiên trong một bước huấn luyện.",
+                "canonical_evidence_ids": [
+                  "event:e6fa232b-e4c1-46f4-a698-c6f1cbe9c744",
+                  "segment:8"
+                ],
+                "source_event_ids": [
+                  "e6fa232b-e4c1-46f4-a698-c6f1cbe9c744"
+                ],
+                "source_segment_ids": [
+                  8
+                ],
+                "backend_start_time": 480.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TOPIC_CHANGE",
+                "text": "Chuyển sang L2 regularization Giảng viên chuyển sang giới thiệu phương pháp L2 regularization. Chúng ta chuyển sang L2 regularization, phương pháp thêm penalty theo bình phương trọng số vào hàm mất mát.",
+                "canonical_evidence_ids": [
+                  "event:869da234-687a-47cb-afa0-d5f227ff644f",
+                  "segment:9"
+                ],
+                "source_event_ids": [
+                  "869da234-687a-47cb-afa0-d5f227ff644f"
+                ],
+                "source_segment_ids": [
+                  9
+                ],
+                "backend_start_time": 540.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "L2 khuyến khích trọng số nhỏ hơn nhưng không có nghĩa mọi trọng số đều bằng không.",
+                "canonical_evidence_ids": [
+                  "segment:10"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  10
+                ],
+                "backend_start_time": 600.0,
+                "backend_end_time": null
+              }
+            ]
+          }
+        ],
+        "grounded_ask": [
+          {
+            "question_id": "vi-supported",
+            "category": "supported",
+            "question": "Dropout được dùng như thế nào khi huấn luyện?",
+            "expected_case": "SUPPORTED",
+            "supported": true,
+            "answer": "Khi huấn luyện, kỹ thuật dropout được dùng bằng cách ngẫu nhiên tắt một phần neuron.",
+            "used_evidence_ids": [
+              "event:493f4261-800c-4ce8-a257-b75e863e663d"
+            ],
+            "citations": [
+              {
+                "evidence_id": "event:493f4261-800c-4ce8-a257-b75e863e663d",
+                "backend_start_time": 180.0,
+                "backend_end_time": 240.0,
+                "source_event_ids": [
+                  "493f4261-800c-4ce8-a257-b75e863e663d"
+                ],
+                "source_segment_ids": [
+                  3
+                ]
+              }
+            ],
+            "abstention": false
+          },
+          {
+            "question_id": "vi-paraphrase",
+            "category": "paraphrased",
+            "question": "Kỹ thuật nào giúp hạn chế việc mô hình học thuộc dữ liệu?",
+            "expected_case": "SUPPORTED",
+            "supported": true,
+            "answer": "Dựa trên nội dung bài giảng, các kỹ thuật giúp hạn chế việc mô hình học thuộc dữ liệu (overfitting) bao gồm regularization, kỹ thuật dropout (tắt ngẫu nhiên một phần neuron khi huấn luyện) và L2.",
+            "used_evidence_ids": [
+              "segment:0",
+              "event:493f4261-800c-4ce8-a257-b75e863e663d",
+              "event:9d928004-e6f9-4d10-a9ac-1dc42e2d1d64",
+              "segment:3"
+            ],
+            "citations": [
+              {
+                "evidence_id": "segment:0",
+                "backend_start_time": 0.0,
+                "backend_end_time": 60.0,
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  0
+                ]
+              },
+              {
+                "evidence_id": "event:493f4261-800c-4ce8-a257-b75e863e663d",
+                "backend_start_time": 180.0,
+                "backend_end_time": 240.0,
+                "source_event_ids": [
+                  "493f4261-800c-4ce8-a257-b75e863e663d"
+                ],
+                "source_segment_ids": [
+                  3
+                ]
+              },
+              {
+                "evidence_id": "event:9d928004-e6f9-4d10-a9ac-1dc42e2d1d64",
+                "backend_start_time": 780.0,
+                "backend_end_time": 840.0,
+                "source_event_ids": [
+                  "9d928004-e6f9-4d10-a9ac-1dc42e2d1d64"
+                ],
+                "source_segment_ids": [
+                  13
+                ]
+              },
+              {
+                "evidence_id": "segment:3",
+                "backend_start_time": 180.0,
+                "backend_end_time": 240.0,
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  3
+                ]
+              }
+            ],
+            "abstention": false
+          },
+          {
+            "question_id": "vi-unsupported",
+            "category": "unsupported",
+            "question": "Ai phát minh dropout?",
+            "expected_case": "UNSUPPORTED",
+            "supported": false,
+            "answer": "Bài giảng hiện tại không có đủ bằng chứng để trả lời câu hỏi này.",
+            "used_evidence_ids": [],
+            "citations": [],
+            "abstention": true
+          },
+          {
+            "question_id": "vi-supported-l2",
+            "category": "supported",
+            "question": "L2 thay đổi hàm mất mát ra sao?",
+            "expected_case": "SUPPORTED",
+            "supported": true,
+            "answer": "L2 regularization thay đổi hàm mất mát bằng cách thêm penalty theo bình phương trọng số vào hàm mất mát.",
+            "used_evidence_ids": [
+              "event:869da234-687a-47cb-afa0-d5f227ff644f"
+            ],
+            "citations": [
+              {
+                "evidence_id": "event:869da234-687a-47cb-afa0-d5f227ff644f",
+                "backend_start_time": 540.0,
+                "backend_end_time": 600.0,
+                "source_event_ids": [
+                  "869da234-687a-47cb-afa0-d5f227ff644f"
+                ],
+                "source_segment_ids": [
+                  9
+                ]
+              }
+            ],
+            "abstention": false
+          },
+          {
+            "question_id": "vi-unsupported-weather",
+            "category": "unsupported",
+            "question": "Ngày mai trời có mưa không?",
+            "expected_case": "UNSUPPORTED",
+            "supported": false,
+            "answer": "Bài giảng hiện tại không có đủ bằng chứng để trả lời câu hỏi này.",
+            "used_evidence_ids": [],
+            "citations": [],
+            "abstention": true
+          }
+        ]
+      },
+      "context_debug": [
+        {
+          "current_time": 300.0,
+          "window_seconds": 120,
+          "input_validation": {
+            "all_event_ids_exist": true,
+            "all_relation_ids_exist": true,
+            "all_segment_ids_canonical": true,
+            "all_referenced_items_same_video": true,
+            "no_rejected_event_or_relation_in_context": true
+          },
+          "window_start": 180.0,
+          "window_end": 300.0,
+          "boundary_seconds": 45.0,
+          "event_count_in_window": 2,
+          "relation_count_in_window": 1,
+          "segment_count_in_window": 4,
+          "evidence_unit_count": 7,
+          "provider_response_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "returned_item_count": 5,
+          "returned_type_values": [
+            "TRANSCRIPT",
+            "TOPIC_CHANGE",
+            "TRANSCRIPT",
+            "QUESTION",
+            "QUESTION_ANSWER"
+          ],
+          "normalized_type_values": [
+            "TRANSCRIPT",
+            "TOPIC_CHANGE",
+            "TRANSCRIPT",
+            "QUESTION",
+            "QUESTION_ANSWER"
+          ],
+          "allowed_type_values": [
+            "ACTION",
+            "ANSWER",
+            "DEADLINE",
+            "EXAMPLE",
+            "EXAM_CUE",
+            "IMPORTANT",
+            "QUESTION",
+            "QUESTION_ANSWER",
+            "TOPIC_CHANGE",
+            "TRANSCRIPT"
+          ],
+          "type_rejection_reasons": [],
+          "accepted_item_count": 5,
+          "rejected_item_count": 0,
+          "rejection_reason_codes": {},
+          "context_supported": true,
+          "failure_class": null
+        },
+        {
+          "current_time": 480.0,
+          "window_seconds": 300,
+          "input_validation": {
+            "all_event_ids_exist": true,
+            "all_relation_ids_exist": true,
+            "all_segment_ids_canonical": true,
+            "all_referenced_items_same_video": true,
+            "no_rejected_event_or_relation_in_context": true
+          },
+          "window_start": 180.0,
+          "window_end": 480.0,
+          "boundary_seconds": 45.0,
+          "event_count_in_window": 4,
+          "relation_count_in_window": 1,
+          "segment_count_in_window": 7,
+          "evidence_unit_count": 12,
+          "provider_response_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "returned_item_count": 8,
+          "returned_type_values": [
+            "TRANSCRIPT",
+            "TOPIC_CHANGE",
+            "TRANSCRIPT",
+            "QUESTION",
+            "ANSWER",
+            "QUESTION_ANSWER",
+            "TRANSCRIPT",
+            "EXAMPLE"
+          ],
+          "normalized_type_values": [
+            "TRANSCRIPT",
+            "TOPIC_CHANGE",
+            "TRANSCRIPT",
+            "QUESTION",
+            "ANSWER",
+            "QUESTION_ANSWER",
+            "TRANSCRIPT",
+            "EXAMPLE"
+          ],
+          "allowed_type_values": [
+            "ACTION",
+            "ANSWER",
+            "DEADLINE",
+            "EXAMPLE",
+            "EXAM_CUE",
+            "IMPORTANT",
+            "QUESTION",
+            "QUESTION_ANSWER",
+            "TOPIC_CHANGE",
+            "TRANSCRIPT"
+          ],
+          "type_rejection_reasons": [],
+          "accepted_item_count": 8,
+          "rejected_item_count": 0,
+          "rejection_reason_codes": {},
+          "context_supported": true,
+          "failure_class": null
+        },
+        {
+          "current_time": 600.0,
+          "window_seconds": 120,
+          "input_validation": {
+            "all_event_ids_exist": true,
+            "all_relation_ids_exist": true,
+            "all_segment_ids_canonical": true,
+            "all_referenced_items_same_video": true,
+            "no_rejected_event_or_relation_in_context": true
+          },
+          "window_start": 480.0,
+          "window_end": 600.0,
+          "boundary_seconds": 45.0,
+          "event_count_in_window": 2,
+          "relation_count_in_window": 0,
+          "segment_count_in_window": 4,
+          "evidence_unit_count": 6,
+          "provider_response_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "returned_item_count": 4,
+          "returned_type_values": [
+            "TRANSCRIPT",
+            "EXAMPLE",
+            "TOPIC_CHANGE",
+            "TRANSCRIPT"
+          ],
+          "normalized_type_values": [
+            "TRANSCRIPT",
+            "EXAMPLE",
+            "TOPIC_CHANGE",
+            "TRANSCRIPT"
+          ],
+          "allowed_type_values": [
+            "ACTION",
+            "ANSWER",
+            "DEADLINE",
+            "EXAMPLE",
+            "EXAM_CUE",
+            "IMPORTANT",
+            "QUESTION",
+            "QUESTION_ANSWER",
+            "TOPIC_CHANGE",
+            "TRANSCRIPT"
+          ],
+          "type_rejection_reasons": [],
+          "accepted_item_count": 4,
+          "rejected_item_count": 0,
+          "rejection_reason_codes": {},
+          "context_supported": true,
+          "failure_class": null
+        }
+      ],
+      "ask_debug": [
+        {
+          "expected_supported": true,
+          "question_language": "vi",
+          "retrieval_candidate_count": 23,
+          "retrieved_evidence_count": 8,
+          "retrieved_evidence_ids": [
+            "event:493f4261-800c-4ce8-a257-b75e863e663d",
+            "event:3700475d-ee47-4e68-ac92-226f1cc848d8",
+            "relation:33e0fda4-9334-4d11-87ca-792c78e68b56",
+            "segment:3",
+            "segment:6",
+            "event:e4242b15-5645-472a-9ed7-9711d3a1c69d",
+            "event:e6fa232b-e4c1-46f4-a698-c6f1cbe9c744",
+            "segment:1"
+          ],
+          "retrieval_scores": [
+            {
+              "evidence_id": "event:493f4261-800c-4ce8-a257-b75e863e663d",
+              "score": 4.95
+            },
+            {
+              "evidence_id": "event:3700475d-ee47-4e68-ac92-226f1cc848d8",
+              "score": 4.94
+            },
+            {
+              "evidence_id": "relation:33e0fda4-9334-4d11-87ca-792c78e68b56",
+              "score": 4.938
+            },
+            {
+              "evidence_id": "segment:3",
+              "score": 4.51
+            },
+            {
+              "evidence_id": "segment:6",
+              "score": 4.51
+            },
+            {
+              "evidence_id": "event:e4242b15-5645-472a-9ed7-9711d3a1c69d",
+              "score": 3.82
+            },
+            {
+              "evidence_id": "event:e6fa232b-e4c1-46f4-a698-c6f1cbe9c744",
+              "score": 3.795
+            },
+            {
+              "evidence_id": "segment:1",
+              "score": 3.385
+            }
+          ],
+          "provider_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "provider_supported_flag": true,
+          "provider_used_evidence_ids": [
+            "event:493f4261-800c-4ce8-a257-b75e863e663d"
+          ],
+          "accepted_evidence_ids": [
+            "event:493f4261-800c-4ce8-a257-b75e863e663d"
+          ],
+          "rejected_evidence_ids": [],
+          "rejection_reason_codes": {},
+          "failure_classes": [],
+          "final_supported": true,
+          "citation_count": 1
+        },
+        {
+          "expected_supported": true,
+          "question_language": "vi",
+          "retrieval_candidate_count": 23,
+          "retrieved_evidence_count": 8,
+          "retrieved_evidence_ids": [
+            "segment:1",
+            "event:493f4261-800c-4ce8-a257-b75e863e663d",
+            "event:e4242b15-5645-472a-9ed7-9711d3a1c69d",
+            "relation:33e0fda4-9334-4d11-87ca-792c78e68b56",
+            "segment:0",
+            "segment:7",
+            "event:9d928004-e6f9-4d10-a9ac-1dc42e2d1d64",
+            "segment:3"
+          ],
+          "retrieval_scores": [
+            {
+              "evidence_id": "segment:1",
+              "score": 4.317692
+            },
+            {
+              "evidence_id": "event:493f4261-800c-4ce8-a257-b75e863e663d",
+              "score": 3.680769
+            },
+            {
+              "evidence_id": "event:e4242b15-5645-472a-9ed7-9711d3a1c69d",
+              "score": 3.675769
+            },
+            {
+              "evidence_id": "relation:33e0fda4-9334-4d11-87ca-792c78e68b56",
+              "score": 3.668769
+            },
+            {
+              "evidence_id": "segment:0",
+              "score": 3.240769
+            },
+            {
+              "evidence_id": "segment:7",
+              "score": 3.240769
+            },
+            {
+              "evidence_id": "event:9d928004-e6f9-4d10-a9ac-1dc42e2d1d64",
+              "score": 2.568846
+            },
+            {
+              "evidence_id": "segment:3",
+              "score": 2.163846
+            }
+          ],
+          "provider_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "provider_supported_flag": true,
+          "provider_used_evidence_ids": [
+            "segment:0",
+            "event:493f4261-800c-4ce8-a257-b75e863e663d",
+            "event:9d928004-e6f9-4d10-a9ac-1dc42e2d1d64",
+            "segment:3"
+          ],
+          "accepted_evidence_ids": [
+            "segment:0",
+            "event:493f4261-800c-4ce8-a257-b75e863e663d",
+            "event:9d928004-e6f9-4d10-a9ac-1dc42e2d1d64",
+            "segment:3"
+          ],
+          "rejected_evidence_ids": [],
+          "rejection_reason_codes": {},
+          "failure_classes": [],
+          "final_supported": true,
+          "citation_count": 4
+        },
+        {
+          "expected_supported": false,
+          "question_language": "vi",
+          "retrieval_candidate_count": 23,
+          "retrieved_evidence_count": 8,
+          "retrieved_evidence_ids": [
+            "event:e6fa232b-e4c1-46f4-a698-c6f1cbe9c744",
+            "event:493f4261-800c-4ce8-a257-b75e863e663d",
+            "event:e4242b15-5645-472a-9ed7-9711d3a1c69d",
+            "event:3700475d-ee47-4e68-ac92-226f1cc848d8",
+            "relation:33e0fda4-9334-4d11-87ca-792c78e68b56",
+            "event:9d928004-e6f9-4d10-a9ac-1dc42e2d1d64",
+            "segment:3",
+            "segment:4"
+          ],
+          "retrieval_scores": [
+            {
+              "evidence_id": "event:e6fa232b-e4c1-46f4-a698-c6f1cbe9c744",
+              "score": 2.92
+            },
+            {
+              "evidence_id": "event:493f4261-800c-4ce8-a257-b75e863e663d",
+              "score": 1.7
+            },
+            {
+              "evidence_id": "event:e4242b15-5645-472a-9ed7-9711d3a1c69d",
+              "score": 1.695
+            },
+            {
+              "evidence_id": "event:3700475d-ee47-4e68-ac92-226f1cc848d8",
+              "score": 1.69
+            },
+            {
+              "evidence_id": "relation:33e0fda4-9334-4d11-87ca-792c78e68b56",
+              "score": 1.688
+            },
+            {
+              "evidence_id": "event:9d928004-e6f9-4d10-a9ac-1dc42e2d1d64",
+              "score": 1.665
+            },
+            {
+              "evidence_id": "segment:3",
+              "score": 1.26
+            },
+            {
+              "evidence_id": "segment:4",
+              "score": 1.26
+            }
+          ],
+          "provider_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "provider_supported_flag": false,
+          "provider_used_evidence_ids": [],
+          "accepted_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "rejection_reason_codes": {},
+          "failure_classes": [
+            "PROVIDER_ABSTAINS"
+          ],
+          "final_supported": false,
+          "citation_count": 0
+        },
+        {
+          "expected_supported": true,
+          "question_language": "vi",
+          "retrieval_candidate_count": 23,
+          "retrieved_evidence_count": 7,
+          "retrieved_evidence_ids": [
+            "event:869da234-687a-47cb-afa0-d5f227ff644f",
+            "segment:9",
+            "segment:11",
+            "event:9d928004-e6f9-4d10-a9ac-1dc42e2d1d64",
+            "segment:10",
+            "segment:13",
+            "segment:14"
+          ],
+          "retrieval_scores": [
+            {
+              "evidence_id": "event:869da234-687a-47cb-afa0-d5f227ff644f",
+              "score": 5.25
+            },
+            {
+              "evidence_id": "segment:9",
+              "score": 4.81
+            },
+            {
+              "evidence_id": "segment:11",
+              "score": 2.41
+            },
+            {
+              "evidence_id": "event:9d928004-e6f9-4d10-a9ac-1dc42e2d1d64",
+              "score": 1.615
+            },
+            {
+              "evidence_id": "segment:10",
+              "score": 1.21
+            },
+            {
+              "evidence_id": "segment:13",
+              "score": 1.21
+            },
+            {
+              "evidence_id": "segment:14",
+              "score": 1.21
+            }
+          ],
+          "provider_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "provider_supported_flag": true,
+          "provider_used_evidence_ids": [
+            "event:869da234-687a-47cb-afa0-d5f227ff644f"
+          ],
+          "accepted_evidence_ids": [
+            "event:869da234-687a-47cb-afa0-d5f227ff644f"
+          ],
+          "rejected_evidence_ids": [],
+          "rejection_reason_codes": {},
+          "failure_classes": [],
+          "final_supported": true,
+          "citation_count": 1
+        },
+        {
+          "expected_supported": false,
+          "question_language": "vi",
+          "retrieval_candidate_count": 23,
+          "retrieved_evidence_count": 8,
+          "retrieved_evidence_ids": [
+            "event:e4242b15-5645-472a-9ed7-9711d3a1c69d",
+            "relation:33e0fda4-9334-4d11-87ca-792c78e68b56",
+            "segment:5",
+            "segment:7",
+            "segment:10",
+            "event:3700475d-ee47-4e68-ac92-226f1cc848d8",
+            "event:e6fa232b-e4c1-46f4-a698-c6f1cbe9c744",
+            "segment:6"
+          ],
+          "retrieval_scores": [
+            {
+              "evidence_id": "event:e4242b15-5645-472a-9ed7-9711d3a1c69d",
+              "score": 2.778333
+            },
+            {
+              "evidence_id": "relation:33e0fda4-9334-4d11-87ca-792c78e68b56",
+              "score": 2.771333
+            },
+            {
+              "evidence_id": "segment:5",
+              "score": 2.343333
+            },
+            {
+              "evidence_id": "segment:7",
+              "score": 2.343333
+            },
+            {
+              "evidence_id": "segment:10",
+              "score": 2.343333
+            },
+            {
+              "evidence_id": "event:3700475d-ee47-4e68-ac92-226f1cc848d8",
+              "score": 1.606667
+            },
+            {
+              "evidence_id": "event:e6fa232b-e4c1-46f4-a698-c6f1cbe9c744",
+              "score": 1.586667
+            },
+            {
+              "evidence_id": "segment:6",
+              "score": 1.176667
+            }
+          ],
+          "provider_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "provider_supported_flag": false,
+          "provider_used_evidence_ids": [],
+          "accepted_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "rejection_reason_codes": {},
+          "failure_classes": [
+            "PROVIDER_ABSTAINS"
+          ],
+          "final_supported": false,
+          "citation_count": 0
+        }
+      ],
+      "provider_telemetry": {
+        "max_provider_calls_per_stage": 3,
+        "stages": {
+          "event_extraction": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 0.0,
+            "budget_exhausted": false
+          },
+          "question_answer_linking": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "context_recovery:vi-topic": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "context_recovery:vi-qa": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "context_recovery:vi-example": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_supported:vi-supported": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_supported:vi-paraphrase": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_unsupported:vi-unsupported": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_supported:vi-supported-l2": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_unsupported:vi-unsupported-weather": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          }
+        },
+        "total_provider_call_count": 10,
+        "total_rate_limit_count": 0
+      },
+      "latency_ms": 61385.09
+    }
+  ]
+}

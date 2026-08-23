@@ -1,0 +1,600 @@
+{
+  "status": "PASS",
+  "generated_at": "2026-08-20T14:32:54.054259+00:00",
+  "provider": "gemini-openai-compatible",
+  "provider_model": "gemini-3.5-flash-lite",
+  "credential_value_logged": false,
+  "model_check": {
+    "status": "PASS",
+    "configured_model": "gemini-3.5-flash-lite",
+    "configured_model_available": true,
+    "available_model_count": 51,
+    "available_models": [
+      "antigravity-preview-05-2026",
+      "aqa",
+      "deep-research-max-preview-04-2026",
+      "deep-research-preview-04-2026",
+      "deep-research-pro-preview-12-2025",
+      "gemini-2.5-computer-use-preview-10-2025",
+      "gemini-2.5-flash",
+      "gemini-2.5-flash-image",
+      "gemini-2.5-flash-lite",
+      "gemini-2.5-flash-native-audio-latest",
+      "gemini-2.5-flash-native-audio-preview-09-2025",
+      "gemini-2.5-flash-native-audio-preview-12-2025",
+      "gemini-2.5-flash-preview-tts",
+      "gemini-2.5-pro",
+      "gemini-2.5-pro-preview-tts",
+      "gemini-3-flash-preview",
+      "gemini-3-pro-image",
+      "gemini-3-pro-image-preview",
+      "gemini-3.1-flash-image",
+      "gemini-3.1-flash-image-preview",
+      "gemini-3.1-flash-lite",
+      "gemini-3.1-flash-lite-image",
+      "gemini-3.1-flash-lite-preview",
+      "gemini-3.1-flash-live-preview",
+      "gemini-3.1-flash-tts-preview",
+      "gemini-3.1-pro-preview",
+      "gemini-3.1-pro-preview-customtools",
+      "gemini-3.5-flash",
+      "gemini-3.5-flash-lite",
+      "gemini-3.5-live-translate-preview",
+      "gemini-3.6-flash",
+      "gemini-3.7-flash",
+      "gemini-embedding-001",
+      "gemini-embedding-2",
+      "gemini-embedding-2-preview",
+      "gemini-flash-latest",
+      "gemini-flash-lite-latest",
+      "gemini-omni-flash-preview",
+      "gemini-pro-latest",
+      "gemini-robotics-er-1.6-preview",
+      "gemini-robotics-er-2-preview",
+      "gemini-robotics-er-2-streaming-preview",
+      "gemma-4-26b-a4b-it",
+      "gemma-4-31b-it",
+      "lyria-3-clip-preview",
+      "lyria-3-pro-preview",
+      "lyria-realtime-exp",
+      "nano-banana-pro-preview",
+      "veo-3.1-fast-generate-preview",
+      "veo-3.1-generate-preview",
+      "veo-3.1-lite-generate-preview"
+    ]
+  },
+  "model_discovery_telemetry": {
+    "max_provider_calls_per_stage": 3,
+    "stages": {
+      "model_discovery": {
+        "provider_call_count": 1,
+        "rate_limit_count": 0,
+        "retry_wait_seconds": [],
+        "pacing_delay_seconds": 0.0,
+        "budget_exhausted": false
+      }
+    },
+    "total_provider_call_count": 1,
+    "total_rate_limit_count": 0
+  },
+  "limits": {
+    "max_real_provider_samples": 3,
+    "max_ask_queries_per_sample": 2,
+    "max_context_calls_per_sample": 1,
+    "max_provider_calls_per_stage": 3,
+    "theoretical_max_sample_provider_calls": 15,
+    "theoretical_max_invocation_provider_calls": 18
+  },
+  "sample_count_available": 3,
+  "sample_count_executed": 1,
+  "selected_sample_id": "synthetic-codeswitch-accessibility",
+  "stop_after": "full",
+  "samples": [
+    {
+      "status": "PASS",
+      "sample_id": "synthetic-codeswitch-accessibility",
+      "language": "vi-en",
+      "duration_seconds": 900,
+      "provider": "gemini-openai-compatible",
+      "model": "gemini-3.5-flash-lite",
+      "event_count": 6,
+      "failed_chunks": 0,
+      "relation_count": 1,
+      "failed_questions": 0,
+      "structured_parse_status": "PASS",
+      "context_status": "PASS",
+      "supported_ask_status": "PASS",
+      "unsupported_abstention": true,
+      "citation_count": 1,
+      "source_id_validation": "PASS",
+      "timestamps_backend_derived": true,
+      "stop_after": "full",
+      "fixture_transcript_path": "evaluation/data/transcripts/synthetic-codeswitch-accessibility.json",
+      "prediction_status": "REAL_PROVIDER_COMPLETE",
+      "predictions": {
+        "events": [
+          {
+            "prediction_id": "1e7b8e85-60a2-4ffe-b767-d26cf91e2692",
+            "event_type": "TOPIC_CHANGE",
+            "explicit_or_inferred": "INFERRED",
+            "source_segment_ids": [
+              3
+            ],
+            "backend_start_time": 180.0,
+            "backend_end_time": 240.0,
+            "title": "Chuyển chủ đề sang khả năng truy cập bằng bàn phím",
+            "description": "Giảng viên chuyển sang thảo luận về keyboard accessibility và yêu cầu với các điều khiển tương tác.",
+            "confidence": 0.95,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          },
+          {
+            "prediction_id": "71cde686-27eb-4dc8-a57f-12d76be1fdbf",
+            "event_type": "QUESTION",
+            "explicit_or_inferred": "EXPLICIT",
+            "source_segment_ids": [
+              5
+            ],
+            "backend_start_time": 300.0,
+            "backend_end_time": 360.0,
+            "title": "Sinh viên đặt câu hỏi về screen reader",
+            "description": "Sinh viên hỏi làm thế nào screen reader biết khi nào câu trả lời mới xuất hiện.",
+            "confidence": 0.98,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          },
+          {
+            "prediction_id": "256d39e0-5420-4191-bbfc-4e51be1b54fb",
+            "event_type": "ANSWER",
+            "explicit_or_inferred": "EXPLICIT",
+            "source_segment_ids": [
+              6
+            ],
+            "backend_start_time": 360.0,
+            "backend_end_time": 420.0,
+            "title": "Giảng viên trả lời về dynamic answer",
+            "description": "Giảng viên giải thích việc sử dụng live region, heading rõ và quản lý focus cho câu trả lời động.",
+            "confidence": 0.98,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          },
+          {
+            "prediction_id": "ad9f2929-6c87-40a1-8d76-4a087fb75c5b",
+            "event_type": "EXAMPLE",
+            "explicit_or_inferred": "EXPLICIT",
+            "source_segment_ids": [
+              7
+            ],
+            "backend_start_time": 420.0,
+            "backend_end_time": 480.0,
+            "title": "Ví dụ về polite status region",
+            "description": "Đưa ra ví dụ về việc polite status region thông báo trạng thái tải grounded evidence và kết quả.",
+            "confidence": 0.95,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          },
+          {
+            "prediction_id": "bb6e9d2a-c9a6-4617-b95f-e0b37ba6c677",
+            "event_type": "TOPIC_CHANGE",
+            "explicit_or_inferred": "INFERRED",
+            "source_segment_ids": [
+              8
+            ],
+            "backend_start_time": 480.0,
+            "backend_end_time": 540.0,
+            "title": "Chuyển sang chủ đề evidence grounding",
+            "description": "Chuyển sang nội dung về evidence grounding và điều kiện chấp nhận câu trả lời.",
+            "confidence": 0.95,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          },
+          {
+            "prediction_id": "bb884344-e5c9-4e67-a6d5-4df8a3538938",
+            "event_type": "IMPORTANT",
+            "explicit_or_inferred": "INFERRED",
+            "source_segment_ids": [
+              12
+            ],
+            "backend_start_time": 720.0,
+            "backend_end_time": 780.0,
+            "title": "Điểm quan trọng về minh bạch thông tin",
+            "description": "Nhấn mạnh tầm quan trọng của transparency thông qua evidence link, AI provenance và khả năng quay lại đúng video.",
+            "confidence": 0.95,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          }
+        ],
+        "question_answer_links": [
+          {
+            "prediction_id": "d0257288-2e69-475c-9811-aacdb2ce3410",
+            "question_event_id": "71cde686-27eb-4dc8-a57f-12d76be1fdbf",
+            "answer_event_id": "256d39e0-5420-4191-bbfc-4e51be1b54fb",
+            "relation_type": "QUESTION_ANSWER",
+            "relation_status": "UNREVIEWED",
+            "confidence": 0.99,
+            "source_event_ids": [
+              "71cde686-27eb-4dc8-a57f-12d76be1fdbf",
+              "256d39e0-5420-4191-bbfc-4e51be1b54fb"
+            ],
+            "source_segment_ids": [
+              5,
+              6
+            ],
+            "backend_start_time": 300.0,
+            "backend_end_time": 420.0
+          }
+        ],
+        "context_recovery": [
+          {
+            "case_id": "context-1",
+            "scenario": null,
+            "window": {
+              "current_time": 720.0,
+              "window_seconds": 300,
+              "start_time": 420.0,
+              "end_time": 720.0
+            },
+            "supported": true,
+            "summary": "Tóm tắt nội dung bài giảng về evidence grounding, các yêu cầu cho dynamic answer, tầm quan trọng của minh bạch thông tin và ví dụ về polite status region.",
+            "items": [
+              {
+                "accepted_context_item_type": "QUESTION_ANSWER",
+                "text": "Question: Sinh viên đặt câu hỏi về screen reader làm sao biết câu trả lời mới đã xuất hiện? Answer: Giảng viên trả lời rằng dynamic answer cần live region phù hợp, heading rõ và focus không bị di chuyển bất ngờ.",
+                "canonical_evidence_ids": [
+                  "event:71cde686-27eb-4dc8-a57f-12d76be1fdbf",
+                  "event:256d39e0-5420-4191-bbfc-4e51be1b54fb",
+                  "segment:5",
+                  "segment:6"
+                ],
+                "source_event_ids": [
+                  "71cde686-27eb-4dc8-a57f-12d76be1fdbf",
+                  "256d39e0-5420-4191-bbfc-4e51be1b54fb"
+                ],
+                "source_segment_ids": [
+                  5,
+                  6
+                ],
+                "backend_start_time": 300.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "ANSWER",
+                "text": "Giảng viên giải thích rằng dynamic answer cần live region phù hợp, heading rõ và focus không bị di chuyển bất ngờ.",
+                "canonical_evidence_ids": [
+                  "event:256d39e0-5420-4191-bbfc-4e51be1b54fb",
+                  "segment:6"
+                ],
+                "source_event_ids": [
+                  "256d39e0-5420-4191-bbfc-4e51be1b54fb"
+                ],
+                "source_segment_ids": [
+                  6
+                ],
+                "backend_start_time": 360.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "EXAMPLE",
+                "text": "For example, a polite status region can announce that grounded evidence is loading and then announce the result.",
+                "canonical_evidence_ids": [
+                  "event:ad9f2929-6c87-40a1-8d76-4a087fb75c5b",
+                  "segment:7"
+                ],
+                "source_event_ids": [
+                  "ad9f2929-6c87-40a1-8d76-4a087fb75c5b"
+                ],
+                "source_segment_ids": [
+                  7
+                ],
+                "backend_start_time": 420.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TOPIC_CHANGE",
+                "text": "Chuyển sang nội dung về evidence grounding và điều kiện chấp nhận câu trả lời khi map về source segment hoặc lecture event hợp lệ.",
+                "canonical_evidence_ids": [
+                  "event:bb6e9d2a-c9a6-4617-b95f-e0b37ba6c677",
+                  "segment:8"
+                ],
+                "source_event_ids": [
+                  "bb6e9d2a-c9a6-4617-b95f-e0b37ba6c677"
+                ],
+                "source_segment_ids": [
+                  8
+                ],
+                "backend_start_time": 480.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "Citation timestamp không do model tự viết; backend derives it from canonical source evidence.",
+                "canonical_evidence_ids": [
+                  "segment:9"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  9
+                ],
+                "backend_start_time": 540.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "Nếu evidence không đủ, hệ thống should abstain thay vì dùng outside knowledge để trả lời cho có.",
+                "canonical_evidence_ids": [
+                  "segment:10"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  10
+                ],
+                "backend_start_time": 600.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "IMPORTANT",
+                "text": "Điểm quan trọng: transparency đến từ evidence link, AI provenance và khả năng quay lại đúng đoạn video.",
+                "canonical_evidence_ids": [
+                  "event:bb884344-e5c9-4e67-a6d5-4df8a3538938",
+                  "segment:12"
+                ],
+                "source_event_ids": [
+                  "bb884344-e5c9-4e67-a6d5-4df8a3538938"
+                ],
+                "source_segment_ids": [
+                  12
+                ],
+                "backend_start_time": 720.0,
+                "backend_end_time": null
+              }
+            ]
+          }
+        ],
+        "grounded_ask": [
+          {
+            "question_id": "ask-1",
+            "category": null,
+            "question": "Tại sao citation phải seek về source timestamp?",
+            "expected_case": "SUPPORTED",
+            "supported": true,
+            "answer": "Dữ liệu cung cấp không đề cập đến lý do tại sao citation phải seek về source timestamp, mà chỉ nêu rằng citation timestamp không do model tự viết mà được backend derive từ canonical source evidence.",
+            "used_evidence_ids": [
+              "segment:9"
+            ],
+            "citations": [
+              {
+                "evidence_id": "segment:9",
+                "backend_start_time": 540.0,
+                "backend_end_time": 600.0,
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  9
+                ]
+              }
+            ],
+            "abstention": false
+          },
+          {
+            "question_id": "ask-2",
+            "category": null,
+            "question": "Which company has the best accessibility product?",
+            "expected_case": "UNSUPPORTED",
+            "supported": false,
+            "answer": "Bài giảng hiện tại không có đủ bằng chứng để trả lời câu hỏi này.",
+            "used_evidence_ids": [],
+            "citations": [],
+            "abstention": true
+          }
+        ]
+      },
+      "context_debug": [
+        {
+          "current_time": 720.0,
+          "window_seconds": 300,
+          "input_validation": {
+            "all_event_ids_exist": true,
+            "all_relation_ids_exist": true,
+            "all_segment_ids_canonical": true,
+            "all_referenced_items_same_video": true,
+            "no_rejected_event_or_relation_in_context": true
+          },
+          "window_start": 420.0,
+          "window_end": 720.0,
+          "boundary_seconds": 45.0,
+          "event_count_in_window": 4,
+          "relation_count_in_window": 1,
+          "segment_count_in_window": 7,
+          "evidence_unit_count": 12,
+          "provider_response_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "returned_item_count": 7,
+          "returned_type_values": [
+            "TOPIC_CHANGE",
+            "ANSWER",
+            "QUESTION_ANSWER",
+            "IMPORTANT",
+            "EXAMPLE",
+            "TRANSCRIPT",
+            "TRANSCRIPT"
+          ],
+          "normalized_type_values": [
+            "TOPIC_CHANGE",
+            "ANSWER",
+            "QUESTION_ANSWER",
+            "IMPORTANT",
+            "EXAMPLE",
+            "TRANSCRIPT",
+            "TRANSCRIPT"
+          ],
+          "allowed_type_values": [
+            "ACTION",
+            "ANSWER",
+            "DEADLINE",
+            "EXAMPLE",
+            "EXAM_CUE",
+            "IMPORTANT",
+            "QUESTION",
+            "QUESTION_ANSWER",
+            "TOPIC_CHANGE",
+            "TRANSCRIPT"
+          ],
+          "type_rejection_reasons": [],
+          "accepted_item_count": 7,
+          "rejected_item_count": 0,
+          "rejection_reason_codes": {},
+          "context_supported": true,
+          "failure_class": null
+        }
+      ],
+      "ask_debug": [
+        {
+          "expected_supported": true,
+          "question_language": "vi-en",
+          "retrieval_candidate_count": 22,
+          "retrieved_evidence_count": 8,
+          "retrieved_evidence_ids": [
+            "segment:9",
+            "event:bb6e9d2a-c9a6-4617-b95f-e0b37ba6c677",
+            "event:ad9f2929-6c87-40a1-8d76-4a087fb75c5b",
+            "segment:8",
+            "event:1e7b8e85-60a2-4ffe-b767-d26cf91e2692",
+            "event:71cde686-27eb-4dc8-a57f-12d76be1fdbf",
+            "event:256d39e0-5420-4191-bbfc-4e51be1b54fb",
+            "relation:d0257288-2e69-475c-9811-aacdb2ce3410"
+          ],
+          "retrieval_scores": [
+            {
+              "evidence_id": "segment:9",
+              "score": 3.438571
+            },
+            {
+              "evidence_id": "event:bb6e9d2a-c9a6-4617-b95f-e0b37ba6c677",
+              "score": 2.735714
+            },
+            {
+              "evidence_id": "event:ad9f2929-6c87-40a1-8d76-4a087fb75c5b",
+              "score": 2.705714
+            },
+            {
+              "evidence_id": "segment:8",
+              "score": 2.295714
+            },
+            {
+              "evidence_id": "event:1e7b8e85-60a2-4ffe-b767-d26cf91e2692",
+              "score": 1.592857
+            },
+            {
+              "evidence_id": "event:71cde686-27eb-4dc8-a57f-12d76be1fdbf",
+              "score": 1.587857
+            },
+            {
+              "evidence_id": "event:256d39e0-5420-4191-bbfc-4e51be1b54fb",
+              "score": 1.582857
+            },
+            {
+              "evidence_id": "relation:d0257288-2e69-475c-9811-aacdb2ce3410",
+              "score": 1.580857
+            }
+          ],
+          "provider_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "provider_supported_flag": true,
+          "provider_used_evidence_ids": [
+            "segment:9"
+          ],
+          "accepted_evidence_ids": [
+            "segment:9"
+          ],
+          "rejected_evidence_ids": [],
+          "rejection_reason_codes": {},
+          "failure_classes": [],
+          "final_supported": true,
+          "citation_count": 1
+        },
+        {
+          "expected_supported": false,
+          "question_language": "unknown",
+          "retrieval_candidate_count": 22,
+          "retrieved_evidence_count": 3,
+          "retrieved_evidence_ids": [
+            "event:1e7b8e85-60a2-4ffe-b767-d26cf91e2692",
+            "segment:3",
+            "segment:14"
+          ],
+          "retrieval_scores": [
+            {
+              "evidence_id": "event:1e7b8e85-60a2-4ffe-b767-d26cf91e2692",
+              "score": 1.65
+            },
+            {
+              "evidence_id": "segment:3",
+              "score": 1.21
+            },
+            {
+              "evidence_id": "segment:14",
+              "score": 1.21
+            }
+          ],
+          "provider_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "provider_supported_flag": false,
+          "provider_used_evidence_ids": [],
+          "accepted_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "rejection_reason_codes": {},
+          "failure_classes": [
+            "PROVIDER_ABSTAINS"
+          ],
+          "final_supported": false,
+          "citation_count": 0
+        }
+      ],
+      "provider_telemetry": {
+        "max_provider_calls_per_stage": 3,
+        "stages": {
+          "event_extraction": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 0.0,
+            "budget_exhausted": false
+          },
+          "question_answer_linking": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "context_recovery:context-1": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_supported:ask-1": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_unsupported:ask-2": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          }
+        },
+        "total_provider_call_count": 5,
+        "total_rate_limit_count": 0
+      },
+      "latency_ms": 28432.15
+    }
+  ]
+}

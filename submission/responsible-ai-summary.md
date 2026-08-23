@@ -1,15 +1,15 @@
-# Responsible AI Summary
+# Responsible AI summary
 
-LectureBridge uses the following nine-principle project framework. It is an implementation map, not an external certification.
+LectureBridge uses the following project framework. It is an implementation map, not an external certification.
 
-1. **Beneficial purpose:** focuses on lecture access and recovery for deaf/hard-of-hearing students and other learners who miss context.
-2. **Inclusion and fairness:** supports VI/EN output, code-switch samples, keyboard operation, non-color labels, and planned screen-reader/usability review. Quality parity is not yet measured.
-3. **Privacy and data minimization:** lesson authorization, private media routes, deletion, ignored runtime data, and bounded Context/Ask provider payloads.
-4. **Transparency:** AI/human provenance, event confidence/review state, source IDs, seekable timestamps, and explicit unsupported responses.
-5. **Explainability and traceability:** every accepted hero-feature claim maps to canonical transcript/event evidence; the backend owns timestamps.
-6. **Safety and security:** current-lecture boundary, no web augmentation, invalid-ID rejection, bounded retry, prompt-injection separation, rate limiting, and abstention.
-7. **Reliability and quality:** deterministic validation/deduplication, automated regression, reproducible evaluation scripts, and honest null metrics when evidence is unavailable.
-8. **Human oversight:** authorized reviewers can confirm, correct, reject, manually relink, and audit semantic output.
-9. **Accountability and sustainability:** failures/limitations are documented; cost caps bound real-provider smoke; no uncontrolled batch or unnecessary vector infrastructure was added.
+1. **Beneficial purpose:** helps learners recover lecture structure and context, with particular attention to learners who choose text-first tools.
+2. **Inclusion and fairness:** supports VI, EN, and code-switch content, keyboard-oriented interaction, non-color labels, and planned screen-reader/usability review. It does not infer disability or biometric attributes.
+3. **Privacy and data minimization:** protects lesson media, applies authorization checks, and sends only bounded task evidence to the configured provider.
+4. **Transparency:** exposes source-linked timestamps, citations, provenance, review state, and explicit unsupported responses.
+5. **Traceability:** accepted claims map to canonical transcript or event evidence; the backend—not the model—derives trusted timestamps.
+6. **Safety and security:** enforces the current-lecture boundary, validates source IDs, bounds retries and rate, separates transcript data from instructions, and abstains when evidence is insufficient.
+7. **Reliability:** uses deterministic schema/evidence validation, automated fake-provider regression, a quota-bounded real-provider workflow, and human-verified quality reporting.
+8. **Human oversight:** authorized reviewers can confirm, correct, reject, and relink semantic output, with sanitized audit history.
+9. **Accountability:** the public evaluation reports both strong results and known errors, including a missed Event, a citation weakness, an incorrect abstention, and lower-quality Context cases.
 
-Known gaps: no passing final real-provider result, human gold review, real-user pilot, screen-reader validation, confidence calibration, or production PostgreSQL acceptance in this snapshot.
+The finalized evidence is a small synthetic evaluation of three project-authored lectures, manually verified by one human reviewer. It provides no inter-rater reliability, statistical-significance claim, universal Deaf and Hard-of-Hearing effectiveness claim, or substitute for keyboard, screen-reader, and user-centered validation.

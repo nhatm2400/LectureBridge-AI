@@ -1,0 +1,319 @@
+{
+  "status": "PASS",
+  "provider": "gemini-openai-compatible",
+  "provider_model": "gemini-3.5-flash",
+  "credential_value_logged": false,
+  "model_check": {
+    "status": "PASS",
+    "configured_model": "gemini-3.5-flash",
+    "configured_model_available": true,
+    "available_model_count": 51,
+    "available_models": [
+      "antigravity-preview-05-2026",
+      "aqa",
+      "deep-research-max-preview-04-2026",
+      "deep-research-preview-04-2026",
+      "deep-research-pro-preview-12-2025",
+      "gemini-2.5-computer-use-preview-10-2025",
+      "gemini-2.5-flash",
+      "gemini-2.5-flash-image",
+      "gemini-2.5-flash-lite",
+      "gemini-2.5-flash-native-audio-latest",
+      "gemini-2.5-flash-native-audio-preview-09-2025",
+      "gemini-2.5-flash-native-audio-preview-12-2025",
+      "gemini-2.5-flash-preview-tts",
+      "gemini-2.5-pro",
+      "gemini-2.5-pro-preview-tts",
+      "gemini-3-flash-preview",
+      "gemini-3-pro-image",
+      "gemini-3-pro-image-preview",
+      "gemini-3.1-flash-image",
+      "gemini-3.1-flash-image-preview",
+      "gemini-3.1-flash-lite",
+      "gemini-3.1-flash-lite-image",
+      "gemini-3.1-flash-lite-preview",
+      "gemini-3.1-flash-live-preview",
+      "gemini-3.1-flash-tts-preview",
+      "gemini-3.1-pro-preview",
+      "gemini-3.1-pro-preview-customtools",
+      "gemini-3.5-flash",
+      "gemini-3.5-flash-lite",
+      "gemini-3.5-live-translate-preview",
+      "gemini-3.6-flash",
+      "gemini-3.7-flash",
+      "gemini-embedding-001",
+      "gemini-embedding-2",
+      "gemini-embedding-2-preview",
+      "gemini-flash-latest",
+      "gemini-flash-lite-latest",
+      "gemini-omni-flash-preview",
+      "gemini-pro-latest",
+      "gemini-robotics-er-1.6-preview",
+      "gemini-robotics-er-2-preview",
+      "gemini-robotics-er-2-streaming-preview",
+      "gemma-4-26b-a4b-it",
+      "gemma-4-31b-it",
+      "lyria-3-clip-preview",
+      "lyria-3-pro-preview",
+      "lyria-realtime-exp",
+      "nano-banana-pro-preview",
+      "veo-3.1-fast-generate-preview",
+      "veo-3.1-generate-preview",
+      "veo-3.1-lite-generate-preview"
+    ]
+  },
+  "model_discovery_telemetry": {
+    "max_provider_calls_per_stage": 3,
+    "stages": {
+      "model_discovery": {
+        "provider_call_count": 1,
+        "rate_limit_count": 0,
+        "retry_wait_seconds": [],
+        "pacing_delay_seconds": 0.0,
+        "budget_exhausted": false
+      }
+    },
+    "total_provider_call_count": 1,
+    "total_rate_limit_count": 0
+  },
+  "limits": {
+    "max_real_provider_samples": 3,
+    "max_ask_queries_per_sample": 2,
+    "max_context_calls_per_sample": 1,
+    "max_provider_calls_per_stage": 3,
+    "theoretical_max_sample_provider_calls": 15,
+    "theoretical_max_invocation_provider_calls": 18
+  },
+  "sample_count_available": 3,
+  "sample_count_executed": 1,
+  "selected_sample_id": "synthetic-codeswitch-accessibility",
+  "stop_after": "full",
+  "samples": [
+    {
+      "status": "PASS",
+      "sample_id": "synthetic-codeswitch-accessibility",
+      "language": "vi-en",
+      "duration_seconds": 900,
+      "provider": "gemini-openai-compatible",
+      "model": "gemini-3.5-flash",
+      "event_count": 6,
+      "failed_chunks": 0,
+      "relation_count": 1,
+      "failed_questions": 0,
+      "structured_parse_status": "PASS",
+      "context_status": "PASS",
+      "supported_ask_status": "PASS",
+      "unsupported_abstention": true,
+      "citation_count": 1,
+      "source_id_validation": "PASS",
+      "timestamps_backend_derived": true,
+      "stop_after": "full",
+      "context_debug": [
+        {
+          "current_time": 720.0,
+          "window_seconds": 300,
+          "input_validation": {
+            "all_event_ids_exist": true,
+            "all_relation_ids_exist": true,
+            "all_segment_ids_canonical": true,
+            "all_referenced_items_same_video": true,
+            "no_rejected_event_or_relation_in_context": true
+          },
+          "window_start": 420.0,
+          "window_end": 720.0,
+          "boundary_seconds": 45.0,
+          "event_count_in_window": 4,
+          "relation_count_in_window": 1,
+          "segment_count_in_window": 7,
+          "evidence_unit_count": 12,
+          "provider_response_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "returned_item_count": 6,
+          "returned_type_values": [
+            "QUESTION_ANSWER",
+            "TOPIC_CHANGE",
+            "EXAMPLE",
+            "IMPORTANT",
+            "TRANSCRIPT",
+            "TRANSCRIPT"
+          ],
+          "normalized_type_values": [
+            "QUESTION_ANSWER",
+            "TOPIC_CHANGE",
+            "EXAMPLE",
+            "IMPORTANT",
+            "TRANSCRIPT",
+            "TRANSCRIPT"
+          ],
+          "allowed_type_values": [
+            "ACTION",
+            "ANSWER",
+            "DEADLINE",
+            "EXAMPLE",
+            "EXAM_CUE",
+            "IMPORTANT",
+            "QUESTION",
+            "QUESTION_ANSWER",
+            "TOPIC_CHANGE",
+            "TRANSCRIPT"
+          ],
+          "type_rejection_reasons": [],
+          "accepted_item_count": 6,
+          "rejected_item_count": 0,
+          "rejection_reason_codes": {},
+          "context_supported": true,
+          "failure_class": null
+        }
+      ],
+      "ask_debug": [
+        {
+          "expected_supported": true,
+          "question_language": "vi-en",
+          "retrieval_candidate_count": 22,
+          "retrieved_evidence_count": 8,
+          "retrieved_evidence_ids": [
+            "segment:9",
+            "event:dc47a437-128e-4715-92a7-64fdbb3c6ffe",
+            "event:cdb5ce9a-7755-482c-937f-d8601bcea476",
+            "segment:8",
+            "event:d08e80e7-21a0-4a58-9f8e-7e1ee33d8f6c",
+            "event:4bc83e49-cc1b-4510-9adc-21813fe7aaaa",
+            "relation:3a1d1297-4f0c-4c7a-a255-46f75569598f",
+            "event:7a6dda37-1b39-4446-8565-24dc8ebbce46"
+          ],
+          "retrieval_scores": [
+            {
+              "evidence_id": "segment:9",
+              "score": 3.438571
+            },
+            {
+              "evidence_id": "event:dc47a437-128e-4715-92a7-64fdbb3c6ffe",
+              "score": 2.735714
+            },
+            {
+              "evidence_id": "event:cdb5ce9a-7755-482c-937f-d8601bcea476",
+              "score": 2.705714
+            },
+            {
+              "evidence_id": "segment:8",
+              "score": 2.295714
+            },
+            {
+              "evidence_id": "event:d08e80e7-21a0-4a58-9f8e-7e1ee33d8f6c",
+              "score": 1.587857
+            },
+            {
+              "evidence_id": "event:4bc83e49-cc1b-4510-9adc-21813fe7aaaa",
+              "score": 1.582857
+            },
+            {
+              "evidence_id": "relation:3a1d1297-4f0c-4c7a-a255-46f75569598f",
+              "score": 1.580857
+            },
+            {
+              "evidence_id": "event:7a6dda37-1b39-4446-8565-24dc8ebbce46",
+              "score": 1.572857
+            }
+          ],
+          "provider_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "provider_supported_flag": true,
+          "provider_used_evidence_ids": [
+            "event:7a6dda37-1b39-4446-8565-24dc8ebbce46"
+          ],
+          "accepted_evidence_ids": [
+            "event:7a6dda37-1b39-4446-8565-24dc8ebbce46"
+          ],
+          "rejected_evidence_ids": [],
+          "rejection_reason_codes": {},
+          "failure_classes": [],
+          "final_supported": true,
+          "citation_count": 1
+        },
+        {
+          "expected_supported": false,
+          "question_language": "unknown",
+          "retrieval_candidate_count": 22,
+          "retrieved_evidence_count": 3,
+          "retrieved_evidence_ids": [
+            "event:1d82f950-90e3-4998-8ad7-10b221ee0b1c",
+            "segment:3",
+            "segment:14"
+          ],
+          "retrieval_scores": [
+            {
+              "evidence_id": "event:1d82f950-90e3-4998-8ad7-10b221ee0b1c",
+              "score": 1.65
+            },
+            {
+              "evidence_id": "segment:3",
+              "score": 1.21
+            },
+            {
+              "evidence_id": "segment:14",
+              "score": 1.21
+            }
+          ],
+          "provider_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "provider_supported_flag": false,
+          "provider_used_evidence_ids": [],
+          "accepted_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "rejection_reason_codes": {},
+          "failure_classes": [
+            "PROVIDER_ABSTAINS"
+          ],
+          "final_supported": false,
+          "citation_count": 0
+        }
+      ],
+      "provider_telemetry": {
+        "max_provider_calls_per_stage": 3,
+        "stages": {
+          "event_extraction": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 0.0,
+            "budget_exhausted": false
+          },
+          "question_answer_linking": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "context_recovery": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_supported": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_unsupported": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          }
+        },
+        "total_provider_call_count": 5,
+        "total_rate_limit_count": 0
+      },
+      "latency_ms": 49397.82
+    }
+  ]
+}

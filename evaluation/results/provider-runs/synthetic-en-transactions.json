@@ -1,0 +1,194 @@
+{
+  "status": "FAIL",
+  "generated_at": "2026-08-20T14:25:02.298718+00:00",
+  "provider": "gemini-openai-compatible",
+  "provider_model": "gemini-3.5-flash",
+  "credential_value_logged": false,
+  "model_check": {
+    "status": "PASS",
+    "configured_model": "gemini-3.5-flash",
+    "configured_model_available": true,
+    "available_model_count": 51,
+    "available_models": [
+      "antigravity-preview-05-2026",
+      "aqa",
+      "deep-research-max-preview-04-2026",
+      "deep-research-preview-04-2026",
+      "deep-research-pro-preview-12-2025",
+      "gemini-2.5-computer-use-preview-10-2025",
+      "gemini-2.5-flash",
+      "gemini-2.5-flash-image",
+      "gemini-2.5-flash-lite",
+      "gemini-2.5-flash-native-audio-latest",
+      "gemini-2.5-flash-native-audio-preview-09-2025",
+      "gemini-2.5-flash-native-audio-preview-12-2025",
+      "gemini-2.5-flash-preview-tts",
+      "gemini-2.5-pro",
+      "gemini-2.5-pro-preview-tts",
+      "gemini-3-flash-preview",
+      "gemini-3-pro-image",
+      "gemini-3-pro-image-preview",
+      "gemini-3.1-flash-image",
+      "gemini-3.1-flash-image-preview",
+      "gemini-3.1-flash-lite",
+      "gemini-3.1-flash-lite-image",
+      "gemini-3.1-flash-lite-preview",
+      "gemini-3.1-flash-live-preview",
+      "gemini-3.1-flash-tts-preview",
+      "gemini-3.1-pro-preview",
+      "gemini-3.1-pro-preview-customtools",
+      "gemini-3.5-flash",
+      "gemini-3.5-flash-lite",
+      "gemini-3.5-live-translate-preview",
+      "gemini-3.6-flash",
+      "gemini-3.7-flash",
+      "gemini-embedding-001",
+      "gemini-embedding-2",
+      "gemini-embedding-2-preview",
+      "gemini-flash-latest",
+      "gemini-flash-lite-latest",
+      "gemini-omni-flash-preview",
+      "gemini-pro-latest",
+      "gemini-robotics-er-1.6-preview",
+      "gemini-robotics-er-2-preview",
+      "gemini-robotics-er-2-streaming-preview",
+      "gemma-4-26b-a4b-it",
+      "gemma-4-31b-it",
+      "lyria-3-clip-preview",
+      "lyria-3-pro-preview",
+      "lyria-realtime-exp",
+      "nano-banana-pro-preview",
+      "veo-3.1-fast-generate-preview",
+      "veo-3.1-generate-preview",
+      "veo-3.1-lite-generate-preview"
+    ]
+  },
+  "model_discovery_telemetry": {
+    "max_provider_calls_per_stage": 3,
+    "stages": {
+      "model_discovery": {
+        "provider_call_count": 1,
+        "rate_limit_count": 0,
+        "retry_wait_seconds": [],
+        "pacing_delay_seconds": 0.0,
+        "budget_exhausted": false
+      }
+    },
+    "total_provider_call_count": 1,
+    "total_rate_limit_count": 0
+  },
+  "limits": {
+    "max_real_provider_samples": 3,
+    "max_ask_queries_per_sample": 5,
+    "max_context_calls_per_sample": 3,
+    "max_provider_calls_per_stage": 3,
+    "theoretical_max_sample_provider_calls": 30,
+    "theoretical_max_invocation_provider_calls": 33
+  },
+  "sample_count_available": 3,
+  "sample_count_executed": 1,
+  "selected_sample_id": "synthetic-en-transactions",
+  "stop_after": "full",
+  "samples": [
+    {
+      "sample_id": "synthetic-en-transactions",
+      "language": "en",
+      "duration_seconds": 900,
+      "provider": "gemini-openai-compatible",
+      "model": "gemini-3.5-flash",
+      "status": "FAILED",
+      "error_code": "RateLimitError",
+      "failure_class": "RATE_LIMIT",
+      "failed_stage": "ask_supported:en-supported-atomicity",
+      "event_count": null,
+      "failed_chunks": null,
+      "relation_count": null,
+      "context_status": "NOT_COMPLETED",
+      "supported_ask_status": "NOT_COMPLETED",
+      "unsupported_abstention": null,
+      "citation_count": null,
+      "stop_after": "full",
+      "context_debug": [],
+      "provider_telemetry": {
+        "max_provider_calls_per_stage": 3,
+        "stages": {
+          "event_extraction": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 0.0,
+            "budget_exhausted": false
+          },
+          "question_answer_linking": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "context_recovery:en-low-info": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "context_recovery:en-boundary": {
+            "provider_call_count": 3,
+            "rate_limit_count": 2,
+            "retry_wait_seconds": [
+              5.788,
+              15.989
+            ],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "context_recovery:en-qa": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_supported:en-supported": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_supported:en-paraphrase": {
+            "provider_call_count": 3,
+            "rate_limit_count": 2,
+            "retry_wait_seconds": [
+              5.433,
+              15.933
+            ],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_unsupported:en-unsupported": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_supported:en-supported-atomicity": {
+            "provider_call_count": 3,
+            "rate_limit_count": 3,
+            "retry_wait_seconds": [
+              5.555,
+              15.26
+            ],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": true
+          }
+        },
+        "total_provider_call_count": 15,
+        "total_rate_limit_count": 7
+      },
+      "latency_ms": null
+    }
+  ]
+}

@@ -8,6 +8,7 @@ import sys
 import time
 import uuid
 from collections.abc import Awaitable, Callable
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -396,6 +397,67 @@ def _context_input_diagnostics(
     }
 
 
+def _event_prediction(event) -> dict[str, Any]:
+    return {
+        "prediction_id": str(event.id),
+        "event_type": event.event_type,
+        "explicit_or_inferred": event.inference_type,
+        "source_segment_ids": list(event.source_segment_ids),
+        "backend_start_time": event.start_time,
+        "backend_end_time": event.end_time,
+        "title": event.title,
+        "description": event.description,
+        "confidence": event.confidence,
+        "created_by": event.created_by,
+        "review_status": event.review_status,
+    }
+
+
+def _relation_prediction(relation, events_by_id: dict[str, Any]) -> dict[str, Any]:
+    question = events_by_id[str(relation.source_event_id)]
+    answer = events_by_id[str(relation.target_event_id)]
+    return {
+        "prediction_id": str(relation.id),
+        "question_event_id": str(relation.source_event_id),
+        "answer_event_id": str(relation.target_event_id),
+        "relation_type": relation.relation_type,
+        "relation_status": relation.review_status,
+        "confidence": relation.confidence,
+        "source_event_ids": [str(question.id), str(answer.id)],
+        "source_segment_ids": sorted(
+            set(question.source_segment_ids + answer.source_segment_ids)
+        ),
+        "backend_start_time": min(question.start_time, answer.start_time),
+        "backend_end_time": max(question.end_time, answer.end_time),
+    }
+
+
+def _context_item_prediction(item) -> dict[str, Any]:
+    evidence_ids = [f"event:{event_id}" for event_id in item.source_event_ids]
+    evidence_ids.extend(
+        f"segment:{segment_id}" for segment_id in item.source_segment_ids
+    )
+    return {
+        "accepted_context_item_type": item.type,
+        "text": item.text,
+        "canonical_evidence_ids": evidence_ids,
+        "source_event_ids": list(item.source_event_ids),
+        "source_segment_ids": list(item.source_segment_ids),
+        "backend_start_time": item.timestamp,
+        "backend_end_time": None,
+    }
+
+
+def _citation_prediction(citation) -> dict[str, Any]:
+    return {
+        "evidence_id": citation.evidence_id,
+        "backend_start_time": citation.timestamp,
+        "backend_end_time": citation.end_time,
+        "source_event_ids": list(citation.source_event_ids),
+        "source_segment_ids": list(citation.source_segment_ids),
+    }
+
+
 async def _run_sample(
     sample: dict[str, Any],
     *,
@@ -445,8 +507,13 @@ async def _run_sample(
         )
         controller.raise_if_rate_limit_exhausted()
         context_results: list[dict[str, Any]] = []
-        for window in sample.get("context_windows", [])[:max_context]:
-            await controller.start_stage("context_recovery", pace=True)
+        for window_index, window in enumerate(
+            sample.get("context_windows", [])[:max_context]
+        ):
+            context_case_id = window.get("id", f"context-{window_index + 1}")
+            await controller.start_stage(
+                f"context_recovery:{context_case_id}", pace=True
+            )
             current_time = float(window["current_time"])
             window_seconds = int(window["window_seconds"])
             diagnostics = {
@@ -459,7 +526,7 @@ async def _run_sample(
                     window_seconds=window_seconds,
                 ),
             }
-            result = await recover_lecture_context(
+            context_response = await recover_lecture_context(
                 session,
                 video_id,
                 grounding_provider,
@@ -470,25 +537,49 @@ async def _run_sample(
             )
             context_results.append(
                 {
-                    "supported": result.supported,
-                    "validated_item_count": len(result.items),
+                    "supported": context_response.supported,
+                    "validated_item_count": len(context_response.items),
                     "all_items_have_source": all(
-                        bool(item.source_event_ids or item.source_segment_ids) for item in result.items
+                        bool(item.source_event_ids or item.source_segment_ids)
+                        for item in context_response.items
                     ),
-                    "all_timestamps_backend_mapped": all(item.timestamp >= 0 for item in result.items),
+                    "all_timestamps_backend_mapped": all(
+                        item.timestamp >= 0 for item in context_response.items
+                    ),
                     "diagnostics": diagnostics,
+                    "prediction": {
+                        "case_id": context_case_id,
+                        "scenario": window.get("scenario"),
+                        "window": {
+                            "current_time": current_time,
+                            "window_seconds": window_seconds,
+                            "start_time": max(0.0, current_time - window_seconds),
+                            "end_time": current_time,
+                        },
+                        "supported": context_response.supported,
+                        "summary": context_response.summary,
+                        "items": [
+                            _context_item_prediction(item)
+                            for item in context_response.items
+                        ],
+                    },
                 }
             )
         ask_results: list[dict[str, Any]] = []
         if stop_after == "full":
-            for query in sample.get("ask_queries", [])[:max_ask]:
+            for query_index, query in enumerate(sample.get("ask_queries", [])[:max_ask]):
                 expected_supported = bool(query["expected_supported"])
+                question_id = query.get("id", f"ask-{query_index + 1}")
                 await controller.start_stage(
-                    "ask_supported" if expected_supported else "ask_unsupported",
+                    (
+                        f"ask_supported:{question_id}"
+                        if expected_supported
+                        else f"ask_unsupported:{question_id}"
+                    ),
                     pace=True,
                 )
                 ask_diagnostics = {"expected_supported": expected_supported}
-                result = await ask_lecture(
+                ask_response = await ask_lecture(
                     session,
                     video_id,
                     grounding_provider,
@@ -499,17 +590,44 @@ async def _run_sample(
                 ask_results.append(
                     {
                         "expected_supported": expected_supported,
-                        "actual_supported": result.supported,
-                        "behavior_matches_expectation": result.supported == expected_supported,
-                        "citation_count": len(result.citations),
+                        "actual_supported": ask_response.supported,
+                        "behavior_matches_expectation": (
+                            ask_response.supported == expected_supported
+                        ),
+                        "citation_count": len(ask_response.citations),
                         "citations_mapped": all(
                             citation.timestamp >= 0
                             and bool(citation.source_segment_ids or citation.source_event_ids)
-                            for citation in result.citations
+                            for citation in ask_response.citations
                         ),
                         "diagnostics": ask_diagnostics,
+                        "prediction": {
+                            "question_id": question_id,
+                            "category": query.get("category"),
+                            "question": query["question"],
+                            "expected_case": (
+                                "SUPPORTED" if expected_supported else "UNSUPPORTED"
+                            ),
+                            "supported": ask_response.supported,
+                            "answer": ask_response.answer,
+                            "used_evidence_ids": list(
+                                ask_diagnostics.get("accepted_evidence_ids", [])
+                            ),
+                            "citations": [
+                                _citation_prediction(citation)
+                                for citation in ask_response.citations
+                            ],
+                            "abstention": not ask_response.supported,
+                        },
                     }
                 )
+        events = list_lecture_events(session, video_id)
+        events_by_id = {str(event.id): event for event in events}
+        relations = list_event_relations(session, video_id)
+        event_predictions = [_event_prediction(event) for event in events]
+        relation_predictions = [
+            _relation_prediction(relation, events_by_id) for relation in relations
+        ]
     context_pass = bool(context_results) and all(
         item["supported"]
         and item["all_items_have_source"]
@@ -578,6 +696,16 @@ async def _run_sample(
             else True
         ),
         "stop_after": stop_after,
+        "fixture_transcript_path": sample["transcript_path"],
+        "prediction_status": "REAL_PROVIDER_COMPLETE",
+        "predictions": {
+            "events": event_predictions,
+            "question_answer_links": relation_predictions,
+            "context_recovery": [
+                item["prediction"] for item in context_results
+            ],
+            "grounded_ask": [item["prediction"] for item in ask_results],
+        },
         "context_debug": [item["diagnostics"] for item in context_results],
         "ask_debug": [item["diagnostics"] for item in ask_results],
         "provider_telemetry": controller.telemetry(),
@@ -590,6 +718,7 @@ async def run(
     *,
     sample_id: str | None = None,
     stop_after: str = "full",
+    skip_model_discovery: bool = False,
 ) -> dict[str, Any]:
     if not config.GEMINI_API_KEY.strip():
         return _blocked_result(manifest)
@@ -599,8 +728,18 @@ async def run(
         max_retries=0,
     )
     model_controller = SmokeCallController()
-    model_check = await check_configured_model(client, model_controller)
-    if model_check["status"] != "PASS":
+    model_check = (
+        {
+            "status": "SKIPPED_AFTER_VERIFIED_DISCOVERY",
+            "configured_model": config.AI_MODEL,
+            "configured_model_available": True,
+            "available_model_count": None,
+            "available_models": [],
+        }
+        if skip_model_discovery
+        else await check_configured_model(client, model_controller)
+    )
+    if not skip_model_discovery and model_check["status"] != "PASS":
         return {
             "status": model_check["status"],
             "provider": PROVIDER_NAME,
@@ -613,8 +752,8 @@ async def run(
             "samples": [],
         }
     max_samples = _bounded(config.MAX_REAL_PROVIDER_SAMPLES, 3)
-    max_ask = _bounded(config.MAX_ASK_QUERIES_PER_SAMPLE, 3)
-    max_context = _bounded(config.MAX_CONTEXT_CALLS_PER_SAMPLE, 2)
+    max_ask = _bounded(config.MAX_ASK_QUERIES_PER_SAMPLE, 5)
+    max_context = _bounded(config.MAX_CONTEXT_CALLS_PER_SAMPLE, 3)
     available_samples = list(manifest.get("samples", []))
     selected_samples = (
         [sample for sample in available_samples if sample.get("sample_id") == sample_id]
@@ -679,6 +818,7 @@ async def run(
     passed = bool(results) and all(result.get("status") == "PASS" for result in results)
     return {
         "status": "PASS" if passed else "FAIL",
+        "generated_at": datetime.now(UTC).isoformat(),
         "provider": PROVIDER_NAME,
         "provider_model": config.AI_MODEL,
         "credential_value_logged": False,
@@ -690,10 +830,10 @@ async def run(
             "max_context_calls_per_sample": max_context,
             "max_provider_calls_per_stage": model_controller.max_calls_per_stage,
             "theoretical_max_sample_provider_calls": (
-                3 if stop_after == "context" else 5
+                2 + max_context + (max_ask if stop_after == "full" else 0)
             ) * model_controller.max_calls_per_stage,
             "theoretical_max_invocation_provider_calls": (
-                (3 if stop_after == "context" else 5) + 1
+                3 + max_context + (max_ask if stop_after == "full" else 0)
             ) * model_controller.max_calls_per_stage,
         },
         "sample_count_available": len(available_samples),
@@ -836,6 +976,11 @@ def main() -> int:
         default="full",
     )
     parser.add_argument("--context-debug-output", type=Path)
+    parser.add_argument(
+        "--skip-model-discovery-after-verification",
+        action="store_true",
+        help="Skip discovery only after a separate discovery check passed in this run sequence.",
+    )
     args = parser.parse_args()
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
     result = asyncio.run(
@@ -843,6 +988,7 @@ def main() -> int:
             manifest,
             sample_id=args.sample,
             stop_after=args.stop_after,
+            skip_model_discovery=args.skip_model_discovery_after_verification,
         )
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)

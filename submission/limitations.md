@@ -1,15 +1,16 @@
 # Limitations
 
-- No passing final real-provider smoke artifact is included in this repository snapshot; no provider-quality claim is available.
-- The 45-minute VI/EN/code-switch set is project-authored synthetic transcript data, not recorded classroom diversity.
-- Event annotations are author drafts awaiting two real team reviewers; Precision, Recall, and F1 remain null.
-- Q-A, Context Recovery, and Grounded Ask reviews are pending; no quality score is reported.
-- Lexical retrieval can miss paraphrases or retrieve weak overlap; the current diagnostic is small and not human gold.
-- Confidence values are provider heuristics and are not calibrated probabilities.
-- Ask Lecture is current-lecture-only and uses no web augmentation.
-- Keyboard-only and screen-reader manual validation are blocked by the non-interactive environment.
-- No deaf/hard-of-hearing user or accessibility expert pilot was run.
-- Production Gemini and PostgreSQL acceptance was not run.
-- The in-memory rate limiter is suitable only for a single-process local MVP.
-- Product illustrations with unresolved provenance were removed and replaced by CSS/icon layouts; newly introduced media still requires an explicit provenance review.
-- A repository license has not been selected.
+- The finalized quality evaluation contains three project-authored synthetic lectures totaling 45 minutes; it does not represent classroom diversity.
+- One human reviewer manually verified the review artifacts, so no inter-rater reliability or independent secondary-review measure is reported.
+- The set is too small for a statistical-significance claim.
+- Results are specific to `gemini-3.5-flash-lite`, the provider-compatible endpoint, current prompts, and current fixtures.
+- The evaluation does not establish universal effectiveness for Deaf and Hard-of-Hearing learners or measured learning outcomes.
+- The full-recall Event subset covers VI and EN; one topic transition, `en-topic-serializable`, was missed.
+- Ask citation correctness was 8/9, and one supported code-switch question incorrectly abstained.
+- Context Recovery included one redundant case and one incomplete case.
+- Retrieval can miss paraphrases or overvalue surface overlap; confidence values are heuristic rather than calibrated probabilities.
+- Ask Lecture is restricted to the current lecture and uses no web augmentation.
+- Keyboard-only and screen-reader validation still requires a documented human session.
+- No Deaf or Hard-of-Hearing user or accessibility-expert pilot is claimed.
+- The in-memory rate limiter is suitable only for a single-process local MVP; production deployment requires distributed operational controls.
+- Runtime media requires separate permission and provenance review, and no repository license has been selected.

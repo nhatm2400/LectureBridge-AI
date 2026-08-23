@@ -1,29 +1,29 @@
-# Intel Demo Shot List
+# Intel demo shot list
 
 ## Recording preconditions
 
-- Real-provider smoke result is PASS.
-- Demo lecture has legitimate cached events, relations, Context Recovery, Ask, and learning artifacts.
-- Supported and unsupported Ask questions were manually verified.
-- No third-party or unresolved-provenance illustration appears in frame.
-- Browser zoom, focus visibility, audio, captions, and network/cache state are checked.
+- Use the project-authored synthetic lecture from `demo/demo-manifest.json`.
+- Confirm that the cached Event, Q↔A, Context Recovery, supported Ask, and unsupported Ask states belong to that lecture.
+- Keep the “small synthetic human-verified evaluation” label visible with metrics.
+- Check browser zoom, focus visibility, captions, network/cache state, and presenter timing.
+- Keep private data, secrets, logs, developer tools, and local paths out of frame.
 
 ## Shots
 
 | Time | Shot | Action | Proof shown |
 |---|---|---|---|
-| 0–15s | Problem card | Show long transcript beside a simple question: “What did I miss?” | Problem, no product overclaim. |
-| 15–30s | Main lecture | Play generated demo video and enable English captions. | Legal synthetic media and timestamped captions. |
-| 30–55s | Semantic Timeline | Select topic change, question, linked answer, and important event. | Event labels, evidence-derived seek, Q-A navigation. |
-| 55–80s | Context Recovery | Choose 2-minute window and activate recovery. Click one result timestamp. | Bounded recent context and video seek. |
-| 80–105s | Grounded Ask | Ask “Why is a dirty read unsafe?”, open citation, then show an unsupported question abstaining. | Current-lecture evidence and safe fallback. |
-| 105–112s | Learning | Briefly show text-only summary/quiz evidence; avoid unverified flashcard art. | Source-aware reuse. |
-| 112–120s | Close | Show 2–4 human-verified metrics and Responsible AI bullets. | Honest measurement and limitations. |
+| 0:00–0:15 | Problem | Show a long transcript and the need to recover structure. | Clear problem statement without a universal accessibility claim. |
+| 0:15–0:35 | Lecture access | Play the synthetic lecture and select timestamped transcript lines. | Legal demo provenance, captions, transcript, and seeking. |
+| 0:35–0:55 | Semantic Timeline | Select topic change, question, linked answer, example, and important event. | Event structure, Q↔A navigation, and evidence-derived seek. |
+| 0:55–1:15 | Context Recovery | Activate “I missed this part—what happened?” and open one result citation. | Bounded recent context and backend-derived timestamp. |
+| 1:15–1:35 | Grounded Ask | Ask a supported question, open its citation, and seek to evidence. | Current-lecture grounding and citation mapping. |
+| 1:35–1:50 | Abstention | Ask an unsupported question and show the fallback. | Responsible behavior when evidence is insufficient. |
+| 1:50–2:00 | Evaluation | Show Event precision 20/20 and VI/EN full-recall match 11/12. | Human-verified measurement with an explicit small synthetic label. |
 
-## Do not show
+## Do not show or claim
 
-- fake or fixture provider results;
-- API keys, `.env`, email addresses, private URLs, logs, database contents, or local paths;
-- any media that is not covered by the demo manifest;
-- draft/null metrics as if they were measured quality;
-- more than the three hero features in detail.
+- `.env`, API keys, email addresses, private URLs, logs, database contents, or local paths
+- private or unresolved-provenance media
+- fixture-only fake-provider output as model-quality evidence
+- “100% accurate AI,” statistical significance, or universal Deaf and Hard-of-Hearing effectiveness
+- more detail than can be explained clearly within the two-minute narrative

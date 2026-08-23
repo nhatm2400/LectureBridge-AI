@@ -1,0 +1,1065 @@
+{
+  "status": "PASS",
+  "generated_at": "2026-08-20T14:38:32.087236+00:00",
+  "provider": "gemini-openai-compatible",
+  "provider_model": "gemini-3.5-flash-lite",
+  "credential_value_logged": false,
+  "model_check": {
+    "status": "SKIPPED_AFTER_VERIFIED_DISCOVERY",
+    "configured_model": "gemini-3.5-flash-lite",
+    "configured_model_available": true,
+    "available_model_count": null,
+    "available_models": []
+  },
+  "model_discovery_telemetry": {
+    "max_provider_calls_per_stage": 3,
+    "stages": {},
+    "total_provider_call_count": 0,
+    "total_rate_limit_count": 0
+  },
+  "limits": {
+    "max_real_provider_samples": 3,
+    "max_ask_queries_per_sample": 5,
+    "max_context_calls_per_sample": 3,
+    "max_provider_calls_per_stage": 3,
+    "theoretical_max_sample_provider_calls": 30,
+    "theoretical_max_invocation_provider_calls": 33
+  },
+  "sample_count_available": 3,
+  "sample_count_executed": 1,
+  "selected_sample_id": "synthetic-en-transactions",
+  "stop_after": "full",
+  "samples": [
+    {
+      "status": "PASS",
+      "sample_id": "synthetic-en-transactions",
+      "language": "en",
+      "duration_seconds": 900,
+      "provider": "gemini-openai-compatible",
+      "model": "gemini-3.5-flash-lite",
+      "event_count": 6,
+      "failed_chunks": 0,
+      "relation_count": 1,
+      "failed_questions": 0,
+      "structured_parse_status": "PASS",
+      "context_status": "PASS",
+      "supported_ask_status": "PASS",
+      "unsupported_abstention": true,
+      "citation_count": 4,
+      "source_id_validation": "PASS",
+      "timestamps_backend_derived": true,
+      "stop_after": "full",
+      "fixture_transcript_path": "evaluation/data/transcripts/synthetic-en-transactions.json",
+      "prediction_status": "REAL_PROVIDER_COMPLETE",
+      "predictions": {
+        "events": [
+          {
+            "prediction_id": "2ef5dc1e-f495-4be0-8077-6bcd94619e70",
+            "event_type": "TOPIC_CHANGE",
+            "explicit_or_inferred": "INFERRED",
+            "source_segment_ids": [
+              4
+            ],
+            "backend_start_time": 240.0,
+            "backend_end_time": 300.0,
+            "title": "Transition to Concurrency Anomalies",
+            "description": "The lecture moves from ACID properties to discussing concurrency anomalies controlled by isolation levels.",
+            "confidence": 0.95,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          },
+          {
+            "prediction_id": "f2a54116-1fb1-43bc-8566-f5fcc1281c55",
+            "event_type": "QUESTION",
+            "explicit_or_inferred": "EXPLICIT",
+            "source_segment_ids": [
+              6
+            ],
+            "backend_start_time": 360.0,
+            "backend_end_time": 420.0,
+            "title": "Student Question on Dirty Reads",
+            "description": "A student asks why a dirty read is dangerous if the value looked valid at the time.",
+            "confidence": 0.95,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          },
+          {
+            "prediction_id": "567b873d-7180-42d0-97bc-1ecac329d033",
+            "event_type": "ANSWER",
+            "explicit_or_inferred": "EXPLICIT",
+            "source_segment_ids": [
+              7
+            ],
+            "backend_start_time": 420.0,
+            "backend_end_time": 480.0,
+            "title": "Explanation of Dirty Read Danger",
+            "description": "The instructor explains that the writer might roll back, leaving the reader with uncommitted and invalid state.",
+            "confidence": 0.95,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          },
+          {
+            "prediction_id": "ffbffebd-0c90-4d90-8f6c-fdb3eaf1e9ae",
+            "event_type": "EXAMPLE",
+            "explicit_or_inferred": "EXPLICIT",
+            "source_segment_ids": [
+              8
+            ],
+            "backend_start_time": 480.0,
+            "backend_end_time": 540.0,
+            "title": "Inventory Service Example",
+            "description": "An inventory service reads an uncommitted quantity and accepts an order before the quantity update rolls back.",
+            "confidence": 0.95,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          },
+          {
+            "prediction_id": "a1de1598-bf9b-43ce-a671-45c02b3fa517",
+            "event_type": "IMPORTANT",
+            "explicit_or_inferred": "INFERRED",
+            "source_segment_ids": [
+              12
+            ],
+            "backend_start_time": 720.0,
+            "backend_end_time": 780.0,
+            "title": "Choosing Isolation Levels",
+            "description": "The important takeaway is to choose the weakest isolation level that protects the application's actual invariants.",
+            "confidence": 0.95,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          },
+          {
+            "prediction_id": "d2ead26d-e764-40ae-bdec-0d14271de529",
+            "event_type": "ACTION",
+            "explicit_or_inferred": "EXPLICIT",
+            "source_segment_ids": [
+              13
+            ],
+            "backend_start_time": 780.0,
+            "backend_end_time": 840.0,
+            "title": "Lab Reproduction of Anomaly",
+            "description": "Students are directed to reproduce an anomaly with two sessions in the lab and record the protective isolation setting.",
+            "confidence": 0.95,
+            "created_by": "AI",
+            "review_status": "UNREVIEWED"
+          }
+        ],
+        "question_answer_links": [
+          {
+            "prediction_id": "777969e7-bd22-426f-a280-51c70a79e63e",
+            "question_event_id": "f2a54116-1fb1-43bc-8566-f5fcc1281c55",
+            "answer_event_id": "567b873d-7180-42d0-97bc-1ecac329d033",
+            "relation_type": "QUESTION_ANSWER",
+            "relation_status": "UNREVIEWED",
+            "confidence": 0.95,
+            "source_event_ids": [
+              "f2a54116-1fb1-43bc-8566-f5fcc1281c55",
+              "567b873d-7180-42d0-97bc-1ecac329d033"
+            ],
+            "source_segment_ids": [
+              6,
+              7
+            ],
+            "backend_start_time": 360.0,
+            "backend_end_time": 480.0
+          }
+        ],
+        "context_recovery": [
+          {
+            "case_id": "en-low-info",
+            "scenario": "low-information",
+            "window": {
+              "current_time": 180.0,
+              "window_seconds": 120,
+              "start_time": 60.0,
+              "end_time": 180.0
+            },
+            "supported": true,
+            "summary": "The lecture introduces database transactions and their consistency boundaries, focusing on the ACID properties: atomicity, consistency, isolation, and durability.",
+            "items": [
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "This lecture introduces database transactions and why a sequence of operations needs a clear consistency boundary.",
+                "canonical_evidence_ids": [
+                  "segment:0"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  0
+                ],
+                "backend_start_time": 0.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "Atomicity means the transaction is applied completely or not applied at all.",
+                "canonical_evidence_ids": [
+                  "segment:1"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  1
+                ],
+                "backend_start_time": 60.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "Consistency means committed work respects the integrity rules defined by the database and application.",
+                "canonical_evidence_ids": [
+                  "segment:2"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  2
+                ],
+                "backend_start_time": 120.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "Isolation controls how concurrent transactions can observe one another, while durability keeps committed data after failure.",
+                "canonical_evidence_ids": [
+                  "segment:3"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  3
+                ],
+                "backend_start_time": 180.0,
+                "backend_end_time": null
+              }
+            ]
+          },
+          {
+            "case_id": "en-boundary",
+            "scenario": "boundary",
+            "window": {
+              "current_time": 360.0,
+              "window_seconds": 120,
+              "start_time": 240.0,
+              "end_time": 360.0
+            },
+            "supported": true,
+            "summary": "The lecture covers the transition from ACID properties to concurrency anomalies and isolation levels, specifically explaining dirty reads.",
+            "items": [
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "Isolation controls how concurrent transactions can observe one another, while durability keeps committed data after failure.",
+                "canonical_evidence_ids": [
+                  "segment:3"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  3
+                ],
+                "backend_start_time": 180.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TOPIC_CHANGE",
+                "text": "Transition to Concurrency Anomalies The lecture moves from ACID properties to discussing concurrency anomalies controlled by isolation levels. We now move from ACID properties to concurrency anomalies that isolation levels are designed to control.",
+                "canonical_evidence_ids": [
+                  "event:2ef5dc1e-f495-4be0-8077-6bcd94619e70",
+                  "segment:4"
+                ],
+                "source_event_ids": [
+                  "2ef5dc1e-f495-4be0-8077-6bcd94619e70"
+                ],
+                "source_segment_ids": [
+                  4
+                ],
+                "backend_start_time": 240.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "A dirty read occurs when one transaction observes data written by another transaction that has not committed.",
+                "canonical_evidence_ids": [
+                  "segment:5"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  5
+                ],
+                "backend_start_time": 300.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "QUESTION",
+                "text": "Student Question on Dirty Reads A student asks why a dirty read is dangerous if the value looked valid at the time. A student asks: why is a dirty read dangerous if the value looked valid at the time?",
+                "canonical_evidence_ids": [
+                  "event:f2a54116-1fb1-43bc-8566-f5fcc1281c55",
+                  "segment:6"
+                ],
+                "source_event_ids": [
+                  "f2a54116-1fb1-43bc-8566-f5fcc1281c55"
+                ],
+                "source_segment_ids": [
+                  6
+                ],
+                "backend_start_time": 360.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "QUESTION_ANSWER",
+                "text": "Question: Student Question on Dirty Reads A student asks why a dirty read is dangerous if the value looked valid at the time. A student asks: why is a dirty read dangerous if the value looked valid at the time? Answer: Explanation of Dirty Read Danger The instructor explains that the writer might roll back, leaving the reader with uncommitted and invalid state. The answer is that the writer may roll back, so the reader could make a decision using a value that never becomes committed state.",
+                "canonical_evidence_ids": [
+                  "event:f2a54116-1fb1-43bc-8566-f5fcc1281c55",
+                  "event:567b873d-7180-42d0-97bc-1ecac329d033",
+                  "segment:6",
+                  "segment:7"
+                ],
+                "source_event_ids": [
+                  "f2a54116-1fb1-43bc-8566-f5fcc1281c55",
+                  "567b873d-7180-42d0-97bc-1ecac329d033"
+                ],
+                "source_segment_ids": [
+                  6,
+                  7
+                ],
+                "backend_start_time": 360.0,
+                "backend_end_time": null
+              }
+            ]
+          },
+          {
+            "case_id": "en-qa",
+            "scenario": "question-answer",
+            "window": {
+              "current_time": 540.0,
+              "window_seconds": 300,
+              "start_time": 240.0,
+              "end_time": 540.0
+            },
+            "supported": true,
+            "summary": "The lecture covers the transition from ACID properties to concurrency anomalies controlled by isolation levels, explaining dirty reads, their dangers, and examples.",
+            "items": [
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "Isolation controls how concurrent transactions can observe one another, while durability keeps committed data after failure.",
+                "canonical_evidence_ids": [
+                  "segment:3"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  3
+                ],
+                "backend_start_time": 180.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TOPIC_CHANGE",
+                "text": "Transition to Concurrency Anomalies The lecture moves from ACID properties to discussing concurrency anomalies controlled by isolation levels. We now move from ACID properties to concurrency anomalies that isolation levels are designed to control.",
+                "canonical_evidence_ids": [
+                  "event:2ef5dc1e-f495-4be0-8077-6bcd94619e70",
+                  "segment:4"
+                ],
+                "source_event_ids": [
+                  "2ef5dc1e-f495-4be0-8077-6bcd94619e70"
+                ],
+                "source_segment_ids": [
+                  4
+                ],
+                "backend_start_time": 240.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "A dirty read occurs when one transaction observes data written by another transaction that has not committed.",
+                "canonical_evidence_ids": [
+                  "segment:5"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  5
+                ],
+                "backend_start_time": 300.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "QUESTION",
+                "text": "Student Question on Dirty Reads A student asks why a dirty read is dangerous if the value looked valid at the time. A student asks: why is a dirty read dangerous if the value looked valid at the time?",
+                "canonical_evidence_ids": [
+                  "event:f2a54116-1fb1-43bc-8566-f5fcc1281c55",
+                  "segment:6"
+                ],
+                "source_event_ids": [
+                  "f2a54116-1fb1-43bc-8566-f5fcc1281c55"
+                ],
+                "source_segment_ids": [
+                  6
+                ],
+                "backend_start_time": 360.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "QUESTION_ANSWER",
+                "text": "Question: Student Question on Dirty Reads A student asks why a dirty read is dangerous if the value looked valid at the time. A student asks: why is a dirty read dangerous if the value looked valid at the time? Answer: Explanation of Dirty Read Danger The instructor explains that the writer might roll back, leaving the reader with uncommitted and invalid state. The answer is that the writer may roll back, so the reader could make a decision using a value that never becomes committed state.",
+                "canonical_evidence_ids": [
+                  "event:f2a54116-1fb1-43bc-8566-f5fcc1281c55",
+                  "event:567b873d-7180-42d0-97bc-1ecac329d033",
+                  "segment:6",
+                  "segment:7"
+                ],
+                "source_event_ids": [
+                  "f2a54116-1fb1-43bc-8566-f5fcc1281c55",
+                  "567b873d-7180-42d0-97bc-1ecac329d033"
+                ],
+                "source_segment_ids": [
+                  6,
+                  7
+                ],
+                "backend_start_time": 360.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "ANSWER",
+                "text": "Explanation of Dirty Read Danger The instructor explains that the writer might roll back, leaving the reader with uncommitted and invalid state. The answer is that the writer may roll back, so the reader could make a decision using a value that never becomes committed state.",
+                "canonical_evidence_ids": [
+                  "event:567b873d-7180-42d0-97bc-1ecac329d033",
+                  "segment:7"
+                ],
+                "source_event_ids": [
+                  "567b873d-7180-42d0-97bc-1ecac329d033"
+                ],
+                "source_segment_ids": [
+                  7
+                ],
+                "backend_start_time": 420.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "EXAMPLE",
+                "text": "Inventory Service Example An inventory service reads an uncommitted quantity and accepts an order before the quantity update rolls back. For example, an inventory service reads an uncommitted quantity of ten, accepts an order, and later discovers that the quantity update was rolled back.",
+                "canonical_evidence_ids": [
+                  "event:ffbffebd-0c90-4d90-8f6c-fdb3eaf1e9ae",
+                  "segment:8"
+                ],
+                "source_event_ids": [
+                  "ffbffebd-0c90-4d90-8f6c-fdb3eaf1e9ae"
+                ],
+                "source_segment_ids": [
+                  8
+                ],
+                "backend_start_time": 480.0,
+                "backend_end_time": null
+              },
+              {
+                "accepted_context_item_type": "TRANSCRIPT",
+                "text": "Read committed prevents dirty reads, but repeated reads may still return different committed values.",
+                "canonical_evidence_ids": [
+                  "segment:9"
+                ],
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  9
+                ],
+                "backend_start_time": 540.0,
+                "backend_end_time": null
+              }
+            ]
+          }
+        ],
+        "grounded_ask": [
+          {
+            "question_id": "en-supported",
+            "category": "supported",
+            "question": "Why is a dirty read unsafe?",
+            "expected_case": "SUPPORTED",
+            "supported": true,
+            "answer": "A dirty read is unsafe because the writer might roll back, which could cause the reader to make a decision using an uncommitted and invalid state that never becomes part of the committed state.",
+            "used_evidence_ids": [
+              "event:567b873d-7180-42d0-97bc-1ecac329d033"
+            ],
+            "citations": [
+              {
+                "evidence_id": "event:567b873d-7180-42d0-97bc-1ecac329d033",
+                "backend_start_time": 420.0,
+                "backend_end_time": 480.0,
+                "source_event_ids": [
+                  "567b873d-7180-42d0-97bc-1ecac329d033"
+                ],
+                "source_segment_ids": [
+                  7
+                ]
+              }
+            ],
+            "abstention": false
+          },
+          {
+            "question_id": "en-paraphrase",
+            "category": "paraphrased",
+            "question": "How can a reader observe a value that later disappears?",
+            "expected_case": "SUPPORTED",
+            "supported": true,
+            "answer": "A reader can observe a value that later disappears through a dirty read, where a reader reads an uncommitted value (such as an inventory service reading an uncommitted quantity) that never becomes committed state because the writer rolls back the update.",
+            "used_evidence_ids": [
+              "event:567b873d-7180-42d0-97bc-1ecac329d033",
+              "event:ffbffebd-0c90-4d90-8f6c-fdb3eaf1e9ae"
+            ],
+            "citations": [
+              {
+                "evidence_id": "event:567b873d-7180-42d0-97bc-1ecac329d033",
+                "backend_start_time": 420.0,
+                "backend_end_time": 480.0,
+                "source_event_ids": [
+                  "567b873d-7180-42d0-97bc-1ecac329d033"
+                ],
+                "source_segment_ids": [
+                  7
+                ]
+              },
+              {
+                "evidence_id": "event:ffbffebd-0c90-4d90-8f6c-fdb3eaf1e9ae",
+                "backend_start_time": 480.0,
+                "backend_end_time": 540.0,
+                "source_event_ids": [
+                  "ffbffebd-0c90-4d90-8f6c-fdb3eaf1e9ae"
+                ],
+                "source_segment_ids": [
+                  8
+                ]
+              }
+            ],
+            "abstention": false
+          },
+          {
+            "question_id": "en-unsupported",
+            "category": "unsupported",
+            "question": "Which database vendor invented serializable isolation?",
+            "expected_case": "UNSUPPORTED",
+            "supported": false,
+            "answer": "The current lecture does not contain enough evidence to answer this question.",
+            "used_evidence_ids": [],
+            "citations": [],
+            "abstention": true
+          },
+          {
+            "question_id": "en-supported-atomicity",
+            "category": "supported",
+            "question": "What does atomicity mean here?",
+            "expected_case": "SUPPORTED",
+            "supported": true,
+            "answer": "Atomicity means the transaction is applied completely or not applied at all.",
+            "used_evidence_ids": [
+              "segment:1"
+            ],
+            "citations": [
+              {
+                "evidence_id": "segment:1",
+                "backend_start_time": 60.0,
+                "backend_end_time": 120.0,
+                "source_event_ids": [],
+                "source_segment_ids": [
+                  1
+                ]
+              }
+            ],
+            "abstention": false
+          },
+          {
+            "question_id": "en-unsupported-release",
+            "category": "unsupported",
+            "question": "What is the latest PostgreSQL release?",
+            "expected_case": "UNSUPPORTED",
+            "supported": false,
+            "answer": "The current lecture does not contain enough evidence to answer this question.",
+            "used_evidence_ids": [],
+            "citations": [],
+            "abstention": true
+          }
+        ]
+      },
+      "context_debug": [
+        {
+          "current_time": 180.0,
+          "window_seconds": 120,
+          "input_validation": {
+            "all_event_ids_exist": true,
+            "all_relation_ids_exist": true,
+            "all_segment_ids_canonical": true,
+            "all_referenced_items_same_video": true,
+            "no_rejected_event_or_relation_in_context": true
+          },
+          "window_start": 60.0,
+          "window_end": 180.0,
+          "boundary_seconds": 45.0,
+          "event_count_in_window": 0,
+          "relation_count_in_window": 0,
+          "segment_count_in_window": 4,
+          "evidence_unit_count": 4,
+          "provider_response_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "returned_item_count": 4,
+          "returned_type_values": [
+            "TRANSCRIPT",
+            "TRANSCRIPT",
+            "TRANSCRIPT",
+            "TRANSCRIPT"
+          ],
+          "normalized_type_values": [
+            "TRANSCRIPT",
+            "TRANSCRIPT",
+            "TRANSCRIPT",
+            "TRANSCRIPT"
+          ],
+          "allowed_type_values": [
+            "ACTION",
+            "ANSWER",
+            "DEADLINE",
+            "EXAMPLE",
+            "EXAM_CUE",
+            "IMPORTANT",
+            "QUESTION",
+            "QUESTION_ANSWER",
+            "TOPIC_CHANGE",
+            "TRANSCRIPT"
+          ],
+          "type_rejection_reasons": [],
+          "accepted_item_count": 4,
+          "rejected_item_count": 0,
+          "rejection_reason_codes": {},
+          "context_supported": true,
+          "failure_class": null
+        },
+        {
+          "current_time": 360.0,
+          "window_seconds": 120,
+          "input_validation": {
+            "all_event_ids_exist": true,
+            "all_relation_ids_exist": true,
+            "all_segment_ids_canonical": true,
+            "all_referenced_items_same_video": true,
+            "no_rejected_event_or_relation_in_context": true
+          },
+          "window_start": 240.0,
+          "window_end": 360.0,
+          "boundary_seconds": 45.0,
+          "event_count_in_window": 2,
+          "relation_count_in_window": 1,
+          "segment_count_in_window": 4,
+          "evidence_unit_count": 7,
+          "provider_response_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "returned_item_count": 5,
+          "returned_type_values": [
+            "TOPIC_CHANGE",
+            "QUESTION",
+            "QUESTION_ANSWER",
+            "TRANSCRIPT",
+            "TRANSCRIPT"
+          ],
+          "normalized_type_values": [
+            "TOPIC_CHANGE",
+            "QUESTION",
+            "QUESTION_ANSWER",
+            "TRANSCRIPT",
+            "TRANSCRIPT"
+          ],
+          "allowed_type_values": [
+            "ACTION",
+            "ANSWER",
+            "DEADLINE",
+            "EXAMPLE",
+            "EXAM_CUE",
+            "IMPORTANT",
+            "QUESTION",
+            "QUESTION_ANSWER",
+            "TOPIC_CHANGE",
+            "TRANSCRIPT"
+          ],
+          "type_rejection_reasons": [],
+          "accepted_item_count": 5,
+          "rejected_item_count": 0,
+          "rejection_reason_codes": {},
+          "context_supported": true,
+          "failure_class": null
+        },
+        {
+          "current_time": 540.0,
+          "window_seconds": 300,
+          "input_validation": {
+            "all_event_ids_exist": true,
+            "all_relation_ids_exist": true,
+            "all_segment_ids_canonical": true,
+            "all_referenced_items_same_video": true,
+            "no_rejected_event_or_relation_in_context": true
+          },
+          "window_start": 240.0,
+          "window_end": 540.0,
+          "boundary_seconds": 45.0,
+          "event_count_in_window": 4,
+          "relation_count_in_window": 1,
+          "segment_count_in_window": 7,
+          "evidence_unit_count": 12,
+          "provider_response_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "returned_item_count": 8,
+          "returned_type_values": [
+            "TOPIC_CHANGE",
+            "QUESTION",
+            "ANSWER",
+            "QUESTION_ANSWER",
+            "EXAMPLE",
+            "TRANSCRIPT",
+            "TRANSCRIPT",
+            "TRANSCRIPT"
+          ],
+          "normalized_type_values": [
+            "TOPIC_CHANGE",
+            "QUESTION",
+            "ANSWER",
+            "QUESTION_ANSWER",
+            "EXAMPLE",
+            "TRANSCRIPT",
+            "TRANSCRIPT",
+            "TRANSCRIPT"
+          ],
+          "allowed_type_values": [
+            "ACTION",
+            "ANSWER",
+            "DEADLINE",
+            "EXAMPLE",
+            "EXAM_CUE",
+            "IMPORTANT",
+            "QUESTION",
+            "QUESTION_ANSWER",
+            "TOPIC_CHANGE",
+            "TRANSCRIPT"
+          ],
+          "type_rejection_reasons": [],
+          "accepted_item_count": 8,
+          "rejected_item_count": 0,
+          "rejection_reason_codes": {},
+          "context_supported": true,
+          "failure_class": null
+        }
+      ],
+      "ask_debug": [
+        {
+          "expected_supported": true,
+          "question_language": "unknown",
+          "retrieval_candidate_count": 22,
+          "retrieved_evidence_count": 7,
+          "retrieved_evidence_ids": [
+            "event:f2a54116-1fb1-43bc-8566-f5fcc1281c55",
+            "event:567b873d-7180-42d0-97bc-1ecac329d033",
+            "relation:777969e7-bd22-426f-a280-51c70a79e63e",
+            "segment:5",
+            "segment:6",
+            "segment:9",
+            "segment:10"
+          ],
+          "retrieval_scores": [
+            {
+              "evidence_id": "event:f2a54116-1fb1-43bc-8566-f5fcc1281c55",
+              "score": 3.111667
+            },
+            {
+              "evidence_id": "event:567b873d-7180-42d0-97bc-1ecac329d033",
+              "score": 3.106667
+            },
+            {
+              "evidence_id": "relation:777969e7-bd22-426f-a280-51c70a79e63e",
+              "score": 3.104667
+            },
+            {
+              "evidence_id": "segment:5",
+              "score": 2.676667
+            },
+            {
+              "evidence_id": "segment:6",
+              "score": 2.676667
+            },
+            {
+              "evidence_id": "segment:9",
+              "score": 2.676667
+            },
+            {
+              "evidence_id": "segment:10",
+              "score": 1.343333
+            }
+          ],
+          "provider_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "provider_supported_flag": true,
+          "provider_used_evidence_ids": [
+            "event:567b873d-7180-42d0-97bc-1ecac329d033"
+          ],
+          "accepted_evidence_ids": [
+            "event:567b873d-7180-42d0-97bc-1ecac329d033"
+          ],
+          "rejected_evidence_ids": [],
+          "rejection_reason_codes": {},
+          "failure_classes": [],
+          "final_supported": true,
+          "citation_count": 1
+        },
+        {
+          "expected_supported": true,
+          "question_language": "unknown",
+          "retrieval_candidate_count": 22,
+          "retrieved_evidence_count": 8,
+          "retrieved_evidence_ids": [
+            "event:567b873d-7180-42d0-97bc-1ecac329d033",
+            "relation:777969e7-bd22-426f-a280-51c70a79e63e",
+            "segment:3",
+            "segment:7",
+            "event:f2a54116-1fb1-43bc-8566-f5fcc1281c55",
+            "event:ffbffebd-0c90-4d90-8f6c-fdb3eaf1e9ae",
+            "segment:6",
+            "segment:8"
+          ],
+          "retrieval_scores": [
+            {
+              "evidence_id": "event:567b873d-7180-42d0-97bc-1ecac329d033",
+              "score": 2.773333
+            },
+            {
+              "evidence_id": "relation:777969e7-bd22-426f-a280-51c70a79e63e",
+              "score": 2.771333
+            },
+            {
+              "evidence_id": "segment:3",
+              "score": 2.343333
+            },
+            {
+              "evidence_id": "segment:7",
+              "score": 2.343333
+            },
+            {
+              "evidence_id": "event:f2a54116-1fb1-43bc-8566-f5fcc1281c55",
+              "score": 1.611667
+            },
+            {
+              "evidence_id": "event:ffbffebd-0c90-4d90-8f6c-fdb3eaf1e9ae",
+              "score": 1.586667
+            },
+            {
+              "evidence_id": "segment:6",
+              "score": 1.176667
+            },
+            {
+              "evidence_id": "segment:8",
+              "score": 1.176667
+            }
+          ],
+          "provider_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "provider_supported_flag": true,
+          "provider_used_evidence_ids": [
+            "event:567b873d-7180-42d0-97bc-1ecac329d033",
+            "event:ffbffebd-0c90-4d90-8f6c-fdb3eaf1e9ae"
+          ],
+          "accepted_evidence_ids": [
+            "event:567b873d-7180-42d0-97bc-1ecac329d033",
+            "event:ffbffebd-0c90-4d90-8f6c-fdb3eaf1e9ae"
+          ],
+          "rejected_evidence_ids": [],
+          "rejection_reason_codes": {},
+          "failure_classes": [],
+          "final_supported": true,
+          "citation_count": 2
+        },
+        {
+          "expected_supported": false,
+          "question_language": "unknown",
+          "retrieval_candidate_count": 22,
+          "retrieved_evidence_count": 8,
+          "retrieved_evidence_ids": [
+            "event:2ef5dc1e-f495-4be0-8077-6bcd94619e70",
+            "event:a1de1598-bf9b-43ce-a671-45c02b3fa517",
+            "event:d2ead26d-e764-40ae-bdec-0d14271de529",
+            "segment:0",
+            "segment:2",
+            "segment:3",
+            "segment:4",
+            "segment:10"
+          ],
+          "retrieval_scores": [
+            {
+              "evidence_id": "event:2ef5dc1e-f495-4be0-8077-6bcd94619e70",
+              "score": 1.65
+            },
+            {
+              "evidence_id": "event:a1de1598-bf9b-43ce-a671-45c02b3fa517",
+              "score": 1.63
+            },
+            {
+              "evidence_id": "event:d2ead26d-e764-40ae-bdec-0d14271de529",
+              "score": 1.615
+            },
+            {
+              "evidence_id": "segment:0",
+              "score": 1.21
+            },
+            {
+              "evidence_id": "segment:2",
+              "score": 1.21
+            },
+            {
+              "evidence_id": "segment:3",
+              "score": 1.21
+            },
+            {
+              "evidence_id": "segment:4",
+              "score": 1.21
+            },
+            {
+              "evidence_id": "segment:10",
+              "score": 1.21
+            }
+          ],
+          "provider_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "provider_supported_flag": false,
+          "provider_used_evidence_ids": [],
+          "accepted_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "rejection_reason_codes": {},
+          "failure_classes": [
+            "PROVIDER_ABSTAINS"
+          ],
+          "final_supported": false,
+          "citation_count": 0
+        },
+        {
+          "expected_supported": true,
+          "question_language": "unknown",
+          "retrieval_candidate_count": 22,
+          "retrieved_evidence_count": 1,
+          "retrieved_evidence_ids": [
+            "segment:1"
+          ],
+          "retrieval_scores": [
+            {
+              "evidence_id": "segment:1",
+              "score": 1.26
+            }
+          ],
+          "provider_parse_status": "PASS",
+          "provider_attempt_count": 1,
+          "provider_error_codes": [],
+          "provider_supported_flag": true,
+          "provider_used_evidence_ids": [
+            "segment:1"
+          ],
+          "accepted_evidence_ids": [
+            "segment:1"
+          ],
+          "rejected_evidence_ids": [],
+          "rejection_reason_codes": {},
+          "failure_classes": [],
+          "final_supported": true,
+          "citation_count": 1
+        },
+        {
+          "expected_supported": false,
+          "question_language": "unknown",
+          "retrieval_candidate_count": 22,
+          "retrieved_evidence_count": 0,
+          "retrieved_evidence_ids": [],
+          "retrieval_scores": [],
+          "provider_parse_status": "NOT_RUN",
+          "provider_attempt_count": 0,
+          "provider_error_codes": [],
+          "provider_supported_flag": null,
+          "provider_used_evidence_ids": [],
+          "accepted_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "rejection_reason_codes": {},
+          "failure_classes": [
+            "NO_RETRIEVAL_HIT"
+          ],
+          "final_supported": false,
+          "citation_count": 0
+        }
+      ],
+      "provider_telemetry": {
+        "max_provider_calls_per_stage": 3,
+        "stages": {
+          "event_extraction": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 0.0,
+            "budget_exhausted": false
+          },
+          "question_answer_linking": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "context_recovery:en-low-info": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "context_recovery:en-boundary": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "context_recovery:en-qa": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_supported:en-supported": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_supported:en-paraphrase": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_unsupported:en-unsupported": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_supported:en-supported-atomicity": {
+            "provider_call_count": 1,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          },
+          "ask_unsupported:en-unsupported-release": {
+            "provider_call_count": 0,
+            "rate_limit_count": 0,
+            "retry_wait_seconds": [],
+            "pacing_delay_seconds": 5.0,
+            "budget_exhausted": false
+          }
+        },
+        "total_provider_call_count": 9,
+        "total_rate_limit_count": 0
+      },
+      "latency_ms": 60399.9
+    }
+  ]
+}

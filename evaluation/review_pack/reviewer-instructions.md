@@ -2,33 +2,34 @@
 
 Status: **PENDING_HUMAN_REVIEW**
 
-The inputs are project-authored synthetic lectures. They are not classroom recordings and are not model-quality evidence by themselves. The latest Gemini smoke failed; therefore provider predictions were not exported into the review CSVs. `event-predictions-review.csv` intentionally contains headers only, and the other prediction fields remain blank. Do not review or score a blank provider output.
+The packs contain real-provider predictions from `gemini-3.5-flash-lite` over project-authored synthetic lectures. Predictions include semantic mistakes and abstentions; technical eligibility does not imply model quality.
 
-## Before review
+## Single-reviewer design
 
-1. Resolve the real-provider smoke blocker and rerun the normal harness.
-2. Export only the resulting real-provider predictions into the provider columns.
-3. Keep every `reviewer_a_*` and `reviewer_b_*` field blank until the named human performs the review.
+- Reviewer A is the only human reviewer and reviews every row in all four prediction packs.
+- Required completion is 20/20 Event, 3/3 Q↔A, 9/9 Context Recovery, and 15/15 Grounded Ask rows.
+- Use only source excerpts, canonical evidence IDs, and backend timestamps.
+- Keep author drafts and automated expectations as unverified references.
+- Do not use smoke status, model confidence, fixture expectation alone, or retrieval score alone as proof of correctness.
+- Compatibility-only Reviewer B and adjudication columns are marked `UNUSED_SINGLE_REVIEWER` and are excluded from validation and metrics.
+- Aggregate metrics remain unavailable until all 47 Reviewer A rows are complete and structurally valid.
 
-## Reviewer A
+## AI-assisted suggestions and confirmation
 
-- Review every predicted event for precision using `CORRECT`, `PARTIALLY_CORRECT`, or `INCORRECT`.
-- Fully annotate the recall subset marked `full_recall_subset=true`.
-- Review every Q-to-A row, Context Recovery window, and Grounded Ask case.
-- Record a name/identifier and review date in the final handoff record; do not use `AUTHOR_DRAFT` as a human identity.
+AI-assisted review suggestions were generated against canonical source evidence and subsequently require manual human verification.
 
-## Reviewer B
+AI suggestions are provisional. The workflow is: AI-assisted suggestion → human checks every row → human corrects disagreements → explicit human confirmation → `HUMAN_VERIFIED` → verified metrics. Never treat populated Reviewer A cells or a passing validator as human confirmation.
 
-- Independently select and review 20–30% of each applicable pack.
-- Set `reviewer_b_selected` only for the independently chosen subset.
-- Do not inspect Reviewer A's judgments before completing the independent pass.
-- Record disagreements for adjudication; do not silently overwrite Reviewer A.
+Canonical CSV literals:
 
-## Scales
+- Event judgment: `CORRECT`, `PARTIALLY_CORRECT`, `INCORRECT`, `MISSING`, or `DUPLICATE`.
+- Timestamp judgment: `CORRECT` or `INCORRECT`.
+- Reviewer Boolean: lowercase `true` or `false`; blank only for a legitimate N/A or incomplete field.
+- Context claim judgments: JSON Boolean arrays whose length equals `model_context_items`.
+- Context completeness/usefulness: `0`, `1`, or `2`.
 
-- Event precision: `CORRECT`, `PARTIALLY_CORRECT`, `INCORRECT`.
-- Context completeness/usefulness: `0` fail, `1` partial, `2` good.
-- Ask answer correctness: `0` incorrect, `1` partial, `2` correct.
-- Citation correctness, retrieval hit, and claim support: explicit boolean judgments.
+Save partial suggestions without setting `human_verification_status`. After manually checking and correcting all 47 rows, the human owner explicitly sets every active row's `human_verification_status` to `HUMAN_VERIFIED`. No tool may infer this state from completion alone.
 
-Only a human may change the pack status to `HUMAN_VERIFIED`. Metrics must not be computed from blank fields, author drafts, fake-provider outputs, or partial failed-smoke metadata.
+## Limitation
+
+This evaluation uses one human reviewer. Therefore, no inter-rater agreement or independent secondary-review reliability measure is reported.

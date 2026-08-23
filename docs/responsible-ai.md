@@ -28,5 +28,5 @@ Automated reprocessing cannot silently replace reviewed content. Review endpoint
 - Lexical retrieval can miss paraphrases or overvalue surface overlap.
 - Provider behavior varies across language and code-switch inputs.
 - Prompt-injection defenses reduce risk but are not a formal security proof.
-- Model quality, accessibility effectiveness, and learning outcomes require real-provider outputs and appropriate human evaluation.
+- Current model-quality evidence is limited to a small human-verified synthetic evaluation; accessibility effectiveness and learning outcomes require separate user-centered evaluation.
 - The in-memory limiter is suitable only for a single-process deployment.

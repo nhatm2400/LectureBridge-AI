@@ -1,27 +1,45 @@
-# Kịch bản video Intel — 2 phút
+# Kịch bản video Intel — 2 phút (Tiếng Việt)
 
-> Chỉ quay sau khi real-provider smoke, human evaluation và hero cache hợp lệ. Không đọc metric placeholder như một kết quả thật.
+## 0:00–0:15 — Vấn đề
 
-## 0–15 giây — Vấn đề
+**Hình ảnh:** Transcript dài bên cạnh video.
 
-“Phụ đề giúp đọc được lời giảng, nhưng khi bỏ lỡ vài phút, sinh viên vẫn phải tìm trong một transcript rất dài. Với sinh viên Điếc và khiếm thính, câu hỏi quan trọng không chỉ là giảng viên đã nói gì, mà là phần nào đang diễn ra và bằng chứng nằm ở đâu.”
+**Lời nói:** “Phụ đề giúp lời giảng trở nên hữu hình, nhưng chưa chắc cho chúng ta thấy cấu trúc của cả bài. Khi bỏ lỡ một đoạn, người học vẫn phải tìm lại câu hỏi, câu trả lời, ví dụ và lý do phần đó quan trọng.”
 
-## 15–30 giây — LectureBridge AI
+## 0:15–0:35 — Truy cập bài giảng
 
-“LectureBridge AI giữ video, phụ đề song ngữ và transcript theo timestamp trong một luồng học được bảo vệ. Đây là bài demo tổng hợp do dự án tự tạo, không có dữ liệu cá nhân hay media của bên thứ ba.”
+**Hình ảnh:** Mở bài demo tổng hợp, phát video và chọn một dòng transcript có timestamp.
 
-## 30–55 giây — Semantic Timeline
+**Lời nói:** “LectureBridge giữ video và transcript theo thời gian trong cùng trải nghiệm. Hệ thống hỗ trợ tiếng Việt, tiếng Anh và code-switch; mỗi dòng đều có thể đưa người học về đúng thời điểm trong bài.”
 
-“AI trích xuất cấu trúc có evidence: chuyển chủ đề, câu hỏi, câu trả lời, ví dụ và điểm quan trọng. Câu hỏi được nối tới câu trả lời; mỗi mục có thể bấm để quay đúng đoạn. Giáo viên có thể xác nhận, sửa hoặc từ chối.”
+## 0:35–0:55 — Semantic Timeline
 
-## 55–80 giây — Context Recovery
+**Hình ảnh:** Chọn `TOPIC_CHANGE → QUESTION → ANSWER → EXAMPLE → IMPORTANT` và mở một liên kết Q↔A.
 
-“Nếu vừa mất tập trung, người học chọn ‘Tôi đã bỏ lỡ gì?’. Backend chỉ gửi cửa sổ gần đây cùng event và Q-A liên quan. Claim không map được về source sẽ bị loại, và timestamp không do model tự tạo.”
+**Lời nói:** “Lecture Intelligence biến transcript thành Semantic Timeline. Người học nhìn thấy lúc chuyển chủ đề, câu hỏi nào được đặt ra, phần nào trả lời, và đâu là ví dụ hay ý quan trọng.”
 
-## 80–105 giây — Grounded Ask
+## 0:55–1:15 — Context Recovery
 
-“Người học hỏi về dirty read. LectureBridge chỉ tìm trong bài hiện tại, trả lời cùng citation rồi seek về bằng chứng. Với câu hỏi ngoài bài, hệ thống từ chối thay vì đoán.”
+**Hình ảnh:** Chọn “Tôi đã bỏ lỡ gì?” và mở một citation.
 
-## 105–120 giây — Đánh giá và Responsible AI
+**Lời nói:** “Nếu vừa mất tập trung, Context Recovery tóm lại cửa sổ gần đây thay vì bắt người học tìm toàn bộ transcript. Mỗi claim gắn với bằng chứng đã kiểm tra, còn timestamp do backend xác định.”
 
-“Cùng source ID được dùng cho summary, flashcard và quiz. Chúng tôi đo event, Q-A, groundedness, abstention và accessibility. Chèn tại đây 2–4 metric đã được human-verified: [METRIC PENDING]. LectureBridge ưu tiên privacy, transparency, abstention và human oversight—AI hỗ trợ việc học, không che giấu giới hạn.”
+## 1:15–1:35 — Grounded Ask
+
+**Hình ảnh:** Đặt câu hỏi có bằng chứng, mở citation và nhảy về video.
+
+**Lời nói:** “LectureBridge chỉ tìm trong bài hiện tại, trả lời từ evidence phù hợp và cho phép nhảy thẳng về nguồn. Cùng evidence graph này hỗ trợ tóm tắt, highlights, flashcards và quiz.”
+
+## 1:35–1:50 — Responsible AI
+
+**Hình ảnh:** Đặt câu hỏi ngoài nội dung và hiển thị abstention.
+
+**Lời nói:** “Khi bài giảng không đủ căn cứ, hệ thống nói rõ là chưa thể trả lời thay vì đoán. Source validation, abstention và human review giúp giới hạn của AI luôn hiển thị.”
+
+## 1:50–2:00 — Kết quả
+
+**Hình ảnh:** Bảng “Small synthetic human-verified evaluation”.
+
+**Lời nói:** “Trong đánh giá tổng hợp quy mô nhỏ đã được xác minh, cả 20 Event prediction được review đều đúng; trên tập gold VI/EN full-recall, hệ thống khớp 11 trên 12 Event. LectureBridge công khai cả kết quả tốt lẫn lỗi còn lại để tiếp tục cải thiện một cách có trách nhiệm.”
+
+Kịch bản public canonical và lưu ý quay được duy trì tại [`demo/demo-script.md`](../demo/demo-script.md).

@@ -44,7 +44,7 @@ For matched spans, report mean absolute start error, end error, and their combin
 
 ## Inter-review check
 
-Reviewer A completes the set. Reviewer B reviews a deterministic 20–30% subset and records agree/disagree plus a note. Report simple agreement numerator/denominator only. Do not call it Cohen's Kappa unless the sampling/design supports that statistic.
+Reviewer A is the single human reviewer and completes 100% of the required event rows. Do not report inter-rater agreement or independent secondary-review reliability measures for this evaluation design.
 
 ## Privacy and status
 
