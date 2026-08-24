@@ -1,394 +1,457 @@
 'use client';
 
-import React, { Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { 
-  User, 
-  Settings as SettingsIcon, 
-  Pencil, 
-  Sun, 
-  Moon, 
-  Eye, 
-  ScrollText,
-  Check,
+import {
   Award,
   BookOpen,
+  Check,
   Clock,
-  LayoutDashboard
+  Eye,
+  LayoutDashboard,
+  Moon,
+  Pencil,
+  ScrollText,
+  Settings as SettingsIcon,
+  Sun,
+  User,
 } from 'lucide-react';
-import { useAppStore } from '@/store/useAppStore';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import React, { Suspense } from 'react';
+
+import { Button, buttonClassName } from '@/components/ui/Button';
+import { Field } from '@/components/ui/Field';
+import { IconButton } from '@/components/ui/IconButton';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { StatePanel } from '@/components/ui/StatePanel';
+import { Surface } from '@/components/ui/Surface';
+import { api, type StudentProfileData } from '@/lib/api';
 import { cn } from '@/lib/utils';
-import { api, StudentProfileData } from '@/lib/api';
+import { useAppStore } from '@/store/useAppStore';
+
+type SettingsTab = 'dashboard' | 'profile' | 'accessibility';
+
+const SETTINGS_TABS: Array<{
+  id: SettingsTab;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+}> = [
+  { id: 'dashboard', label: 'Tổng quan', icon: LayoutDashboard },
+  { id: 'profile', label: 'Hồ sơ', icon: User },
+  { id: 'accessibility', label: 'Trợ năng', icon: SettingsIcon },
+];
+
+function PreferenceSwitch({
+  checked,
+  description,
+  icon: Icon,
+  label,
+  onChange,
+}: {
+  checked: boolean;
+  description: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  label: string;
+  onChange: () => void;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-5 border-t border-[var(--lb-border)] py-5 first:border-t-0 first:pt-0 last:pb-0">
+      <div className="flex min-w-0 gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[var(--lb-accent-soft)] text-[var(--lb-accent)]" aria-hidden="true">
+          <Icon size={19} />
+        </span>
+        <div>
+          <p className="text-sm font-semibold text-[var(--lb-ink)]">{label}</p>
+          <p className="mt-1 max-w-xl text-sm leading-6 text-[var(--lb-muted)]">{description}</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-label={label}
+        onClick={onChange}
+        className="flex h-11 w-14 shrink-0 items-center justify-center rounded-md"
+      >
+        <span className={cn(
+          'relative h-6 w-11 rounded-full transition-colors duration-150',
+          checked ? 'bg-[var(--lb-accent)]' : 'bg-[var(--lb-border-strong)]',
+        )}>
+          <span className={cn(
+            'absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-[var(--lb-elevated)] transition-transform duration-150',
+            checked ? 'translate-x-5' : 'translate-x-0',
+          )} />
+        </span>
+      </button>
+    </div>
+  );
+}
 
 function SettingsPageContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const activeTab = (searchParams.get('tab') as 'dashboard' | 'profile' | 'accessibility') || 'dashboard';
-  
-  const setActiveTab = (tab: 'dashboard' | 'profile' | 'accessibility') => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('tab', tab);
-    router.push(`/student/settings?${params.toString()}`);
-  };
+  const requestedTab = searchParams.get('tab');
+  const activeTab: SettingsTab = SETTINGS_TABS.some((tab) => tab.id === requestedTab)
+    ? requestedTab as SettingsTab
+    : 'dashboard';
 
   const [profileData, setProfileData] = React.useState<StudentProfileData | null>(null);
-  const [, setLoading] = React.useState(true);
-
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [loadError, setLoadError] = React.useState('');
+  const [saveError, setSaveError] = React.useState('');
+  const [isEditingProfile, setIsEditingProfile] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [editedName, setEditedName] = React.useState('');
   const [editedBio, setEditedBio] = React.useState('');
   const [editedGoals, setEditedGoals] = React.useState('');
 
-  React.useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const data = await api.student.getProfile();
-        setProfileData(data);
-        setEditedBio(data.profile.bio || '');
-        setEditedGoals(data.profile.learning_goals || '');
-      } catch (err) {
-        console.error("Failed to fetch profile", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
-  }, []);
-
-  const { 
-    theme, setTheme, 
-    highContrast, setHighContrast, 
-    autoScroll, setAutoScroll,
-    user 
+  const {
+    autoScroll,
+    highContrast,
+    setAutoScroll,
+    setHighContrast,
+    setTheme,
+    theme,
+    user,
   } = useAppStore();
 
-  const [isEditingProfile, setIsEditingProfile] = React.useState(false);
-  const [editedName, setEditedName] = React.useState(user?.name || '');
-  const [isSaving, setIsSaving] = React.useState(false);
+  const loadProfile = React.useCallback(async () => {
+    setIsLoading(true);
+    setLoadError('');
+    try {
+      const data = await api.student.getProfile();
+      setProfileData(data);
+      setEditedBio(data.profile.bio || '');
+      setEditedGoals(data.profile.learning_goals || '');
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : 'Không thể tải hồ sơ học tập.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    void loadProfile();
+  }, [loadProfile]);
 
   React.useEffect(() => {
     if (user?.name) setEditedName(user.name);
-  }, [user]);
+  }, [user?.name]);
+
+  const cancelEditing = () => {
+    setEditedName(user?.name || '');
+    setEditedBio(profileData?.profile.bio || '');
+    setEditedGoals(profileData?.profile.learning_goals || '');
+    setSaveError('');
+    setIsEditingProfile(false);
+  };
 
   const handleSaveProfile = async () => {
     if (!editedName.trim()) return;
     setIsSaving(true);
+    setSaveError('');
     try {
-      await api.student.updateProfile({ 
+      await api.student.updateProfile({
         bio: editedBio.trim(),
         learning_goals: editedGoals.trim(),
         full_name: editedName.trim(),
       } as Parameters<typeof api.student.updateProfile>[0]);
-      
+
       if (user) {
         useAppStore.getState().login({ ...user, name: editedName.trim() });
       }
 
-      // Update local profile data too
-      if (profileData) {
-        setProfileData({
-          ...profileData,
-          profile: {
-            ...profileData.profile,
-            bio: editedBio.trim(),
-            learning_goals: editedGoals.trim()
-          }
-        });
-      }
-
+      setProfileData((current) => current ? {
+        ...current,
+        profile: {
+          ...current.profile,
+          bio: editedBio.trim(),
+          learning_goals: editedGoals.trim(),
+        },
+      } : current);
       setIsEditingProfile(false);
-    } catch (err) {
-      console.error("Save failed", err);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Không thể lưu thay đổi.');
     } finally {
       setIsSaving(false);
     }
   };
 
+  const renderProfileState = () => {
+    if (isLoading) {
+      return <StatePanel state="loading" title="Đang tải hồ sơ" description="LectureBridge đang lấy tiến độ và thiết lập của bạn." />;
+    }
+    if (loadError) {
+      return (
+        <StatePanel
+          state="error"
+          title="Không thể tải hồ sơ"
+          description={loadError}
+          action={<Button variant="secondary" onClick={() => void loadProfile()}>Thử lại</Button>}
+        />
+      );
+    }
+    if (!profileData) {
+      return <StatePanel state="empty" title="Chưa có dữ liệu hồ sơ" description="Hãy thử tải lại trang sau ít phút." />;
+    }
+    return null;
+  };
+
+  const profileState = activeTab !== 'accessibility' ? renderProfileState() : null;
+
   return (
-    <div className="min-h-screen bg-transparent">
-      <div className="px-8 md:px-12 py-8 max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row gap-8">
-          
-          {/* Sidebar Tabs */}
-          <div className="w-full md:w-64 space-y-2">
-            <button 
-              onClick={() => setActiveTab('dashboard')}
-              className={cn(
-                "w-full flex items-center gap-3 px-5 py-4 rounded-2xl transition-all font-bold text-sm",
-                activeTab === 'dashboard' 
-                  ? "bg-white text-primary shadow-sm" 
-                  : "text-slate-500 hover:bg-white/50"
-              )}
-            >
-              <LayoutDashboard size={18} />
-              Dashboard học tập
-            </button>
-            <button 
-              onClick={() => setActiveTab('profile')}
-              className={cn(
-                "w-full flex items-center gap-3 px-5 py-4 rounded-2xl transition-all font-bold text-sm",
-                activeTab === 'profile' 
-                  ? "bg-white text-primary shadow-sm" 
-                  : "text-slate-500 hover:bg-white/50"
-              )}
-            >
-              <User size={18} />
-              Hồ sơ của tôi
-            </button>
-            <button 
-              onClick={() => setActiveTab('accessibility')}
-              className={cn(
-                "w-full flex items-center gap-3 px-5 py-4 rounded-2xl transition-all font-bold text-sm",
-                activeTab === 'accessibility' 
-                  ? "bg-white text-primary shadow-sm" 
-                  : "text-slate-500 hover:bg-white/50"
-              )}
-            >
-              <SettingsIcon size={18} />
-              Cài đặt trợ năng
-            </button>
+    <div className="bg-transparent">
+      <div className="mx-auto w-full max-w-6xl space-y-6 px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
+        <PageHeader
+          eyebrow="Tài khoản"
+          title="Cài đặt và hồ sơ"
+          description="Theo dõi hoạt động học tập, cập nhật thông tin cá nhân và điều chỉnh trải nghiệm theo nhu cầu của bạn."
+        />
+
+        <nav aria-label="Các mục cài đặt" className="rounded-[10px] border border-[var(--lb-border)] bg-[var(--lb-surface)] p-1">
+          <div className="grid grid-cols-3 gap-1">
+            {SETTINGS_TABS.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <Link
+                  key={tab.id}
+                  href={`/student/settings?tab=${tab.id}`}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={cn(
+                    'flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-md px-2 text-xs font-semibold transition-colors duration-150 sm:px-4 sm:text-sm',
+                    isActive
+                      ? 'bg-[var(--lb-accent-soft)] text-[var(--lb-ink)]'
+                      : 'text-[var(--lb-muted)] hover:bg-[var(--lb-elevated)] hover:text-[var(--lb-ink)]',
+                  )}
+                >
+                  <tab.icon size={17} className={isActive ? 'text-[var(--lb-accent)]' : 'text-[var(--lb-subtle)]'} aria-hidden="true" />
+                  <span className="truncate">{tab.label}</span>
+                </Link>
+              );
+            })}
           </div>
+        </nav>
 
-          {/* Main Content */}
-          <div className="flex-1">
-            {activeTab === 'dashboard' && profileData && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                {/* Stats Cards */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                   {[
-                     { label: 'Đã đăng ký', value: profileData.stats.total_enrollments, icon: BookOpen, color: 'bg-blue-500' },
-                     { label: 'Hoàn thành', value: profileData.stats.completed_lessons, icon: Check, color: 'bg-emerald-500' },
-                     { label: 'Giờ học', value: `${profileData.stats.total_hours}h`, icon: Clock, color: 'bg-amber-500' },
-                     { label: 'Chứng chỉ', value: profileData.stats.certificates_count, icon: Award, color: 'bg-rose-500' },
-                   ].map((stat, i) => (
-                     <div key={i} className="card-premium p-6 bg-white flex flex-col gap-4">
-                        <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg", stat.color)}>
-                           <stat.icon size={24} />
-                        </div>
-                        <div>
-                           <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">{stat.label}</p>
-                           <p className="text-2xl font-extrabold text-slate-900">{stat.value}</p>
-                        </div>
-                     </div>
-                   ))}
-                </div>
+        {profileState}
 
-                {/* Certificates List */}
-                <div className="card-premium p-10 bg-white">
-                  <h2 className="text-xl font-extrabold tracking-tight text-slate-900 mb-8">Chứng chỉ của tôi</h2>
-                  {profileData.profile.certifications && profileData.profile.certifications.length > 0 ? (
-                    <div className="grid gap-4">
-                      {profileData.profile.certifications.map((cert, idx) => (
-                        <div key={idx} className="p-6 bg-slate-50 rounded-[28px] border border-slate-100 flex items-center justify-between group hover:bg-white hover:shadow-xl transition-all">
-                           <div className="flex items-center gap-6">
-                              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
-                                 <Award size={28} />
-                              </div>
-                              <div>
-                                 <h4 className="font-extrabold text-slate-900">{cert.course_title}</h4>
-                                 <p className="text-xs font-bold text-slate-400">ID: {cert.cert_id} • Cấp ngày: {new Date(cert.issue_date).toLocaleDateString('vi-VN')}</p>
-                              </div>
-                           </div>
-                           <button className="px-6 py-3 bg-white text-slate-900 border border-slate-200 rounded-xl font-extrabold text-xs uppercase tracking-widest hover:bg-primary hover:text-white hover:border-primary transition-all">
-                              Tải xuống
-                           </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="py-12 text-center">
-                       <Award size={48} className="mx-auto text-slate-200 mb-4" />
-                       <p className="text-slate-400 font-bold">Bạn chưa có chứng chỉ nào. Hãy hoàn thành các khóa học để nhận chứng chỉ!</p>
-                    </div>
-                  )}
-                </div>
+        {!profileState && activeTab === 'dashboard' && profileData && (
+          <div className="space-y-6">
+            <section aria-labelledby="learning-overview-heading">
+              <div className="mb-4">
+                <h2 id="learning-overview-heading" className="text-xl">Hoạt động học tập</h2>
+                <p className="mt-1 text-sm leading-6 text-[var(--lb-muted)]">Một góc nhìn ngắn về tiến độ hiện tại của bạn.</p>
               </div>
-            )}
+              <Surface className="overflow-hidden">
+                <dl className="grid grid-cols-2 gap-px bg-[var(--lb-border)] md:grid-cols-4">
+                  {[
+                    { label: 'Đã đăng ký', value: profileData.stats.total_enrollments, icon: BookOpen },
+                    { label: 'Hoàn thành', value: profileData.stats.completed_lessons, icon: Check },
+                    { label: 'Giờ học', value: `${profileData.stats.total_hours}h`, icon: Clock },
+                    { label: 'Chứng chỉ', value: profileData.stats.certificates_count, icon: Award },
+                  ].map((stat) => (
+                    <div key={stat.label} className="bg-[var(--lb-surface)] p-5 sm:p-6">
+                      <dt className="flex items-center gap-2 text-sm font-semibold text-[var(--lb-muted)]">
+                        <stat.icon size={17} className="text-[var(--lb-accent)]" aria-hidden="true" />
+                        {stat.label}
+                      </dt>
+                      <dd className="mt-3 text-[1.75rem] font-bold leading-none tabular-nums text-[var(--lb-ink)]">{stat.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </Surface>
+            </section>
 
-            {activeTab === 'profile' ? (
-              <div className="card-premium p-10 bg-white animate-in fade-in slide-in-from-right-4 duration-500">
-                <div className="flex items-center justify-between mb-8 pb-5 border-b border-slate-100">
-                  <h2 className="text-xl font-extrabold tracking-tight text-slate-900">Thông tin cá nhân</h2>
-                  <button 
-                    onClick={() => setIsEditingProfile(true)}
-                    className="p-2 bg-slate-50 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors border border-slate-200"
-                  >
-                    <Pencil size={16} />
-                  </button>
+            <Surface className="overflow-hidden" aria-labelledby="certificates-heading">
+              <div className="flex flex-col gap-2 border-b border-[var(--lb-border)] p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
+                <div>
+                  <h2 id="certificates-heading" className="text-xl">Chứng chỉ của tôi</h2>
+                  <p className="mt-1 text-sm leading-6 text-[var(--lb-muted)]">Các chứng chỉ được cấp sau khi hoàn thành khóa học.</p>
                 </div>
+                <span className="text-sm font-semibold tabular-nums text-[var(--lb-muted)]">{profileData.profile.certifications?.length || 0} chứng chỉ</span>
+              </div>
 
-                <div className="grid md:grid-cols-2 gap-y-8 gap-x-10">
-                  <div>
-                    <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5">Tên hiển thị</p>
-                    {isEditingProfile ? (
-                      <input 
-                        value={editedName}
-                        onChange={(e) => setEditedName(e.target.value)}
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:border-primary/40 focus:bg-white transition-all"
-                        placeholder="Nhập tên hiển thị mới"
-                        autoFocus
-                      />
-                    ) : (
-                      <p className="text-[15px] font-bold text-slate-700">{user?.name}</p>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5">Địa chỉ email</p>
-                    <p className="text-[15px] font-bold text-slate-700">{user?.email}</p>
-                  </div>
+              {profileData.profile.certifications && profileData.profile.certifications.length > 0 ? (
+                <ul className="divide-y divide-[var(--lb-border)] px-5 sm:px-6">
+                  {profileData.profile.certifications.map((cert) => (
+                    <li key={cert.cert_id} className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex min-w-0 items-start gap-3">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[var(--lb-accent-soft)] text-[var(--lb-accent)]" aria-hidden="true">
+                          <Award size={19} />
+                        </span>
+                        <div className="min-w-0">
+                          <h3 className="truncate text-base">{cert.course_title}</h3>
+                          <p className="mt-1 text-xs leading-5 text-[var(--lb-muted)]">ID: {cert.cert_id} · Cấp ngày {new Date(cert.issue_date).toLocaleDateString('vi-VN')}</p>
+                        </div>
+                      </div>
+                      <Button variant="secondary" size="sm">Tải xuống</Button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="px-5 py-8 text-center sm:px-6 sm:py-10">
+                  <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-md bg-[var(--lb-accent-soft)] text-[var(--lb-accent)]" aria-hidden="true">
+                    <Award size={21} />
+                  </span>
+                  <h3 className="mt-4 text-lg">Chưa có chứng chỉ</h3>
+                  <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--lb-muted)]">Hoàn thành khóa học đang theo học để chứng chỉ đầu tiên xuất hiện tại đây.</p>
+                  <Link href="/student/documents" className={buttonClassName({ variant: 'secondary', size: 'sm', className: 'mt-5' })}>
+                    Xem khóa học đã đăng ký
+                  </Link>
                 </div>
+              )}
+            </Surface>
+          </div>
+        )}
 
-                <div className="mt-10 pt-8 border-t border-slate-100">
-                  <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Giới thiệu</p>
-                  {isEditingProfile ? (
-                    <textarea 
-                      value={editedBio}
-                      onChange={(e) => setEditedBio(e.target.value)}
-                      rows={3}
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:border-primary/40 focus:bg-white transition-all resize-none"
-                      placeholder="Chia sẻ một chút về bản thân bạn..."
+        {!profileState && activeTab === 'profile' && profileData && (
+          <Surface className="overflow-hidden" aria-labelledby="profile-heading">
+            <div className="flex items-center justify-between gap-4 border-b border-[var(--lb-border)] p-5 sm:p-6">
+              <div>
+                <h2 id="profile-heading" className="text-xl">Thông tin cá nhân</h2>
+                <p className="mt-1 text-sm leading-6 text-[var(--lb-muted)]">Thông tin được hiển thị trong không gian học tập của bạn.</p>
+              </div>
+              {!isEditingProfile && (
+                <IconButton label="Chỉnh sửa hồ sơ" onClick={() => setIsEditingProfile(true)} className="border-[var(--lb-border)] bg-[var(--lb-elevated)]">
+                  <Pencil size={17} aria-hidden="true" />
+                </IconButton>
+              )}
+            </div>
+
+            <form
+              className="space-y-6 p-5 sm:p-6"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void handleSaveProfile();
+              }}
+            >
+              <div className="grid gap-6 md:grid-cols-2">
+                {isEditingProfile ? (
+                  <Field label="Tên hiển thị" htmlFor="profile-display-name">
+                    <input
+                      id="profile-display-name"
+                      value={editedName}
+                      onChange={(event) => setEditedName(event.target.value)}
+                      className="lb-field"
+                      placeholder="Nhập tên hiển thị"
+                      autoComplete="name"
+                      autoFocus
                     />
-                  ) : (
-                    <p className="text-[15px] font-medium text-slate-600 leading-relaxed">
-                      {profileData?.profile.bio || "Bạn chưa có thông tin giới thiệu."}
-                    </p>
-                  )}
-                </div>
-                
-                <div className="mt-8">
-                  <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Mục tiêu học tập</p>
-                  {isEditingProfile ? (
-                    <textarea 
-                      value={editedGoals}
-                      onChange={(e) => setEditedGoals(e.target.value)}
-                      rows={3}
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:border-primary/40 focus:bg-white transition-all resize-none"
-                      placeholder="Mục tiêu học tập của bạn là gì?"
-                    />
-                  ) : (
-                    <p className="text-[15px] font-medium text-slate-600 leading-relaxed">
-                      {profileData?.profile.learning_goals || "Hãy đặt ra mục tiêu để có động lực hơn nhé!"}
-                    </p>
-                  )}
-                </div>
-
-                {isEditingProfile && (
-                  <div className="mt-10 pt-8 border-t border-slate-100 flex justify-end gap-3">
-                    <button 
-                      onClick={() => setIsEditingProfile(false)}
-                      className="px-6 py-3 bg-slate-100 text-slate-500 rounded-xl text-xs font-extrabold uppercase tracking-widest hover:bg-slate-200 transition-all"
-                    >
-                      Hủy
-                    </button>
-                    <button 
-                      onClick={handleSaveProfile}
-                      disabled={isSaving}
-                      className="px-8 py-3 bg-primary text-white rounded-xl text-xs font-extrabold uppercase tracking-widest shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all disabled:opacity-50"
-                    >
-                      {isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
-                    </button>
+                  </Field>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-[var(--lb-ink)]">Tên hiển thị</p>
+                    <p id="profile-display-name" className="min-h-11 border-b border-[var(--lb-border)] py-3 text-sm font-semibold text-[var(--lb-ink)]">{user?.name || 'Chưa cập nhật'}</p>
                   </div>
                 )}
-              </div>
-            ) : activeTab === 'accessibility' ? (
-              <div className="card-premium p-10 bg-white animate-in fade-in slide-in-from-right-4 duration-500">
-                <div className="flex items-center justify-between mb-8 pb-5 border-b border-slate-100">
-                  <h2 className="text-xl font-extrabold tracking-tight text-slate-900">Cấu hình trợ năng</h2>
-                </div>
-
-                <div className="space-y-10">
-                  {/* Theme Mode */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-slate-800">
-                      {theme === 'light' ? <Sun size={18} className="text-primary" /> : <Moon size={18} className="text-primary" />}
-                      <h3 className="font-bold">Giao diện hiển thị</h3>
-                    </div>
-                    <div className="flex gap-4">
-                      <button 
-                        onClick={() => setTheme('light')}
-                        className={cn(
-                          "flex-1 p-4 rounded-2xl border-2 flex flex-col items-center gap-3 transition-all",
-                          theme === 'light' ? "border-primary bg-primary/5" : "border-slate-100 hover:border-slate-200"
-                        )}
-                      >
-                        <div className="w-full h-20 bg-slate-50 rounded-xl border border-slate-200 p-2 flex flex-col gap-2">
-                           <div className="h-2 w-3/4 bg-slate-200 rounded-full" />
-                           <div className="h-2 w-1/2 bg-slate-200 rounded-full" />
-                        </div>
-                        <span className={cn("text-sm font-bold", theme === 'light' ? "text-primary" : "text-slate-500")}>Chế độ sáng</span>
-                      </button>
-                      <button 
-                        onClick={() => setTheme('dark')}
-                        className={cn(
-                          "flex-1 p-4 rounded-2xl border-2 flex flex-col items-center gap-3 transition-all",
-                          theme === 'dark' ? "border-primary bg-primary/5" : "border-slate-100 hover:border-slate-200"
-                        )}
-                      >
-                        <div className="w-full h-20 bg-slate-900 rounded-xl border border-slate-800 p-2 flex flex-col gap-2">
-                           <div className="h-2 w-3/4 bg-slate-800 rounded-full" />
-                           <div className="h-2 w-1/2 bg-slate-800 rounded-full" />
-                        </div>
-                        <span className={cn("text-sm font-bold", theme === 'dark' ? "text-primary" : "text-slate-500")}>Chế độ tối</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Contrast Mode */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-primary shadow-sm border border-slate-100">
-                          <Eye size={20} />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-slate-900">Độ tương phản cao</h3>
-                          <p className="text-xs text-slate-400 font-medium">Làm nổi bật các thành phần giao diện quan trọng.</p>
-                        </div>
-                      </div>
-                      <button 
-                        onClick={() => setHighContrast(!highContrast)}
-                        className={cn(
-                          "w-14 h-8 rounded-full transition-all relative p-1",
-                          highContrast ? "bg-primary" : "bg-slate-200"
-                        )}
-                      >
-                        <div className={cn(
-                          "w-6 h-6 bg-white rounded-full shadow-md transition-all",
-                          highContrast ? "translate-x-6" : "translate-x-0"
-                        )} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Auto Scroll */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-primary shadow-sm border border-slate-100">
-                          <ScrollText size={20} />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-slate-900">Tự động cuộn phụ đề</h3>
-                          <p className="text-xs text-slate-400 font-medium">Phụ đề sẽ tự động cuộn theo tiến trình video.</p>
-                        </div>
-                      </div>
-                      <button 
-                        onClick={() => setAutoScroll(!autoScroll)}
-                        className={cn(
-                          "w-14 h-8 rounded-full transition-all relative p-1",
-                          autoScroll ? "bg-primary" : "bg-slate-200"
-                        )}
-                      >
-                        <div className={cn(
-                          "w-6 h-6 bg-white rounded-full shadow-md transition-all",
-                          autoScroll ? "translate-x-6" : "translate-x-0"
-                        )} />
-                      </button>
-                    </div>
-                  </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-[var(--lb-ink)]">Địa chỉ email</p>
+                  <p id="profile-email" className="min-h-11 border-b border-[var(--lb-border)] py-3 text-sm font-semibold text-[var(--lb-ink)]">{user?.email || 'Chưa cập nhật'}</p>
                 </div>
               </div>
-            ) : null}
-          </div>
-        </div>
+
+              {isEditingProfile ? (
+                <Field label="Giới thiệu" htmlFor="profile-bio">
+                  <textarea id="profile-bio" value={editedBio} onChange={(event) => setEditedBio(event.target.value)} rows={4} className="lb-field resize-y" placeholder="Chia sẻ ngắn về bản thân bạn" />
+                </Field>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-[var(--lb-ink)]">Giới thiệu</p>
+                  <p id="profile-bio" className="min-h-20 rounded-md border border-[var(--lb-border)] bg-[var(--lb-elevated)] p-4 text-sm leading-6 text-[var(--lb-muted)]">{profileData.profile.bio || 'Bạn chưa thêm thông tin giới thiệu.'}</p>
+                </div>
+              )}
+
+              {isEditingProfile ? (
+                <Field label="Mục tiêu học tập" htmlFor="profile-goals">
+                  <textarea id="profile-goals" value={editedGoals} onChange={(event) => setEditedGoals(event.target.value)} rows={4} className="lb-field resize-y" placeholder="Bạn muốn đạt được điều gì trong quá trình học?" />
+                </Field>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-[var(--lb-ink)]">Mục tiêu học tập</p>
+                  <p id="profile-goals" className="min-h-20 rounded-md border border-[var(--lb-border)] bg-[var(--lb-elevated)] p-4 text-sm leading-6 text-[var(--lb-muted)]">{profileData.profile.learning_goals || 'Bạn chưa đặt mục tiêu học tập.'}</p>
+                </div>
+              )}
+
+              {saveError && <p role="alert" className="rounded-md border border-[var(--lb-danger)] bg-[var(--lb-danger-soft)] p-3 text-sm font-semibold text-[var(--lb-danger)]">{saveError}</p>}
+
+              {isEditingProfile && (
+                <div className="flex flex-col-reverse gap-3 border-t border-[var(--lb-border)] pt-5 sm:flex-row sm:justify-end">
+                  <Button type="button" variant="ghost" onClick={cancelEditing}>Hủy</Button>
+                  <Button type="submit" disabled={isSaving || !editedName.trim()}>{isSaving ? 'Đang lưu…' : 'Lưu thay đổi'}</Button>
+                </div>
+              )}
+            </form>
+          </Surface>
+        )}
+
+        {activeTab === 'accessibility' && (
+          <Surface className="overflow-hidden" aria-labelledby="accessibility-heading">
+            <div className="border-b border-[var(--lb-border)] p-5 sm:p-6">
+              <h2 id="accessibility-heading" className="text-xl">Cấu hình trợ năng</h2>
+              <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--lb-muted)]">Điều chỉnh cách LectureBridge hiển thị nội dung và đồng bộ transcript trong quá trình học.</p>
+            </div>
+
+            <div className="space-y-7 p-5 sm:p-6">
+              <section aria-labelledby="appearance-heading">
+                <h3 id="appearance-heading" className="text-base">Giao diện hiển thị</h3>
+                <p className="mt-1 text-sm leading-6 text-[var(--lb-muted)]">Chọn chế độ phù hợp với môi trường học hiện tại.</p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    aria-pressed={theme === 'light'}
+                    onClick={() => setTheme('light')}
+                    className={cn(
+                      'flex min-h-20 items-start gap-3 rounded-md border p-4 text-left transition-colors duration-150',
+                      theme === 'light'
+                        ? 'border-[var(--lb-accent)] bg-[var(--lb-accent-soft)]'
+                        : 'border-[var(--lb-border)] bg-[var(--lb-elevated)] hover:border-[var(--lb-border-strong)]',
+                    )}
+                  >
+                    <Sun size={20} className="mt-0.5 shrink-0 text-[var(--lb-accent)]" aria-hidden="true" />
+                    <span>
+                      <span className="block text-sm font-semibold text-[var(--lb-ink)]">Chế độ sáng</span>
+                      <span className="mt-1 block text-xs leading-5 text-[var(--lb-muted)]">Nền giấy sáng cho môi trường đủ ánh sáng.</span>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={theme === 'dark'}
+                    onClick={() => setTheme('dark')}
+                    className={cn(
+                      'flex min-h-20 items-start gap-3 rounded-md border p-4 text-left transition-colors duration-150',
+                      theme === 'dark'
+                        ? 'border-[var(--lb-accent)] bg-[var(--lb-accent-soft)]'
+                        : 'border-[var(--lb-border)] bg-[var(--lb-elevated)] hover:border-[var(--lb-border-strong)]',
+                    )}
+                  >
+                    <Moon size={20} className="mt-0.5 shrink-0 text-[var(--lb-accent)]" aria-hidden="true" />
+                    <span>
+                      <span className="block text-sm font-semibold text-[var(--lb-ink)]">Chế độ tối</span>
+                      <span className="mt-1 block text-xs leading-5 text-[var(--lb-muted)]">Giảm độ sáng trong không gian học tối.</span>
+                    </span>
+                  </button>
+                </div>
+              </section>
+
+              <section className="border-t border-[var(--lb-border)] pt-6" aria-labelledby="reading-heading">
+                <h3 id="reading-heading" className="text-base">Đọc và theo dõi nội dung</h3>
+                <div className="mt-4">
+                  <PreferenceSwitch
+                    checked={highContrast}
+                    onChange={() => setHighContrast(!highContrast)}
+                    icon={Eye}
+                    label="Độ tương phản cao"
+                    description="Làm rõ ranh giới và trạng thái của các thành phần quan trọng."
+                  />
+                  <PreferenceSwitch
+                    checked={autoScroll}
+                    onChange={() => setAutoScroll(!autoScroll)}
+                    icon={ScrollText}
+                    label="Tự động cuộn phụ đề"
+                    description="Giữ đoạn transcript đang phát trong vùng nhìn thấy khi video tiếp tục."
+                  />
+                </div>
+              </section>
+            </div>
+          </Surface>
+        )}
       </div>
     </div>
   );
@@ -396,7 +459,13 @@ function SettingsPageContent() {
 
 export default function SettingsPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center font-bold text-slate-400">Đang tải...</div>}>
+    <Suspense
+      fallback={(
+        <div className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
+          <StatePanel state="loading" title="Đang mở cài đặt" />
+        </div>
+      )}
+    >
       <SettingsPageContent />
     </Suspense>
   );

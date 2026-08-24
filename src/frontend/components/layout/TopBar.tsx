@@ -131,7 +131,7 @@ export function TopBar({
               <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--lb-accent-soft)] text-[var(--lb-accent)]"><User size={17} /></span>
               <span className="hidden max-w-40 sm:block">
                 <span className="block truncate text-sm font-semibold text-[var(--lb-ink)]">{user?.name || 'Khách'}</span>
-                <span className="block truncate text-xs text-[var(--lb-muted)]">{user?.role || 'Khách'}</span>
+                <span className="block truncate text-xs capitalize text-[var(--lb-muted)]">{user?.role || 'Khách'}</span>
               </span>
             </button>
             {openMenu === 'profile' && (

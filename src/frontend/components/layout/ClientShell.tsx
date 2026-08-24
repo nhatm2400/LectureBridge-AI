@@ -70,23 +70,27 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className={isAdminPage ? 'h-screen overflow-hidden' : 'flex min-h-screen flex-col overflow-x-hidden'}>
+    <div className={isAdminPage ? 'h-screen overflow-hidden' : 'flex min-h-dvh flex-col overflow-x-clip'}>
       <a className="skip-link" href="#main-content">Bỏ qua đến nội dung chính</a>
       <TopBar showNavigation={showNavigation} onOpenNavigation={openMobileNavigation} />
       {showNavigation && (
         <MobileAppSidebar open={mobileNavigationOpen} onClose={closeMobileNavigation} />
       )}
-      <div className={isAdminPage ? 'flex h-full min-h-0 pt-16' : 'flex min-h-screen flex-1 pt-16'}>
+      <div className={isAdminPage ? 'flex h-full min-h-0 pt-16' : 'flex min-h-0 flex-1 pt-16'}>
         {showNavigation && <AppSidebar />}
         <main
           id="main-content"
           tabIndex={-1}
-          className={isAdminPage ? 'min-w-0 flex-1 overflow-y-auto' : 'min-w-0 flex-1 pb-10'}
+          className={isAdminPage ? 'min-w-0 flex-1 overflow-y-auto' : 'flex min-w-0 flex-1 flex-col'}
         >
-          {children}
+          {isAdminPage ? children : (
+            <>
+              <div className="min-w-0 flex-1 pb-10">{children}</div>
+              {showNavigation && <Footer />}
+            </>
+          )}
         </main>
       </div>
-      {!isAdminPage && showNavigation && <Footer />}
     </div>
   );
 }
