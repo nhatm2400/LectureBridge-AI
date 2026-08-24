@@ -2,44 +2,49 @@
 
 ## 0:00–0:15 — Vấn đề
 
-**Hình ảnh:** Transcript dài bên cạnh video.
+**Hình ảnh:** Bắt đầu ngay trong bài giảng demo. Video đang ở một đoạn muộn, bên cạnh là transcript dài.
 
-**Lời nói:** “Phụ đề giúp lời giảng trở nên hữu hình, nhưng chưa chắc cho chúng ta thấy cấu trúc của cả bài. Khi bỏ lỡ một đoạn, người học vẫn phải tìm lại câu hỏi, câu trả lời, ví dụ và lý do phần đó quan trọng.”
+**Lời nói:** “Phụ đề cho thấy từng câu, nhưng chưa chắc khôi phục mạch học. Bỏ lỡ vài phút, người học phải đọc transcript dài để biết chủ đề đã đổi gì và câu hỏi nào vừa được trả lời.”
 
-## 0:15–0:35 — Truy cập bài giảng
+## 0:15–0:40 — Khôi phục đúng phần vừa bỏ lỡ
 
-**Hình ảnh:** Mở bài demo tổng hợp, phát video và chọn một dòng transcript có timestamp.
+**Hình ảnh:** Trong mục “Tôi đã bỏ lỡ gì?”, chọn cửa sổ thời gian phù hợp rồi bấm “Phục hồi ngữ cảnh”. Hiển thị kết quả đã chuẩn bị của chính bài giảng này.
 
-**Lời nói:** “LectureBridge giữ video và transcript theo thời gian trong cùng trải nghiệm. Hệ thống hỗ trợ tiếng Việt, tiếng Anh và code-switch; mỗi dòng đều có thể đưa người học về đúng thời điểm trong bài.”
+**Lời nói:** “Đây là LectureBridge. Trong mục ‘Tôi đã bỏ lỡ gì?’, tôi chọn cửa sổ cần khôi phục rồi bấm ‘Phục hồi ngữ cảnh’. Hệ thống không tóm tắt cả bài; nó dựng lại phần vừa bỏ lỡ từ transcript và các sự kiện ngữ nghĩa của chính bài giảng.”
 
-## 0:35–0:55 — Semantic Timeline
+## 0:40–1:05 — Lộ trình học đã diễn ra
 
-**Hình ảnh:** Chọn `TOPIC_CHANGE → QUESTION → ANSWER → EXAMPLE → IMPORTANT` và mở một liên kết Q↔A.
+**Hình ảnh:** Lần lượt chỉ vào `TOPIC_CHANGE`, câu hỏi, câu trả lời liên kết và một `EXAMPLE` hoặc `IMPORTANT`; mở nhanh quan hệ Q↔A trên Semantic Timeline.
 
-**Lời nói:** “Lecture Intelligence biến transcript thành Semantic Timeline. Người học nhìn thấy lúc chuyển chủ đề, câu hỏi nào được đặt ra, phần nào trả lời, và đâu là ví dụ hay ý quan trọng.”
+**Lời nói:** “Kết quả cho tôi thấy lộ trình đã diễn ra: một lần chuyển chủ đề, câu hỏi giảng viên đặt ra, câu trả lời xuất hiện sau đó, cùng ví dụ hoặc ý quan trọng. Liên kết Q với A giữ quan hệ giữa các ý, thay vì biến transcript thành một danh sách câu rời rạc.”
 
-## 0:55–1:15 — Context Recovery
+## 1:05–1:20 — Kiểm chứng tại nguồn
 
-**Hình ảnh:** Chọn “Tôi đã bỏ lỡ gì?” và mở một citation.
+**Hình ảnh:** Kích hoạt một citation trong kết quả Context Recovery và cho thấy player seek về đúng đoạn nguồn.
 
-**Lời nói:** “Nếu vừa mất tập trung, Context Recovery tóm lại cửa sổ gần đây thay vì bắt người học tìm toàn bộ transcript. Mỗi claim gắn với bằng chứng đã kiểm tra, còn timestamp do backend xác định.”
+**Lời nói:** “Mỗi mục đều có bằng chứng. Mở nguồn sẽ đưa video về đúng thời điểm. Model chọn source ID; backend kiểm tra ID và lấy timestamp từ transcript canonical, nên model không thể tạo mốc thời gian.”
 
-## 1:15–1:35 — Grounded Ask
+## 1:20–1:35 — Hỏi tiếp mà không rời bài giảng
 
-**Hình ảnh:** Đặt câu hỏi có bằng chứng, mở citation và nhảy về video.
+**Hình ảnh:** Hiển thị một câu hỏi follow-up đã chuẩn bị, câu trả lời có căn cứ và citation tương ứng.
 
-**Lời nói:** “LectureBridge chỉ tìm trong bài hiện tại, trả lời từ evidence phù hợp và cho phép nhảy thẳng về nguồn. Cùng evidence graph này hỗ trợ tóm tắt, highlights, flashcards và quiz.”
+**Lời nói:** “Sau khi nối lại mạch học, tôi có thể hỏi tiếp về chính đoạn này. LectureBridge chỉ trả lời từ evidence của bài hiện tại, hiển thị citation và cho phép kiểm chứng ngay trên video.”
 
-## 1:35–1:50 — Responsible AI
+## 1:35–1:45 — Biết khi nào không nên trả lời
 
-**Hình ảnh:** Đặt câu hỏi ngoài nội dung và hiển thị abstention.
+**Hình ảnh:** Hiển thị câu hỏi ngoài nội dung đã chuẩn bị và trạng thái abstention không có citation.
 
-**Lời nói:** “Khi bài giảng không đủ căn cứ, hệ thống nói rõ là chưa thể trả lời thay vì đoán. Source validation, abstention và human review giúp giới hạn của AI luôn hiển thị.”
+**Lời nói:** “Nếu tôi hỏi điều bài giảng không chứa, hệ thống từ chối thay vì dùng kiến thức ngoài hoặc đoán.”
 
-## 1:50–2:00 — Kết quả
+## 1:45–2:00 — Bằng chứng ban đầu và giới hạn
 
-**Hình ảnh:** Bảng “Small synthetic human-verified evaluation”.
+**Hình ảnh:** Bảng có nhãn rõ “Small synthetic human-verified evaluation”, ba metric chính và dòng “one reviewer; no universal accessibility claim”.
 
-**Lời nói:** “Trong đánh giá tổng hợp quy mô nhỏ đã được xác minh, cả 20 Event prediction được review đều đúng; trên tập gold VI/EN full-recall, hệ thống khớp 11 trên 12 Event. LectureBridge công khai cả kết quả tốt lẫn lỗi còn lại để tiếp tục cải thiện một cách có trách nhiệm.”
+**Lời nói:** “Đánh giá synthetic do một người xác minh: Event precision 20 trên 20, recall VI/EN 11 trên 12, Context grounding 51 trên 51. Đây là bằng chứng ban đầu, không phải kết luận hiệu quả phổ quát.”
 
-Kịch bản public canonical và lưu ý quay được duy trì tại [`demo/demo-script.md`](../demo/demo-script.md).
+## Quy tắc quay
+
+- Recovery journey chiếm 80/120 giây đầu, tương đương 66,7% video.
+- Dùng kết quả UI đã chuẩn bị; không reprocess và không gọi real provider chỉ để quay lại cảnh.
+- Không quay admin, upload, settings hoặc danh sách toàn bộ tính năng.
+- Đây là kịch bản submission-specific cho Intel Vietnam AI Impact Festival 2026; không mô tả roadmap như chức năng hiện có.

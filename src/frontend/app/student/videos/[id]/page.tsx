@@ -9,7 +9,6 @@ import {
   Maximize,
   Captions,
   FileText,
-  Sparkles,
   Clock,
   Zap,
   ClipboardCheck,
@@ -17,12 +16,10 @@ import {
   List,
   Film,
   CheckCircle,
-  Sparkle,
-  Brain,
-  Lightbulb,
-  Rocket,
   SkipBack,
-  SkipForward
+  SkipForward,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useParams, useRouter } from 'next/navigation';
@@ -123,7 +120,7 @@ export default function VideoLessonPage() {
   const transcriptPanelRef = useRef<HTMLDivElement>(null);
   const transcriptItemRefs = useRef<Record<number, HTMLButtonElement | null>>({});
 
-  const [activeTab, setActiveTab] = useState('transcript');
+  const [activeTab, setActiveTab] = useState('summary');
   const [currentTime, setCurrentTime] = useState(0);
 
   // Data state
@@ -166,13 +163,11 @@ export default function VideoLessonPage() {
   const [rightPanelTab, setRightPanelTab] = useState('transcript');
   const [currentFlashcardIndex, setCurrentFlashcardIndex] = useState(0);
   const [isFlashcardFlipped, setIsFlashcardFlipped] = useState(false);
-  const [dragOffsetX, setDragOffsetX] = useState(0);
-  const dragStartXRef = useRef<number | null>(null);
-  const dragMovedRef = useRef(false);
   const [videoBroken, setVideoBroken] = useState(false);
   const [savedProgress, setSavedProgress] = useState<UserProgress | null>(null);
   const [moduleLessons, setModuleLessons] = useState<ModuleLessonItem[]>([]);
   const [isLoadingModuleLessons, setIsLoadingModuleLessons] = useState(false);
+  const [lessonTitle, setLessonTitle] = useState('Bài giảng đang học');
 
   const currentIndex = useMemo(() => moduleLessons.findIndex((l) => l.id === videoId), [moduleLessons, videoId]);
   const hasPrev = currentIndex > 0;
@@ -315,8 +310,10 @@ export default function VideoLessonPage() {
   useEffect(() => {
     const fetchModuleLessons = async () => {
       setIsLoadingModuleLessons(true);
+      setLessonTitle('Bài giảng đang học');
       try {
         const currentLesson = await api.courses.getLesson(videoId);
+        setLessonTitle(currentLesson.title || 'Bài giảng đang học');
         const lessons = await api.courses.listLessons(currentLesson.module_id);
         const sortedByTitle = [...lessons].sort((a, b) => {
           const byOrder = (a.sort_order ?? 0) - (b.sort_order ?? 0);
@@ -648,7 +645,6 @@ export default function VideoLessonPage() {
   useEffect(() => {
     setCurrentFlashcardIndex(0);
     setIsFlashcardFlipped(false);
-    setDragOffsetX(0);
   }, [videoId, flashcards.length]);
 
   const handleTimeUpdate = () => {
@@ -743,40 +739,44 @@ export default function VideoLessonPage() {
     [segments, currentTime]
   );
 
+  const currentLessonTitle = useMemo(
+    () => lessonTitle || moduleLessons.find((lesson) => lesson.id === videoId)?.title || 'Bài giảng đang học',
+    [lessonTitle, moduleLessons, videoId]
+  );
+
 
 
 
 
   const renderPanelState = (message: string) => (
-    <div className="p-8 rounded-3xl bg-slate-50 text-slate-500 font-bold text-center leading-relaxed">
+    <div className="rounded-[10px] border border-[var(--lb-border)] bg-[var(--lb-elevated)] p-8 text-center text-sm font-semibold leading-relaxed text-[var(--lb-muted)]">
       {message}
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-transparent relative overflow-hidden">
-      {/* Subtle Overlay to ensure readability */}
-      <div className="absolute inset-0 bg-slate-900/40 pointer-events-none" />
-
-      <div className="p-6 md:p-10 max-w-[1600px] mx-auto space-y-8 relative z-10">
+    <div className="min-h-screen overflow-hidden bg-[var(--lb-canvas)]">
+      <div className="mx-auto max-w-[1440px] space-y-8 px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
 
         {/* Header - Inclusive Title */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-1">
-            <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight">
-              BÀI HỌC <span className="text-[#FF4F6E]">TRỰC QUAN</span> NÂNG CAO
+        <div className="flex flex-col justify-between gap-5 border-b border-[var(--lb-border)] pb-6 md:flex-row md:items-end">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--lb-accent)]">Bài giảng đang học</p>
+            <h1 className="mt-2 text-3xl leading-tight text-[var(--lb-ink)] md:text-4xl">
+              {currentLessonTitle}
             </h1>
+            <p className="mt-2 text-sm text-[var(--lb-muted)]">Phát video, theo dõi transcript và khôi phục phần nội dung vừa bỏ lỡ.</p>
           </div>
-          {/* Sign Language toggle removed per user request */}
+          <span className="w-fit rounded-full border border-[var(--lb-border)] bg-[var(--lb-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--lb-muted)]">{language.toUpperCase()} · {formatTime(currentTime)} / {formatTime(duration)}</span>
         </div>
 
-        <div className="grid lg:grid-cols-12 gap-10">
+        <div className="grid gap-5 lg:grid-cols-12 lg:items-start">
           {/* Left Column: Player & Smart Content (Wider) */}
-          <div className="lg:col-span-7 space-y-8">
+          <div className="space-y-5 lg:col-span-8">
 
             <div
               className={cn(
-                "video-container-premium bg-black rounded-[40px] overflow-hidden shadow-2xl border-4 border-white relative aspect-video group cursor-pointer",
+                "video-container-premium group relative aspect-video cursor-pointer overflow-hidden rounded-[14px] border border-[var(--lb-border-strong)] bg-black",
                 reducedMotion && "motion-reduce"
               )}
               onMouseMove={handleUserActivity}
@@ -806,7 +806,7 @@ export default function VideoLessonPage() {
                   saveProgress(currentTime);
                 }}
                 onEnded={handleVideoEnded}
-                className={cn('w-full h-full object-cover transition-opacity duration-500', videoBroken && 'hidden', isPlaying ? 'opacity-100' : 'opacity-80')}
+                className={cn('h-full w-full object-cover transition-opacity duration-150', videoBroken && 'hidden', isPlaying ? 'opacity-100' : 'opacity-80')}
                 src={videoSrc}
                 preload="metadata"
                 playsInline
@@ -820,17 +820,17 @@ export default function VideoLessonPage() {
 
               {/* Big Center Play Button (only when paused or hovering) */}
               <div className={cn(
-                "absolute inset-0 flex items-center justify-center z-20 transition-all duration-300 pointer-events-none",
-                (!isPlaying || showControls) ? "opacity-100 scale-100" : "opacity-0 scale-90"
+                "pointer-events-none absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-150",
+                (!isPlaying || showControls) ? "opacity-100" : "opacity-0"
               )}>
-                <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shadow-2xl">
-                  {isPlaying ? <Pause size={32} className="text-white fill-white" /> : <Play size={32} className="text-white fill-white ml-1" />}
+                <div className="flex h-16 w-16 items-center justify-center rounded-full border border-white/40 bg-black/65">
+                  {isPlaying ? <Pause size={28} className="fill-white text-white" /> : <Play size={28} className="ml-1 fill-white text-white" />}
                 </div>
               </div>
 
               {/* Custom Controls Bar */}
               <div className={cn(
-                "absolute bottom-0 left-0 right-0 z-40 p-6 pt-20 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-all duration-500",
+                "absolute bottom-0 left-0 right-0 z-40 bg-black/80 p-3 transition-all duration-150 sm:p-4",
                 showControls ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0 pointer-events-none"
               )}>
                 {/* Progress Bar */}
@@ -848,40 +848,40 @@ export default function VideoLessonPage() {
                   />
                   <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-[#FF4F6E] to-[#FF8C94] relative"
+                      className="relative h-full bg-[var(--lb-accent)]"
                       style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}
                     >
-                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg scale-0 group-hover/progress:scale-100 transition-transform" />
+                      <div className="absolute right-0 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-white opacity-0 transition-opacity group-hover/progress:opacity-100" />
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center gap-6">
+                <div className="flex flex-wrap items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-1 sm:gap-2">
                     <button
                       onClick={handlePrevVideo}
                       disabled={!hasPrev}
-                      className="text-white/80 hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none hover:scale-110 transition-transform"
+                      className="hidden h-11 w-11 items-center justify-center rounded-md text-white/80 transition-colors hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-30 sm:flex"
                       aria-label="Bài trước"
                     >
                       <SkipBack size={20} fill="currentColor" />
                     </button>
 
-                    <button onClick={togglePlay} className="text-white hover:scale-110 transition-transform" aria-label={isPlaying ? 'Tạm dừng video' : 'Phát video'}>
+                    <button onClick={togglePlay} className="flex h-11 w-11 items-center justify-center rounded-md text-white hover:bg-white/10" aria-label={isPlaying ? 'Tạm dừng video' : 'Phát video'}>
                       {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
                     </button>
 
                     <button
                       onClick={handleNextVideo}
                       disabled={!hasNext}
-                      className="text-white/80 hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none hover:scale-110 transition-transform"
+                      className="hidden h-11 w-11 items-center justify-center rounded-md text-white/80 transition-colors hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-30 sm:flex"
                       aria-label="Bài tiếp theo"
                     >
                       <SkipForward size={20} fill="currentColor" />
                     </button>
 
-                    <div className="flex items-center gap-2">
-                      <button onClick={toggleMute} className="text-white/80 hover:text-white transition-colors" aria-label={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}>
+                    <div className="flex items-center gap-1">
+                      <button onClick={toggleMute} className="flex h-11 w-11 items-center justify-center rounded-md text-white/80 transition-colors hover:bg-white/10 hover:text-white" aria-label={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}>
                         {isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
                       </button>
                       <input
@@ -892,16 +892,16 @@ export default function VideoLessonPage() {
                         step="0.1"
                         value={isMuted ? 0 : volume}
                         onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                        className="w-16 h-1 bg-white/20 rounded-full appearance-none cursor-pointer accent-[#FF4F6E]"
+                        className="hidden h-1 w-16 cursor-pointer appearance-none rounded-full bg-white/20 accent-[var(--lb-accent)] sm:block"
                       />
                     </div>
 
-                    <div className="text-[12px] font-extrabold text-white/70 tracking-widest font-heading">
+                    <div className="hidden text-xs font-bold text-white/75 sm:block">
                       {formatTime(currentTime)} <span className="mx-1 opacity-30">/</span> {formatTime(duration)}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 relative">
+                  <div className="relative flex items-center gap-1">
                     {/* Settings Group: Captions, Lang, Speed, Fullscreen */}
 
                     <button
@@ -910,29 +910,29 @@ export default function VideoLessonPage() {
                         setShowCaptions(!showCaptions);
                       }}
                       className={cn(
-                        "p-2 rounded-xl transition-all",
-                        showCaptions ? "text-[#FF4F6E] bg-[#FF4F6E]/10" : "text-white/60 hover:text-white"
+                        "flex h-11 w-11 items-center justify-center rounded-md transition-colors",
+                        showCaptions ? "bg-white/20 text-white" : "text-white/60 hover:bg-white/10 hover:text-white"
                       )}
                       aria-label={showCaptions ? 'Tắt phụ đề' : 'Bật phụ đề'}
                     >
                       <Captions size={20} />
                     </button>
 
-                    <div className="flex bg-white/10 backdrop-blur-md rounded-xl p-1 border border-white/10 items-center gap-1">
+                    <div className="flex items-center gap-1 rounded-md border border-white/20 bg-black/35 p-1">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setCaptionBackground(!captionBackground);
                         }}
                         className={cn(
-                          "px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold uppercase transition-all",
+                          "hidden min-h-9 rounded-md px-2 text-[10px] font-bold uppercase transition-colors sm:block",
                           captionBackground ? "bg-white/20 text-white shadow-sm" : "text-white/40 hover:text-white/70"
                         )}
                         title="Nền phụ đề"
                       >
                         BG
                       </button>
-                      <div className="w-[1px] h-3 bg-white/10" />
+                      <div className="hidden h-3 w-px bg-white/10 sm:block" />
                       {['vi', 'en'].map((l) => {
                         const isEnabled = Array.isArray(segmentsByLanguage[l]) && segmentsByLanguage[l].length > 0;
                         return (
@@ -944,8 +944,8 @@ export default function VideoLessonPage() {
                             }}
                             disabled={!isEnabled}
                             className={cn(
-                              "px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold uppercase transition-all",
-                              language === l ? "bg-[#FF4F6E] text-white shadow-lg" : "text-white/40 hover:text-white/70",
+                              "min-h-9 rounded-md px-2 text-[10px] font-bold uppercase transition-colors",
+                              language === l ? "bg-white text-black" : "text-white/60 hover:bg-white/10 hover:text-white",
                               !isEnabled && "opacity-20 cursor-not-allowed"
                             )}
                           >
@@ -957,7 +957,7 @@ export default function VideoLessonPage() {
 
                     <div className="relative">
                       {showSpeedMenu && (
-                        <div className="absolute bottom-full mb-4 right-0 bg-slate-900/95 backdrop-blur-md rounded-2xl p-2 border border-white/10 shadow-2xl min-w-[100px] z-[60] flex flex-col gap-1 overflow-hidden animate-in fade-in slide-in-from-bottom-2">
+                        <div className="absolute bottom-full right-0 z-[60] mb-3 flex min-w-[112px] flex-col gap-1 overflow-hidden rounded-[10px] border border-white/20 bg-black/95 p-2">
                           {[0.5, 0.75, 1, 1.25, 1.5, 2].map((speed) => (
                             <button
                               key={speed}
@@ -966,9 +966,9 @@ export default function VideoLessonPage() {
                                 handlePlaybackSpeedChange(speed);
                               }}
                               className={cn(
-                                "px-4 py-2 text-[11px] font-extrabold rounded-xl transition-all text-left",
+                                "min-h-10 rounded-md px-3 py-2 text-left text-xs font-bold transition-colors",
                                 playbackSpeed === speed
-                                  ? "bg-[#FF4F6E] text-white"
+                                  ? "bg-white text-black"
                                   : "text-white/60 hover:bg-white/10 hover:text-white"
                               )}
                             >
@@ -983,14 +983,14 @@ export default function VideoLessonPage() {
                           e.stopPropagation();
                           setShowSpeedMenu(!showSpeedMenu);
                         }}
-                        className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-[11px] font-extrabold text-white/90 transition-all font-heading border border-white/5"
+                        className="flex h-11 min-w-11 items-center justify-center rounded-md border border-white/20 bg-black/35 px-2 text-xs font-bold text-white/90 transition-colors hover:bg-white/10"
                         aria-label="Chọn tốc độ phát"
                       >
                         {playbackSpeed === 1 ? '1x' : `${playbackSpeed}x`}
                       </button>
                     </div>
 
-                    <button onClick={toggleFullscreen} className="p-2 text-white/80 hover:text-white hover:scale-110 transition-all" aria-label="Mở toàn màn hình">
+                    <button onClick={toggleFullscreen} className="flex h-11 w-11 items-center justify-center rounded-md text-white/80 transition-colors hover:bg-white/10 hover:text-white" aria-label="Mở toàn màn hình">
                       <Maximize size={20} />
                     </button>
                   </div>
@@ -1002,7 +1002,7 @@ export default function VideoLessonPage() {
                 <div
                   key={`${activeSegment.start}-${activeSegment.end}`}
                   className={cn(
-                    "absolute left-1/2 -translate-x-1/2 w-[92%] md:w-[86%] pointer-events-none z-30 transition-all duration-500",
+                    "pointer-events-none absolute left-1/2 z-30 w-[92%] -translate-x-1/2 transition-all duration-150 md:w-[86%]",
                     showControls ? captionPositionWithControlsClass[captionPosition] : captionPositionClass[captionPosition]
                   )}
                 >
@@ -1012,7 +1012,7 @@ export default function VideoLessonPage() {
                         aria-live="polite"
                         className={cn(
                           "text-center font-extrabold tracking-tight text-white",
-                          captionBackground && "rounded-xl bg-black/45 px-4 py-2 backdrop-blur-sm"
+                          captionBackground && "rounded-md bg-black/75 px-4 py-2"
                         )}
                         style={{ fontSize: captionSize, lineHeight: captionLineHeight }}
                       >
@@ -1024,8 +1024,8 @@ export default function VideoLessonPage() {
                             <span
                               key={idx}
                               className={cn(
-                                "transition-all duration-300",
-                                isWordActive ? "text-white" : "text-white/25 blur-[0.5px]"
+                                "transition-colors duration-150",
+                                isWordActive ? "text-white" : "text-white/45"
                               )}
                             >
                               {word}{' '}
@@ -1053,105 +1053,42 @@ export default function VideoLessonPage() {
 
               {/* Visual Sound Pulse REMOVED per user request */}
             </div>
-
-
-
-            {/* AI Smart Analysis Panel - High Accessibility for Deaf Users */}
-            <div className="bg-white/95 backdrop-blur-md rounded-[40px] p-10 border border-white/20 shadow-xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-8 opacity-5">
-                <Sparkles size={120} className="text-[#FF4F6E]" />
-              </div>
-
-              <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
-                <div className="flex items-center gap-6">
-                  <div className="w-16 h-16 bg-[#FF4F6E]/10 rounded-[28px] flex items-center justify-center text-[#FF4F6E] animate-pulse">
-                    <Sparkles size={32} />
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-2xl md:text-xl lg:text-2xl font-extrabold text-slate-900 tracking-tight">TRÍ TUỆ TRỰC QUAN</h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide max-w-[200px] md:max-w-none leading-tight scale-75 origin-left">Tóm tắt AI tức thì cho người học trực quan</p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-end gap-4 w-full md:w-auto md:pr-4">
-                  <button
-                    onClick={handleGetSummary}
-                    disabled={isLoadingSummary}
-                    className="flex-1 md:flex-none px-8 py-5 bg-[#FF4F6E] text-white rounded-[24px] font-extrabold text-sm uppercase tracking-widest shadow-2xl shadow-[#FF4F6E]/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3"
-                  >
-                    {isLoadingSummary ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Đang phân tích...
-                      </>
-                    ) : (
-                      <>
-                        <Zap size={20} fill="currentColor" />
-                        TẠO TÓM TẮT BẰNG AI
-                      </>
-                    )}
-                  </button>
-
-
-                </div>
-              </div>
-
-
-
-              {summaryPoints.length > 0 && (
-                <div className="mt-10 grid md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
-                  {summaryPoints.map((pt, i) => (
-                    <div key={i} className="flex items-start gap-4 p-6 bg-slate-50 rounded-[28px] border border-slate-100/50 hover:bg-white hover:shadow-xl transition-all group/card">
-                      <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#FF4F6E] shadow-sm shrink-0 group-hover/card:scale-110 transition-transform">
-                        <CheckCircle size={18} />
-                      </div>
-                      <p className="text-sm font-bold text-slate-700 leading-relaxed">{pt}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
           </div>
 
           {/* Right Column: Dynamic Panel (Transcript or Lessons) */}
-          <div className="lg:col-span-5 relative">
-            <div className="sticky top-28 bg-white/95 backdrop-blur-md border border-white/20 rounded-[40px] shadow-2xl shadow-slate-200/40 h-[calc(100vh-140px)] flex flex-col overflow-hidden">
+          <div className="relative lg:col-span-4">
+            <div className="flex h-[32rem] flex-col overflow-hidden rounded-[14px] border border-[var(--lb-border)] bg-[var(--lb-surface)] lg:sticky lg:top-20 lg:h-[calc(100vh-96px)]">
 
               {/* Panel Tabs */}
-              <div className="flex border-b border-slate-50" role="tablist" aria-label="Bảng nội dung bên phải">
+              <div className="flex border-b border-[var(--lb-border)]" role="tablist" aria-label="Bảng nội dung bên phải">
                 <button
                   onClick={() => setRightPanelTab('transcript')}
                   role="tab"
                   aria-selected={rightPanelTab === 'transcript'}
                   className={cn(
-                    "flex-1 py-8 flex items-center justify-center gap-3 transition-all",
-                    rightPanelTab === 'transcript' ? "bg-white text-slate-900" : "bg-slate-50 text-slate-400 hover:text-slate-600"
+                    "flex min-h-14 flex-1 items-center justify-center gap-2 border-b-2 px-3 text-sm font-bold transition-colors",
+                    rightPanelTab === 'transcript' ? "border-[var(--lb-accent)] bg-[var(--lb-elevated)] text-[var(--lb-ink)]" : "border-transparent text-[var(--lb-muted)] hover:bg-[var(--lb-elevated)]"
                   )}
                 >
-                  <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-all", rightPanelTab === 'transcript' ? "bg-slate-900 text-white shadow-lg" : "bg-slate-200 text-slate-500")}>
-                    <FileText size={20} />
-                  </div>
-                  <span className="text-sm font-extrabold uppercase tracking-widest">Phụ đề</span>
+                  <FileText size={18} className={rightPanelTab === 'transcript' ? 'text-[var(--lb-accent)]' : ''} />
+                  <span>Transcript</span>
                 </button>
                 <button
                   onClick={() => setRightPanelTab('lessons')}
                   role="tab"
                   aria-selected={rightPanelTab === 'lessons'}
                   className={cn(
-                    "flex-1 py-8 flex items-center justify-center gap-3 transition-all",
-                    rightPanelTab === 'lessons' ? "bg-white text-slate-900" : "bg-slate-50 text-slate-400 hover:text-slate-600"
+                    "flex min-h-14 flex-1 items-center justify-center gap-2 border-b-2 px-3 text-sm font-bold transition-colors",
+                    rightPanelTab === 'lessons' ? "border-[var(--lb-accent)] bg-[var(--lb-elevated)] text-[var(--lb-ink)]" : "border-transparent text-[var(--lb-muted)] hover:bg-[var(--lb-elevated)]"
                   )}
                 >
-                  <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-all", rightPanelTab === 'lessons' ? "bg-slate-900 text-white shadow-lg" : "bg-slate-200 text-slate-500")}>
-                    <List size={20} />
-                  </div>
-                  <span className="text-sm font-extrabold uppercase tracking-widest">Bài học</span>
+                  <List size={18} className={rightPanelTab === 'lessons' ? 'text-[var(--lb-accent)]' : ''} />
+                  <span>Bài học</span>
                 </button>
               </div>
 
 
-              <div ref={transcriptPanelRef} className="flex-1 overflow-y-auto p-10 space-y-6 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+              <div ref={transcriptPanelRef} className="custom-scrollbar flex-1 space-y-2 overflow-y-auto p-3 sm:p-4">
                 {rightPanelTab === 'transcript' ? (
                   <>
                     {isLoadingTranscript && renderPanelState('Đang tải phụ đề...')}
@@ -1168,31 +1105,29 @@ export default function VideoLessonPage() {
                           onClick={() => seekTo(formatTime(s.start))}
                           aria-current={isActive ? 'true' : undefined}
                           className={cn(
-                            "block w-full p-6 rounded-[32px] transition-all cursor-pointer group relative text-left focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FF4F6E]/35",
-                            isActive ? "bg-[#FF4F6E] text-white shadow-2xl shadow-[#FF4F6E]/30 scale-[1.02]" : "hover:bg-slate-50 border border-transparent hover:border-slate-100 text-slate-600"
+                            "group relative block min-h-16 w-full rounded-md border p-4 text-left transition-colors",
+                            isActive ? "border-[var(--lb-accent)] bg-[var(--lb-accent-soft)] text-[var(--lb-ink)]" : "border-transparent text-[var(--lb-muted)] hover:border-[var(--lb-border)] hover:bg-[var(--lb-elevated)]"
                           )}
                         >
                           <span className={cn(
-                            "text-[10px] font-extrabold uppercase tracking-[0.2em] mb-3 block",
-                            isActive ? "text-white/70" : "text-[#FF4F6E]"
+                            "mb-2 block font-mono text-xs font-bold",
+                            isActive ? "text-[var(--lb-accent)]" : "text-[var(--lb-subtle)]"
                           )}>
                             {formatTime(s.start)}
                           </span>
                           <p className={cn(
-                            "text-base leading-relaxed",
-                            isActive ? "font-extrabold" : "font-bold"
+                            "text-sm leading-6",
+                            isActive ? "font-semibold text-[var(--lb-ink)]" : "font-medium"
                           )}>
                             {s.text}
                           </p>
-                          {isActive && !reducedMotion && (
-                            <div className="absolute top-8 right-8 animate-ping w-3 h-3 bg-white rounded-full" />
-                          )}
+                          {isActive && <span className="absolute right-3 top-3 rounded-full bg-[var(--lb-accent)] px-2 py-0.5 text-[10px] font-bold text-[var(--lb-on-accent)]">Đang phát</span>}
                         </button>
                       );
                     })}
                   </>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-2">
                     {isLoadingModuleLessons && renderPanelState('Đang tải danh sách bài học...')}
                     {!isLoadingModuleLessons && moduleLessons.length === 0 && renderPanelState('Chưa có video trong chương này.')}
                     {!isLoadingModuleLessons && moduleLessons.map((lesson, idx) => (
@@ -1203,22 +1138,22 @@ export default function VideoLessonPage() {
                           router.push(`/student/videos/${lesson.id}`);
                         }}
                         className={cn(
-                          "flex w-full items-center gap-4 p-4 rounded-3xl cursor-pointer text-left transition-all border-2 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FF4F6E]/35",
+                          "flex min-h-20 w-full items-center gap-3 rounded-md border p-3 text-left transition-colors",
                           videoId === lesson.id && "cursor-default",
-                          videoId === lesson.id ? "border-[#FF4F6E] bg-white shadow-lg" : "border-transparent hover:bg-slate-50"
+                          videoId === lesson.id ? "border-[var(--lb-accent)] bg-[var(--lb-accent-soft)]" : "border-transparent hover:border-[var(--lb-border)] hover:bg-[var(--lb-elevated)]"
                         )}
                       >
-                        <div className="relative w-24 h-14 rounded-xl overflow-hidden shrink-0 shadow-sm">
+                        <div className="relative h-14 w-24 shrink-0 overflow-hidden rounded-md">
                           <Image src={lesson.thumb} alt={lesson.title} fill className="object-cover" unoptimized={true} />
                           <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <Play size={16} className="text-white" fill="currentColor" />
                           </div>
                         </div>
                         <div className="space-y-1">
-                          <h4 className={cn("text-xs font-extrabold leading-tight", videoId === lesson.id ? "text-slate-900" : "text-slate-500")}>
+                          <h4 className={cn("text-xs font-semibold leading-tight", videoId === lesson.id ? "text-[var(--lb-ink)]" : "text-[var(--lb-muted)]")}>
                             {idx + 1}. {lesson.title}
                           </h4>
-                          <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
+                          <div className="flex items-center gap-2 text-[10px] text-[var(--lb-subtle)]">
                             <Clock size={10} />
                             {lesson.duration}
                           </div>
@@ -1229,10 +1164,9 @@ export default function VideoLessonPage() {
                 )}
               </div>
 
-              <div className="p-8 bg-slate-50 border-t border-slate-100 text-center">
-                <div className="inline-flex items-center gap-3 px-6 py-2 bg-white rounded-full border border-slate-200 text-[10px] font-extrabold text-slate-400 uppercase tracking-[0.2em] shadow-sm">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Đồng bộ trực tiếp: {language.toUpperCase()}
+              <div className="border-t border-[var(--lb-border)] bg-[var(--lb-elevated)] p-3 text-center">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[var(--lb-border)] px-3 py-1.5 text-xs font-semibold text-[var(--lb-muted)]">
+                  <Captions size={14} aria-hidden="true" /> Đồng bộ · {language.toUpperCase()}
                 </div>
               </div>
             </div>
@@ -1240,67 +1174,85 @@ export default function VideoLessonPage() {
 
         </div>
 
+        <section aria-label="Khôi phục và hỏi theo ngữ cảnh">
+          <LectureGroundingPanel
+            videoId={videoId}
+            currentTime={currentTime}
+            outputLanguage={language === 'en' ? 'en' : 'vi'}
+            onSeek={handleSeek}
+          />
+        </section>
+
+        <section className="rounded-[10px] border border-[var(--lb-border)] bg-[var(--lb-surface)] p-5 sm:p-6" aria-label="Cấu trúc bài giảng">
+          <SemanticTimeline videoId={videoId} currentTime={currentTime} onSeek={handleSeek} />
+        </section>
+
             {/* Smart Content Section - Expanded Layout */}
-            <div className="space-y-6 mt-10 lg:mt-16">
+            <div className="space-y-5 border-t border-[var(--lb-border)] pt-8">
 
               {/* Visual Tabs Section */}
-              <div className="bg-white/95 backdrop-blur-md rounded-[40px] p-8 md:p-10 border border-white/20 shadow-xl shadow-slate-200/20">
-                <div className="flex flex-wrap items-center gap-x-8 gap-y-3 border-b border-slate-100 mb-10 pb-2">
+              <div className="rounded-[10px] border border-[var(--lb-border)] bg-[var(--lb-surface)] p-5 sm:p-6">
+                <div className="mb-6">
+                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--lb-muted)]">Công cụ học tập</p>
+                  <h2 className="mt-1 text-xl">Ôn tập sau khi đã khôi phục mạch bài</h2>
+                </div>
+                <div className="mb-6 flex flex-wrap gap-2 border-b border-[var(--lb-border)] pb-4" role="tablist" aria-label="Công cụ học tập">
                   {[
-                    { id: 'timeline', label: 'Cấu trúc thời gian', icon: Clock },
-                    { id: 'highlights', label: 'Điểm nhấn chính', icon: Zap },
-                    { id: 'quiz', label: 'Làm bài quiz', icon: ClipboardCheck },
+                    { id: 'summary', label: 'Tóm tắt', icon: FileText },
+                    { id: 'highlights', label: 'Điểm nhấn', icon: Zap },
+                    { id: 'quiz', label: 'Quiz', icon: ClipboardCheck },
                     { id: 'flashcards', label: 'Thẻ ghi nhớ', icon: BookOpen },
                   ].map((tab) => (
                     <button
+                      type="button"
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
+                      role="tab"
+                      aria-selected={activeTab === tab.id}
                       className={cn(
-                        "pb-6 text-[12px] font-extrabold uppercase tracking-[0.15em] transition-all relative flex items-center gap-3 shrink-0",
-                        activeTab === tab.id ? "text-[#FF4F6E]" : "text-slate-400 hover:text-slate-600"
+                        "flex min-h-11 shrink-0 items-center gap-2 rounded-md border px-3 text-sm font-semibold transition-colors",
+                        activeTab === tab.id ? "border-[var(--lb-accent)] bg-[var(--lb-accent-soft)] text-[var(--lb-accent)]" : "border-[var(--lb-border)] bg-[var(--lb-elevated)] text-[var(--lb-muted)] hover:text-[var(--lb-ink)]"
                       )}
                     >
                       <tab.icon size={18} />
                       {tab.label}
-                      {activeTab === tab.id && <div className="absolute bottom-0 left-0 w-full h-1.5 bg-[#FF4F6E] rounded-t-full" />}
                     </button>
                   ))}
                 </div>
 
                 <div className="min-h-[350px]">
-                  {activeTab === 'timeline' && (
-                    <>
-                      <SemanticTimeline
-                        videoId={videoId}
-                        currentTime={currentTime}
-                        onSeek={handleSeek}
-                      />
-                      <LectureGroundingPanel
-                        videoId={videoId}
-                        currentTime={currentTime}
-                        outputLanguage={language === 'en' ? 'en' : 'vi'}
-                        onSeek={handleSeek}
-                      />
-                    </>
+                  {activeTab === 'summary' && (
+                    <div>
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <h3 className="text-lg">Tóm tắt bài học</h3>
+                          <p className="mt-1 text-sm text-[var(--lb-muted)]">Tạo bản tóm tắt ngắn sau khi đã xem nguồn và timeline.</p>
+                        </div>
+                        <button type="button" onClick={handleGetSummary} disabled={isLoadingSummary || summaryPoints.length > 0} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[var(--lb-accent)] px-4 text-sm font-bold text-[var(--lb-on-accent)] hover:bg-[var(--lb-accent-hover)] disabled:opacity-55">
+                          {isLoadingSummary ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" /> : <FileText size={17} />}
+                          {isLoadingSummary ? 'Đang tạo tóm tắt…' : summaryPoints.length > 0 ? 'Đã tạo tóm tắt' : 'Tạo tóm tắt bài học'}
+                        </button>
+                      </div>
+                      {summaryPoints.length > 0 && (
+                        <ul className="mt-5 divide-y divide-[var(--lb-border)] border-y border-[var(--lb-border)]">
+                          {summaryPoints.map((point, index) => <li key={index} className="flex gap-3 py-4 text-sm leading-6 text-[var(--lb-ink)]"><CheckCircle size={18} className="mt-0.5 shrink-0 text-[var(--lb-success)]" />{point}</li>)}
+                        </ul>
+                      )}
+                    </div>
                   )}
 
                   {activeTab === 'highlights' && (
                     isLoadingMetadata ? renderPanelState('Đang tải điểm nhấn...') : metadataError ? renderPanelState(metadataError) : highlights.length === 0 ? renderPanelState('Chưa có dữ liệu điểm nhấn.') : (
-                      <div className="space-y-6">
+                      <div className="divide-y divide-[var(--lb-border)] border-y border-[var(--lb-border)]">
                         {highlights.map((item, i) => (
-                          <div key={i} className="bg-[#FF4F6E]/5 rounded-[32px] p-8 md:p-10 border border-[#FF4F6E]/10 relative group overflow-hidden transition-all hover:bg-[#FF4F6E]/10">
-                            <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:scale-125 transition-transform duration-700">
-                              <Zap size={150} fill="currentColor" className="text-[#FF4F6E]" />
+                          <div key={i} className="grid gap-4 py-5 sm:grid-cols-[7rem_1fr]">
+                            <div>
+                              <span className="text-xs font-bold text-[var(--lb-muted)]">Trọng tâm</span>
+                              <span className="mt-1 block font-mono text-lg font-bold text-[var(--lb-accent)]">{item.time}</span>
                             </div>
-                            <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
-                              <div className="w-24 h-24 bg-white rounded-[28px] shadow-xl shadow-[#FF4F6E]/10 flex flex-col items-center justify-center shrink-0 border border-[#FF4F6E]/20">
-                                <span className="text-[10px] font-extrabold text-[#FF4F6E] uppercase tracking-widest mb-1">Trọng tâm</span>
-                                <span className="text-xl font-extrabold text-slate-900">{item.time}</span>
-                              </div>
-                              <div className="space-y-3">
-                                <h4 className="text-2xl font-extrabold text-slate-900 leading-tight">{item.reason}</h4>
-                                <p className="text-base font-bold text-slate-500 italic">&ldquo;{item.context}&rdquo;</p>
-                              </div>
+                            <div>
+                              <h4 className="text-lg leading-tight">{item.reason}</h4>
+                              <p className="mt-2 text-sm leading-6 text-[var(--lb-muted)]">&ldquo;{item.context}&rdquo;</p>
                             </div>
                           </div>
                         ))}
@@ -1324,8 +1276,8 @@ export default function VideoLessonPage() {
                                   setQuizSubmitResult(null);
                                 }}
                                 className={cn(
-                                  "px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider border transition-all",
-                                  selectedQuizIdx === idx ? "bg-[#FF4F6E] text-white border-[#FF4F6E]" : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+                                  "min-h-11 rounded-md border px-4 text-xs font-bold transition-colors",
+                                  selectedQuizIdx === idx ? "border-[var(--lb-accent)] bg-[var(--lb-accent-soft)] text-[var(--lb-accent)]" : "border-[var(--lb-border)] bg-[var(--lb-elevated)] text-[var(--lb-muted)] hover:text-[var(--lb-ink)]"
                                 )}
                               >
                                 Quiz {idx + 1}
@@ -1335,17 +1287,17 @@ export default function VideoLessonPage() {
 
                           {activeQuiz && (
                             <div className="space-y-5">
-                              <div className="rounded-2xl bg-slate-50 border border-slate-100 p-5">
-                                <p className="text-sm font-extrabold text-slate-900">{activeQuiz.title}</p>
-                                <p className="text-xs font-bold text-slate-500 mt-1">Điểm đạt: {activeQuiz.passing_score}%</p>
+                              <div className="rounded-md border border-[var(--lb-border)] bg-[var(--lb-elevated)] p-5">
+                                <p className="text-sm font-bold text-[var(--lb-ink)]">{activeQuiz.title}</p>
+                                <p className="mt-1 text-xs text-[var(--lb-muted)]">Điểm đạt: {activeQuiz.passing_score}%</p>
                               </div>
 
                               {(activeQuiz.questions ?? []).map((question, qIdx) => (
-                                <div key={question.id} className="rounded-2xl border border-slate-100 p-5 bg-white">
-                                  <p className="text-sm font-extrabold text-slate-900 mb-4">{qIdx + 1}. {question.question_text}</p>
+                                <div key={question.id} className="rounded-[10px] border border-[var(--lb-border)] bg-[var(--lb-surface)] p-5">
+                                  <p className="mb-4 text-sm font-bold text-[var(--lb-ink)]">{qIdx + 1}. {question.question_text}</p>
                                   <div className="space-y-2">
                                     {(question.options ?? []).map((opt) => (
-                                      <label key={opt.id} className="flex items-center gap-3 rounded-xl border border-slate-100 p-3 hover:bg-slate-50 cursor-pointer">
+                                      <label key={opt.id} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-md border border-[var(--lb-border)] p-3 hover:bg-[var(--lb-elevated)]">
                                         <input
                                           type="radio"
                                           name={`quiz-${question.id}`}
@@ -1353,7 +1305,7 @@ export default function VideoLessonPage() {
                                           onChange={() => handleSelectQuizAnswer(question.id, opt.id)}
                                           disabled={!!quizSubmitResult}
                                         />
-                                        <span className="text-sm font-bold text-slate-600">{opt.option_text}</span>
+                                        <span className="text-sm font-medium text-[var(--lb-ink)]">{opt.option_text}</span>
                                       </label>
                                     ))}
                                   </div>
@@ -1365,7 +1317,7 @@ export default function VideoLessonPage() {
                                   <button
                                     onClick={handleSubmitQuiz}
                                     disabled={isSubmittingQuiz}
-                                    className="w-full md:w-auto px-10 py-4 rounded-2xl bg-[#FF4F6E] text-white text-sm font-extrabold uppercase tracking-widest shadow-xl shadow-[#FF4F6E]/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100"
+                                    className="min-h-11 w-full rounded-md bg-[var(--lb-accent)] px-6 text-sm font-bold text-[var(--lb-on-accent)] transition-colors hover:bg-[var(--lb-accent-hover)] disabled:opacity-50 md:w-auto"
                                   >
                                     {isSubmittingQuiz ? (
                                       <div className="flex items-center gap-2">
@@ -1375,35 +1327,35 @@ export default function VideoLessonPage() {
                                     ) : 'NỘP BÀI'}
                                   </button>
                                 ) : quizSubmitResult.status === 'passed' ? (
-                                  <div className="bg-emerald-50 border-2 border-emerald-100 p-8 rounded-[32px] flex flex-col md:flex-row items-center gap-6 animate-in fade-in zoom-in-95 duration-500">
-                                    <div className="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-200">
+                                  <div className="flex flex-col items-center gap-5 rounded-[10px] border border-[var(--lb-success)] bg-[var(--lb-success-soft)] p-6 md:flex-row">
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[var(--lb-success)] text-white">
                                       <CheckCircle size={32} />
                                     </div>
                                     <div className="text-center md:text-left flex-1">
-                                      <h4 className="text-xl font-extrabold text-emerald-900 tracking-tight">HOÀN THÀNH</h4>
-                                      <p className="text-sm font-bold text-emerald-600 uppercase tracking-widest mt-1">
+                                      <h4 className="text-xl text-[var(--lb-ink)]">Hoàn thành</h4>
+                                      <p className="mt-1 text-sm font-semibold text-[var(--lb-success)]">
                                         Bạn đã vượt qua bài kiểm tra với {quizSubmitResult.score}% điểm
                                       </p>
-                                      <p className="text-xs font-bold text-emerald-500 mt-2">
+                                      <p className="mt-2 text-xs text-[var(--lb-muted)]">
                                         Đúng {quizSubmitResult.correct} trên tổng số {quizSubmitResult.total} câu hỏi.
                                       </p>
                                     </div>
                                   </div>
                                 ) : (
-                                  <div className="bg-red-50 border-2 border-red-100 p-8 rounded-[32px] flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                  <div className="flex flex-col gap-5 rounded-[10px] border border-[var(--lb-danger)] bg-[var(--lb-danger-soft)] p-6">
                                     <div className="flex items-center gap-6">
-                                      <div className="w-16 h-16 bg-red-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-red-200 shrink-0">
+                                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-[var(--lb-danger)] text-white">
                                         <Zap size={32} fill="currentColor" />
                                       </div>
                                       <div>
-                                        <h4 className="text-xl font-extrabold text-red-900 tracking-tight">KẾT QUẢ CHƯA ĐẠT</h4>
-                                        <p className="text-sm font-bold text-red-600 uppercase tracking-widest mt-1">
+                                        <h4 className="text-xl text-[var(--lb-ink)]">Kết quả chưa đạt</h4>
+                                        <p className="mt-1 text-sm font-semibold text-[var(--lb-danger)]">
                                           Điểm của bạn: {quizSubmitResult.score}% (Cần {activeQuiz?.passing_score}%)
                                         </p>
                                       </div>
                                     </div>
-                                    <div className="h-[1px] bg-red-100 w-full" />
-                                    <p className="text-sm font-bold text-slate-500 leading-relaxed">
+                                    <div className="h-px w-full bg-[var(--lb-border)]" />
+                                    <p className="text-sm leading-relaxed text-[var(--lb-muted)]">
                                       Đừng bỏ cuộc! Hãy xem lại nội dung bài giảng và thử sức lại một lần nữa để củng cố kiến thức nhé.
                                     </p>
                                     <button
@@ -1411,9 +1363,9 @@ export default function VideoLessonPage() {
                                         setQuizSubmitResult(null);
                                         setQuizAnswers({});
                                       }}
-                                      className="w-full py-4 bg-white border-2 border-red-200 rounded-2xl text-red-600 text-sm font-extrabold uppercase tracking-widest hover:bg-red-50 hover:border-red-300 transition-all shadow-sm"
+                                      className="min-h-11 w-full rounded-md border border-[var(--lb-danger)] bg-[var(--lb-elevated)] px-4 text-sm font-bold text-[var(--lb-danger)] hover:bg-[var(--lb-danger-soft)]"
                                     >
-                                      LÀM LẠI
+                                      Làm lại
                                     </button>
                                   </div>
                                 )}
@@ -1426,113 +1378,23 @@ export default function VideoLessonPage() {
                   )}
 
                   {activeTab === 'flashcards' && (
-                    <div className="space-y-6">
+                    <div className="space-y-5">
                       {isLoadingMetadata && renderPanelState('Đang tải thẻ ghi nhớ...')}
                       {!isLoadingMetadata && metadataError && renderPanelState(metadataError)}
                       {!isLoadingMetadata && !metadataError && flashcards.length === 0 && renderPanelState('Chưa có thẻ ghi nhớ.')}
                       {!isLoadingMetadata && !metadataError && flashcards.length > 0 && (
                         <>
-                          <div className="flex items-center justify-center">
-                            <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400 font-extrabold">
-                              Thẻ {currentFlashcardIndex + 1} / {flashcards.length}
-                            </p>
+                          <div className="flex items-center justify-between gap-3">
+                            <button type="button" aria-label="Thẻ trước" onClick={() => { setIsFlashcardFlipped(false); setCurrentFlashcardIndex((current) => (current - 1 + flashcards.length) % flashcards.length); }} className="flex h-11 w-11 items-center justify-center rounded-md border border-[var(--lb-border)] text-[var(--lb-muted)] hover:bg-[var(--lb-accent-soft)]"><ChevronLeft size={19} /></button>
+                            <p className="text-sm font-semibold text-[var(--lb-muted)]">Thẻ {currentFlashcardIndex + 1} / {flashcards.length}</p>
+                            <button type="button" aria-label="Thẻ tiếp theo" onClick={() => { setIsFlashcardFlipped(false); setCurrentFlashcardIndex((current) => (current + 1) % flashcards.length); }} className="flex h-11 w-11 items-center justify-center rounded-md border border-[var(--lb-border)] text-[var(--lb-muted)] hover:bg-[var(--lb-accent-soft)]"><ChevronRight size={19} /></button>
                           </div>
-
-                          <div className="relative [perspective:1200px] flex justify-center">
-                            <Sparkle className="absolute -top-5 left-[16%] w-5 h-5 text-[#FF4F6E]/65 dark:text-pink-300/70" />
-                            <Brain className="absolute top-[18%] -left-2 w-5 h-5 text-indigo-500/55 dark:text-indigo-300/70" />
-                            <Lightbulb className="absolute top-[20%] -right-2 w-5 h-5 text-amber-500/60 dark:text-amber-300/75" />
-                            <Rocket className="absolute -bottom-5 right-[14%] w-5 h-5 text-emerald-500/60 dark:text-emerald-300/70" />
-                            <button
-                              key={flashcards[currentFlashcardIndex].id || currentFlashcardIndex}
-                              onPointerDown={(e) => {
-                                dragStartXRef.current = e.clientX;
-                                dragMovedRef.current = false;
-                                (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
-                              }}
-                              onPointerMove={(e) => {
-                                if (dragStartXRef.current === null) return;
-                                const delta = e.clientX - dragStartXRef.current;
-                                if (Math.abs(delta) > 4) dragMovedRef.current = true;
-                                setDragOffsetX(delta);
-                              }}
-                              onPointerUp={() => {
-                                const threshold = 70;
-                                if (dragOffsetX <= -threshold) {
-                                  setIsFlashcardFlipped(false);
-                                  setCurrentFlashcardIndex((prev) => (prev + 1) % flashcards.length);
-                                } else if (dragOffsetX >= threshold) {
-                                  setIsFlashcardFlipped(false);
-                                  setCurrentFlashcardIndex((prev) => (prev - 1 + flashcards.length) % flashcards.length);
-                                } else if (!dragMovedRef.current) {
-                                  setIsFlashcardFlipped((prev) => !prev);
-                                }
-                                dragStartXRef.current = null;
-                                dragMovedRef.current = false;
-                                setDragOffsetX(0);
-                              }}
-                              onPointerCancel={() => {
-                                dragStartXRef.current = null;
-                                dragMovedRef.current = false;
-                                setDragOffsetX(0);
-                              }}
-                              className="block w-full max-w-[380px] mx-auto aspect-[3/4] rounded-[32px] text-left focus:outline-none focus:ring-2 focus:ring-[#FF4F6E]/40 animate-in fade-in slide-in-from-bottom-4 duration-300 touch-pan-y select-none"
-                              aria-label="Flip flashcard"
-                              style={{
-                                transform: `translateX(${dragOffsetX}px) rotate(${dragOffsetX * 0.03}deg)`,
-                                transition: dragStartXRef.current === null ? 'transform 180ms ease-out' : 'none',
-                              }}
-                            >
-                              <div
-                                className={cn(
-                                  "relative w-full h-full [transform-style:preserve-3d] transition-transform duration-500",
-                                  isFlashcardFlipped ? "[transform:rotateY(180deg)]" : "[transform:rotateY(0deg)]"
-                                )}
-                              >
-                                <div className="absolute inset-0 rounded-[32px] border border-slate-200 shadow-lg [backface-visibility:hidden] overflow-hidden">
-                                  <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-br from-rose-100 via-white to-amber-100 dark:from-slate-800 dark:via-slate-900 dark:to-rose-950" />
-                                  <div className="absolute inset-0 bg-white/52 dark:bg-slate-900/50" />
-                                  <div className="absolute inset-0 p-8 flex flex-col items-center justify-center text-center">
-                                    <div className="absolute top-4 right-4 rounded-full bg-white/55 dark:bg-slate-900/45 p-1.5 border border-white/50 dark:border-slate-400/30">
-                                      <Sparkle size={14} className="text-[#FF4F6E] dark:text-pink-300" />
-                                    </div>
-                                    <div className="absolute bottom-4 left-4 rounded-full bg-white/50 dark:bg-slate-900/45 p-1.5 border border-white/50 dark:border-slate-400/30">
-                                      <Lightbulb size={14} className="text-amber-500 dark:text-amber-300" />
-                                    </div>
-                                    <p className="text-xs uppercase tracking-[0.15em] text-slate-500 dark:text-slate-300 font-extrabold mb-3">Câu hỏi</p>
-                                    <p className="text-lg md:text-xl font-extrabold text-slate-900 dark:text-slate-50 leading-snug">
-                                      {flashcards[currentFlashcardIndex].front}
-                                    </p>
-                                    {flashcards[currentFlashcardIndex].hint ? (
-                                      <p className="absolute bottom-8 left-8 right-8 text-[11px] md:text-xs font-bold text-slate-600 dark:text-slate-200 text-center">
-                                        Gợi ý: {flashcards[currentFlashcardIndex].hint}
-                                      </p>
-                                    ) : null}
-                                  </div>
-                                </div>
-
-                                <div className="absolute inset-0 rounded-[32px] border border-slate-800 shadow-lg [transform:rotateY(180deg)] [backface-visibility:hidden] overflow-hidden">
-                                  <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-900 to-rose-950 dark:from-slate-900 dark:via-slate-950 dark:to-black" />
-                                  <div className="absolute inset-0 bg-slate-900/58 dark:bg-slate-950/64" />
-                                  <div className="absolute inset-0 p-8 flex flex-col items-center justify-center text-center">
-                                    <div className="absolute top-4 right-4 rounded-full bg-black/35 dark:bg-white/10 p-1.5 border border-white/25">
-                                      <Brain size={14} className="text-cyan-200 dark:text-cyan-300" />
-                                    </div>
-                                    <div className="absolute bottom-4 left-4 rounded-full bg-black/30 dark:bg-white/10 p-1.5 border border-white/25">
-                                      <Rocket size={14} className="text-emerald-200 dark:text-emerald-300" />
-                                    </div>
-                                    <p className="text-xs uppercase tracking-[0.15em] text-slate-300 font-extrabold mb-3">Đáp án</p>
-                                    <p className="text-base md:text-lg font-extrabold text-white dark:text-slate-50 leading-snug">
-                                      {flashcards[currentFlashcardIndex].back}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            </button>
-                          </div>
-                          <p className="text-center text-[11px] text-slate-400 font-bold">
-                            Kéo trái/phải để chuyển thẻ. Chạm để lật thẻ.
-                          </p>
+                          <button type="button" onClick={() => setIsFlashcardFlipped((current) => !current)} className="mx-auto flex min-h-[320px] w-full max-w-xl flex-col items-center justify-center rounded-[10px] border border-[var(--lb-border-strong)] bg-[var(--lb-elevated)] p-8 text-center hover:border-[var(--lb-accent)]" aria-label={isFlashcardFlipped ? 'Hiện mặt câu hỏi' : 'Hiện mặt đáp án'}>
+                            <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--lb-accent)]">{isFlashcardFlipped ? 'Đáp án' : 'Câu hỏi'}</span>
+                            <span className="mt-5 text-xl font-semibold leading-8 text-[var(--lb-ink)]">{isFlashcardFlipped ? flashcards[currentFlashcardIndex].back : flashcards[currentFlashcardIndex].front}</span>
+                            {!isFlashcardFlipped && flashcards[currentFlashcardIndex].hint && <span className="mt-8 text-sm text-[var(--lb-muted)]">Gợi ý: {flashcards[currentFlashcardIndex].hint}</span>}
+                            <span className="mt-8 text-xs font-semibold text-[var(--lb-muted)]">Nhấn để lật thẻ</span>
+                          </button>
 
                         </>
                       )}

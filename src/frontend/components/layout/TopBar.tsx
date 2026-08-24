@@ -1,23 +1,29 @@
 'use client';
 
-import React from 'react';
-import { Bell, LogOut, Moon, Sun, User } from 'lucide-react';
+import { Bell, LogOut, Menu, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import React from 'react';
+
+import { Brand } from '@/components/Brand';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { IconButton } from '@/components/ui/IconButton';
 import { api } from '@/lib/api';
 import { useAppStore } from '@/store/useAppStore';
 
-export function TopBar() {
-  const { theme, setTheme, user, logout } = useAppStore();
-  const [mounted, setMounted] = React.useState(false);
-  const router = useRouter();
-  const [notifOpen, setNotifOpen] = React.useState(false);
-  const [notifications, setNotifications] = React.useState<
-    Array<{ id: string; message: string; created_at: string; read: boolean }>
-  >([]);
+type Notification = { id: string; message: string; created_at: string; read: boolean };
 
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+export function TopBar({
+  showNavigation,
+  onOpenNavigation,
+}: {
+  showNavigation: boolean;
+  onOpenNavigation: () => void;
+}) {
+  const { user, logout } = useAppStore();
+  const router = useRouter();
+  const [openMenu, setOpenMenu] = React.useState<'notifications' | 'profile' | null>(null);
+  const [notifications, setNotifications] = React.useState<Notification[]>([]);
+  const actionsRef = React.useRef<HTMLDivElement>(null);
 
   const loadNotifications = React.useCallback(() => {
     if (typeof window === 'undefined') return;
@@ -32,11 +38,26 @@ export function TopBar() {
     return () => window.removeEventListener('app-notification-updated', handler);
   }, [loadNotifications]);
 
+  React.useEffect(() => {
+    const onPointerDown = (event: MouseEvent) => {
+      if (!actionsRef.current?.contains(event.target as Node)) setOpenMenu(null);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpenMenu(null);
+    };
+    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, []);
+
   const handleLogout = async () => {
     try {
       await api.auth.logout();
     } catch {
-      // Clear local session state even if the backend is unreachable.
+      // Local state still clears if the backend is unavailable.
     } finally {
       logout();
       router.push('/auth/login');
@@ -44,107 +65,82 @@ export function TopBar() {
   };
 
   const unreadCount = notifications.filter((item) => !item.read).length;
-
-  const markAllRead = () => {
-    if (typeof window === 'undefined') return;
-    const next = notifications.map((item) => ({ ...item, read: true }));
-    window.localStorage.setItem('app_notifications', JSON.stringify(next));
-    setNotifications(next);
+  const toggleNotifications = () => {
+    const nextOpen = openMenu !== 'notifications';
+    setOpenMenu(nextOpen ? 'notifications' : null);
+    if (nextOpen && typeof window !== 'undefined') {
+      const next = notifications.map((item) => ({ ...item, read: true }));
+      window.localStorage.setItem('app_notifications', JSON.stringify(next));
+      setNotifications(next);
+    }
   };
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 border-b border-[var(--app-border-subtle)] bg-[var(--app-surface)] shadow-sm">
-      <div className="relative z-50 flex h-20 items-center justify-end border-b border-[var(--app-border-subtle)] bg-[var(--app-surface)] px-8">
-        <div className="flex items-center justify-end gap-6">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-              aria-label={mounted ? (theme === 'light' ? 'Chuyển sang chế độ tối' : 'Chuyển sang chế độ sáng') : ''}
-              title={mounted ? (theme === 'light' ? 'Chuyển sang chế độ tối' : 'Chuyển sang chế độ sáng') : ''}
-              suppressHydrationWarning
-              className="rounded-full p-2.5 text-slate-500 transition-all hover:bg-slate-50 hover:text-primary"
-            >
-              {mounted ? (theme === 'light' ? <Moon size={20} /> : <Sun size={20} />) : <div className="h-5 w-5" />}
-            </button>
+    <header className="fixed inset-x-0 top-0 z-50 h-16 border-b border-[var(--lb-border)] bg-[var(--lb-surface)]">
+      <div className="mx-auto flex h-full items-center justify-between gap-3 px-3 sm:px-5">
+        <div className="flex min-w-0 items-center gap-2">
+          {showNavigation && (
+            <IconButton label="Mở điều hướng" onClick={onOpenNavigation} className="lg:hidden">
+              <Menu size={20} />
+            </IconButton>
+          )}
+          <Brand wordmarkClassName="hidden sm:inline" />
+        </div>
 
-            <div className="relative">
-              <button
-                onClick={() => {
-                  const next = !notifOpen;
-                  setNotifOpen(next);
-                  if (next) markAllRead();
-                }}
-                suppressHydrationWarning
-                className="relative rounded-full p-2.5 text-slate-500 transition-all hover:bg-slate-50 hover:text-primary"
-                aria-label="Thông báo"
-              >
-                <Bell size={20} />
-                {unreadCount > 0 && (
-                  <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full border-2 border-white bg-red-500" />
-                )}
-              </button>
-              {notifOpen && (
-                <div className="absolute right-0 z-50 mt-2 w-[320px] rounded-2xl border border-slate-100 bg-white p-3 shadow-xl">
-                  <div className="mb-2 flex items-center justify-between">
-                    <p className="text-xs font-extrabold uppercase tracking-widest text-slate-400">Thông báo</p>
-                    <button
-                      className="text-[11px] font-bold text-slate-500 hover:text-primary"
-                      onClick={markAllRead}
-                      suppressHydrationWarning
-                    >
-                      Đánh dấu đã đọc
-                    </button>
-                  </div>
-                  <div className="max-h-72 space-y-2 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <p className="rounded-xl bg-slate-50 px-3 py-4 text-xs font-bold text-slate-400">
-                        Chưa có thông báo.
-                      </p>
-                    ) : (
-                      notifications.map((item) => (
-                        <div key={item.id} className="rounded-xl border border-slate-100 px-3 py-2">
-                          <p className="text-xs font-bold text-slate-700">{item.message}</p>
-                          <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                            {new Date(item.created_at).toLocaleString()}
-                          </p>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
+        <div ref={actionsRef} className="relative flex items-center gap-1">
+          <ThemeToggle />
+          <div className="relative">
+            <IconButton
+              label={unreadCount > 0 ? `Thông báo, ${unreadCount} chưa đọc` : 'Thông báo'}
+              aria-expanded={openMenu === 'notifications'}
+              aria-haspopup="menu"
+              onClick={toggleNotifications}
+            >
+              <Bell size={19} />
+              {unreadCount > 0 && (
+                <span className="absolute right-2 top-2 min-w-4 rounded-full bg-[var(--lb-danger)] px-1 text-center text-[10px] font-bold leading-4 text-white" aria-hidden="true">
+                  {Math.min(unreadCount, 9)}
+                </span>
               )}
-            </div>
+            </IconButton>
+            {openMenu === 'notifications' && (
+              <div role="menu" className="absolute right-0 mt-2 w-[min(22rem,calc(100vw-1.5rem))] rounded-[10px] border border-[var(--lb-border)] bg-[var(--lb-elevated)] p-3 shadow-[var(--lb-shadow-popover)]">
+                <p className="px-1 pb-2 text-xs font-bold tracking-[0.08em] text-[var(--lb-subtle)]">Thông báo</p>
+                <div className="max-h-72 space-y-2 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <p className="rounded-md bg-[var(--lb-accent-soft)] px-3 py-4 text-sm text-[var(--lb-muted)]">Chưa có thông báo.</p>
+                  ) : notifications.map((item) => (
+                    <div key={item.id} role="menuitem" tabIndex={0} className="rounded-md border border-[var(--lb-border)] px-3 py-2.5">
+                      <p className="text-sm font-semibold text-[var(--lb-ink)]">{item.message}</p>
+                      <p className="mt-1 text-xs text-[var(--lb-muted)]">{new Date(item.created_at).toLocaleString()}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="h-8 w-px bg-slate-100" />
-
-          <div className="group relative flex cursor-pointer items-center gap-3 pl-2">
-            <div className="hidden text-right sm:block">
-              <p className="text-sm font-bold text-slate-900 transition-colors group-hover:text-primary">
-                {user?.name || 'Khách'}
-              </p>
-              <p className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
-                {user?.role || 'Khách'}
-              </p>
-            </div>
-
-            <div className="group/profile relative">
-              <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-slate-100 shadow-sm transition-all group-hover:border-primary">
-                <User className="text-slate-400" size={24} />
-              </div>
-              <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white bg-green-500" />
-
-              <div className="invisible absolute right-0 top-full mt-2 w-48 rounded-2xl border border-slate-100 bg-white py-2 opacity-0 shadow-xl transition-all group-hover/profile:visible group-hover/profile:opacity-100">
-                <button
-                  onClick={handleLogout}
-                  suppressHydrationWarning
-                  className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-red-500"
-                >
-                  <LogOut size={16} />
-                  Đăng xuất
+          <div className="relative">
+            <button
+              type="button"
+              className="flex min-h-11 items-center gap-2 rounded-md px-2 text-left transition-colors hover:bg-[var(--lb-accent-soft)]"
+              aria-expanded={openMenu === 'profile'}
+              aria-haspopup="menu"
+              onClick={() => setOpenMenu(openMenu === 'profile' ? null : 'profile')}
+            >
+              <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--lb-accent-soft)] text-[var(--lb-accent)]"><User size={17} /></span>
+              <span className="hidden max-w-40 sm:block">
+                <span className="block truncate text-sm font-semibold text-[var(--lb-ink)]">{user?.name || 'Khách'}</span>
+                <span className="block truncate text-xs text-[var(--lb-muted)]">{user?.role || 'Khách'}</span>
+              </span>
+            </button>
+            {openMenu === 'profile' && (
+              <div role="menu" className="absolute right-0 mt-2 w-48 rounded-[10px] border border-[var(--lb-border)] bg-[var(--lb-elevated)] p-2 shadow-[var(--lb-shadow-popover)]">
+                <button type="button" role="menuitem" onClick={handleLogout} className="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-sm font-semibold text-[var(--lb-muted)] hover:bg-[var(--lb-danger-soft)] hover:text-[var(--lb-danger)]">
+                  <LogOut size={17} /> Đăng xuất
                 </button>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

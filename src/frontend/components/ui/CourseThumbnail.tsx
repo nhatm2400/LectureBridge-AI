@@ -15,7 +15,7 @@ export function CourseThumbnail({ src, alt }: CourseThumbnailProps) {
     <div
       role="img"
       aria-label={`${alt} — chưa có ảnh đại diện`}
-      className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-700 to-rose-800 text-white"
+      className="absolute inset-0 flex items-center justify-center bg-[var(--lb-accent-soft)] text-[var(--lb-accent)]"
     >
       <BookOpen aria-hidden="true" size={42} strokeWidth={1.7} />
     </div>

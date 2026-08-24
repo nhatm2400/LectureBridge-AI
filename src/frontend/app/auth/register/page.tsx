@@ -1,10 +1,22 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { CheckCircle2, Eye, EyeOff, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { User, Mail, Lock, Eye, EyeOff, Loader2, CheckCircle2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+
+import { Button } from '@/components/ui/Button';
+import { Field } from '@/components/ui/Field';
+import { IconButton } from '@/components/ui/IconButton';
 import { api } from '@/lib/api';
+
+type FieldErrors = {
+  fullName?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  terms?: string;
+};
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -12,7 +24,6 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,31 +31,21 @@ export default function RegisterPage() {
   const [role, setRole] = useState<'student' | 'teacher' | 'admin'>('student');
   const [allowRoleRegistration, setAllowRoleRegistration] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<{
-    fullName?: string;
-    email?: string;
-    password?: string;
-    confirmPassword?: string;
-    terms?: string;
-  }>({});
-
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
   useEffect(() => {
-    const loadRegistrationConfig = async () => {
-      const config = await api.auth.getRegistrationConfig();
-      setAllowRoleRegistration(config.allow_role_registration);
-    };
-    loadRegistrationConfig();
+    api.auth.getRegistrationConfig()
+      .then((config) => setAllowRoleRegistration(config.allow_role_registration))
+      .catch(() => setAllowRoleRegistration(false));
   }, []);
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRegister = async (event: React.FormEvent) => {
+    event.preventDefault();
     setIsSubmitting(true);
     setError(null);
     setFieldErrors({});
-
-    const nextErrors: typeof fieldErrors = {};
+    const nextErrors: FieldErrors = {};
     const trimmedName = fullName.trim();
     const trimmedEmail = email.trim();
 
@@ -52,9 +53,7 @@ export default function RegisterPage() {
     if (!trimmedEmail) nextErrors.email = 'Vui lòng nhập địa chỉ email.';
     else if (!isValidEmail(trimmedEmail)) nextErrors.email = 'Vui lòng nhập email hợp lệ.';
     if (password.length < 8) nextErrors.password = 'Mật khẩu phải có ít nhất 8 ký tự.';
-    else if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/\d/.test(password)) {
-      nextErrors.password = 'Mật khẩu phải có chữ hoa, chữ thường và số.';
-    }
+    else if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/\d/.test(password)) nextErrors.password = 'Mật khẩu phải có chữ hoa, chữ thường và số.';
     if (password !== confirmPassword) nextErrors.confirmPassword = 'Mật khẩu xác nhận không khớp.';
     if (!acceptedTerms) nextErrors.terms = 'Bạn cần đồng ý điều khoản để tiếp tục.';
 
@@ -73,14 +72,10 @@ export default function RegisterPage() {
         confirm_password: confirmPassword,
         role: allowRoleRegistration ? role : 'student',
       });
-
       setIsSuccess(true);
-      setTimeout(() => {
-        router.push('/auth/login');
-      }, 2000);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Đăng ký thất bại. Vui lòng thử lại.';
-      setError(message);
+      setTimeout(() => router.push('/auth/login'), 2000);
+    } catch (caught: unknown) {
+      setError(caught instanceof Error ? caught.message : 'Đăng ký thất bại. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);
     }
@@ -88,151 +83,68 @@ export default function RegisterPage() {
 
   if (isSuccess) {
     return (
-      <div className="flex flex-col items-center justify-center space-y-6 py-10 animate-in fade-in zoom-in duration-500">
-        <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center text-green-500">
-          <CheckCircle2 size={48} />
-        </div>
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-extrabold text-slate-900">Đăng ký thành công!</h1>
-          <p className="text-slate-500 font-medium">Đang chuyển đến trang đăng nhập...</p>
-        </div>
+      <div className="py-8 text-center" role="status" aria-live="polite">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-md bg-[var(--lb-success-soft)] text-[var(--lb-success)]"><CheckCircle2 size={30} /></span>
+        <h1 className="mt-5 text-2xl">Đăng ký thành công</h1>
+        <p className="mt-2 text-sm text-[var(--lb-muted)]">Đang chuyển đến trang đăng nhập…</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="space-y-3 text-center lg:text-left">
-        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Đăng ký</h1>
-        <p className="text-slate-500 font-medium">
-          Đã có tài khoản?
-          <Link href="/auth/login" className="text-[#FF4F6E] font-bold hover:underline ml-1">Đăng nhập</Link>
-        </p>
+    <div>
+      <div className="mb-7">
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--lb-accent)]">Tạo không gian học</p>
+        <h1 className="mt-3 text-3xl">Đăng ký LectureBridge</h1>
+        <p className="mt-2 text-sm text-[var(--lb-muted)]">Đã có tài khoản? <Link href="/auth/login" className="font-bold text-[var(--lb-accent)] underline-offset-4 hover:underline">Đăng nhập</Link></p>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-2xl text-sm font-bold animate-in fade-in zoom-in duration-300">
-          {error}
-        </div>
-      )}
+      {error && <div role="alert" className="mb-5 rounded-md border border-[var(--lb-danger)] bg-[var(--lb-danger-soft)] px-4 py-3 text-sm font-semibold text-[var(--lb-danger)]">{error}</div>}
 
-      <form onSubmit={handleRegister} noValidate className="space-y-5">
-        <div className="space-y-2">
-          <label className="text-xs font-extrabold uppercase tracking-widest text-slate-400">Họ và tên *</label>
-          <div className="relative group">
-            <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#FF4F6E] transition-colors" size={20} />
-            <input
-              required
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Nhập họ và tên"
-              aria-invalid={Boolean(fieldErrors.fullName)}
-              className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#FF4F6E]/5 focus:bg-white focus:border-[#FF4F6E]/30 transition-all font-medium text-slate-700"
-            />
-          </div>
-          {fieldErrors.fullName && <p className="text-xs font-bold text-red-600">{fieldErrors.fullName}</p>}
-        </div>
+      <form onSubmit={handleRegister} noValidate className="space-y-4">
+        <Field label="Họ và tên" htmlFor="register-name" error={fieldErrors.fullName}>
+          <input id="register-name" required type="text" autoComplete="name" value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Nguyễn Văn An" aria-invalid={Boolean(fieldErrors.fullName)} aria-describedby={fieldErrors.fullName ? 'register-name-error' : undefined} className="lb-field" />
+        </Field>
 
-        <div className="space-y-2">
-          <label className="text-xs font-extrabold uppercase tracking-widest text-slate-400">Địa chỉ email *</label>
-          <div className="relative group">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#FF4F6E] transition-colors" size={20} />
-            <input
-              required
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Nhập email"
-              aria-invalid={Boolean(fieldErrors.email)}
-              className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#FF4F6E]/5 focus:bg-white focus:border-[#FF4F6E]/30 transition-all font-medium text-slate-700"
-            />
-          </div>
-          {fieldErrors.email && <p className="text-xs font-bold text-red-600">{fieldErrors.email}</p>}
-        </div>
+        <Field label="Email" htmlFor="register-email" error={fieldErrors.email}>
+          <input id="register-email" required type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="ban@example.com" aria-invalid={Boolean(fieldErrors.email)} aria-describedby={fieldErrors.email ? 'register-email-error' : undefined} className="lb-field" />
+        </Field>
 
-        <div className="space-y-2">
-          <label className="text-xs font-extrabold uppercase tracking-widest text-slate-400">Mật khẩu *</label>
-          <div className="relative group">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#FF4F6E] transition-colors" size={20} />
-            <input
-              required
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Tạo mật khẩu"
-              aria-invalid={Boolean(fieldErrors.password)}
-              className="w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#FF4F6E]/5 focus:bg-white focus:border-[#FF4F6E]/30 transition-all font-medium text-slate-700"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 transition-colors"
-            >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
+        <Field label="Mật khẩu" htmlFor="register-password" error={fieldErrors.password} hint="Ít nhất 8 ký tự, gồm chữ hoa, chữ thường và số.">
+          <div className="relative">
+            <input id="register-password" required type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Tạo mật khẩu" aria-invalid={Boolean(fieldErrors.password)} aria-describedby={fieldErrors.password ? 'register-password-error' : 'register-password-hint'} className="lb-field pr-12" />
+            <IconButton label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'} onClick={() => setShowPassword((current) => !current)} className="absolute right-0.5 top-1/2 -translate-y-1/2">
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </IconButton>
           </div>
-          {fieldErrors.password && <p className="text-xs font-bold text-red-600">{fieldErrors.password}</p>}
-        </div>
+        </Field>
 
-        <div className="space-y-2">
-          <label className="text-xs font-extrabold uppercase tracking-widest text-slate-400">Xác nhận mật khẩu *</label>
-          <div className="relative group">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#FF4F6E] transition-colors" size={20} />
-            <input
-              required
-              type={showPassword ? 'text' : 'password'}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Nhập lại mật khẩu"
-              aria-invalid={Boolean(fieldErrors.confirmPassword)}
-              className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#FF4F6E]/5 focus:bg-white focus:border-[#FF4F6E]/30 transition-all font-medium text-slate-700"
-            />
-          </div>
-          {fieldErrors.confirmPassword && <p className="text-xs font-bold text-red-600">{fieldErrors.confirmPassword}</p>}
-        </div>
+        <Field label="Xác nhận mật khẩu" htmlFor="register-confirm-password" error={fieldErrors.confirmPassword}>
+          <input id="register-confirm-password" required type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Nhập lại mật khẩu" aria-invalid={Boolean(fieldErrors.confirmPassword)} aria-describedby={fieldErrors.confirmPassword ? 'register-confirm-password-error' : undefined} className="lb-field" />
+        </Field>
 
         {allowRoleRegistration && (
-          <div className="space-y-2">
-            <label className="text-xs font-extrabold uppercase tracking-widest text-slate-400">Vai trò dev/test</label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as 'student' | 'teacher' | 'admin')}
-              className="w-full px-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#FF4F6E]/5 focus:bg-white focus:border-[#FF4F6E]/30 transition-all font-bold text-slate-700"
-            >
+          <Field label="Vai trò dev/test" htmlFor="register-role" hint="Chỉ dùng cho môi trường dev/test; production nên tắt đăng ký role công khai.">
+            <select id="register-role" value={role} onChange={(event) => setRole(event.target.value as 'student' | 'teacher' | 'admin')} className="lb-field font-semibold">
               <option value="student">Student</option>
               <option value="teacher">Teacher</option>
               <option value="admin">Admin</option>
             </select>
-            <p className="text-[11px] font-bold text-amber-600">
-              Chỉ dùng cho môi trường dev/test. Production nên tắt đăng ký role công khai.
-            </p>
-          </div>
+          </Field>
         )}
 
-        <div className="space-y-4 pt-2">
-          <div className="flex items-start gap-3">
-            <input
-              type="checkbox"
-              id="terms"
-              checked={acceptedTerms}
-              onChange={(e) => setAcceptedTerms(e.target.checked)}
-              className="mt-1 w-4 h-4 rounded border-slate-200 text-[#FF4F6E] focus:ring-[#FF4F6E]"
-            />
-            <label htmlFor="terms" className="text-xs font-bold text-slate-500 leading-relaxed cursor-pointer">
-              Tôi đồng ý với <span className="text-slate-900">Điều khoản dịch vụ</span> và <span className="text-slate-900">Chính sách bảo mật</span>
-            </label>
-          </div>
-          {fieldErrors.terms && <p className="text-xs font-bold text-red-600">{fieldErrors.terms}</p>}
+        <div>
+          <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-md py-2 text-sm leading-6 text-[var(--lb-muted)]">
+            <input type="checkbox" checked={acceptedTerms} onChange={(event) => setAcceptedTerms(event.target.checked)} className="mt-1 h-5 w-5 accent-[var(--lb-accent)]" aria-invalid={Boolean(fieldErrors.terms)} aria-describedby={fieldErrors.terms ? 'register-terms-error' : undefined} />
+            <span>Tôi đồng ý với <strong className="text-[var(--lb-ink)]">Điều khoản dịch vụ</strong> và <strong className="text-[var(--lb-ink)]">Chính sách bảo mật</strong>.</span>
+          </label>
+          {fieldErrors.terms && <p id="register-terms-error" className="text-sm font-semibold text-[var(--lb-danger)]">{fieldErrors.terms}</p>}
         </div>
 
-        <button
-          disabled={isSubmitting}
-          className="w-full py-4 bg-[#FF4F6E] text-white font-extrabold rounded-2xl shadow-xl shadow-[#FF4F6E]/20 hover:bg-[#e64663] transition-all active:scale-[0.98] flex items-center justify-center gap-2 mt-4 disabled:opacity-70"
-        >
-          {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : 'Đăng ký'}
-        </button>
-
+        <Button type="submit" disabled={isSubmitting} className="mt-2 w-full">
+          {isSubmitting && <Loader2 className="animate-spin" size={18} aria-hidden="true" />}
+          {isSubmitting ? 'Đang đăng ký…' : 'Đăng ký'}
+        </Button>
       </form>
     </div>
   );
