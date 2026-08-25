@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { CourseThumbnail } from '@/components/ui/CourseThumbnail';
 import { api, type Course, type StudentDashboard } from '@/lib/api';
+import { localizeCourseTitle } from '@/lib/course-content-i18n';
 import { useI18n } from '@/lib/i18n';
 import { cn, getFullImageUrl } from '@/lib/utils';
 
@@ -48,7 +49,7 @@ function normalizeCourseCards(dashboard: StudentDashboard, courses: Course[]): C
 }
 
 export default function EnrolledCourses() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const [mounted, setMounted] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [activeTab, setActiveTab] = React.useState<CourseTab>('enrolled');
@@ -170,10 +171,12 @@ export default function EnrolledCourses() {
         ) : (
           <>
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {pagedCards.map((course) => (
+              {pagedCards.map((course) => {
+                const courseTitle = localizeCourseTitle(course.title, locale);
+                return (
                 <div key={course.id} className="group overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
                   <div className="relative aspect-video">
-                    <CourseThumbnail src={course.thumbnail} alt={course.title} />
+                    <CourseThumbnail src={course.thumbnail} alt={courseTitle} />
                   </div>
                   <div className="space-y-4 p-6">
                     <div className="flex items-center justify-between">
@@ -182,7 +185,7 @@ export default function EnrolledCourses() {
                         {course.category}
                       </span>
                     </div>
-                    <h4 className="min-h-[40px] line-clamp-2 text-sm font-extrabold leading-snug text-slate-900">{course.title}</h4>
+                    <h4 className="min-h-[40px] line-clamp-2 text-sm font-extrabold leading-snug text-slate-900">{courseTitle}</h4>
                     <div>
                       <div className="mb-1 flex justify-between text-[11px] font-bold text-slate-500">
                         <span>
@@ -202,7 +205,8 @@ export default function EnrolledCourses() {
                     </Link>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="flex items-center justify-between border-t border-slate-50 pt-10">

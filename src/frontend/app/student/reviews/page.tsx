@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { MessageSquare, Star } from 'lucide-react';
 import { api, type MyReviewItem } from '@/lib/api';
+import { localizeCourseTitle } from '@/lib/course-content-i18n';
 import { localeCode, useI18n } from '@/lib/i18n';
 
 export default function StudentReviewsPage() {
@@ -46,7 +47,7 @@ export default function StudentReviewsPage() {
               <div key={item.id} className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
                 <div className="flex items-center justify-between gap-4">
                   <Link href={`/student/courses/${item.course_id}`} className="text-sm font-extrabold text-slate-900 hover:text-[#FF4F6E]">
-                    {item.course_title}
+                    {localizeCourseTitle(item.course_title, locale)}
                   </Link>
                   <span className="text-xs font-bold text-slate-400">{new Date(item.updated_at).toLocaleString(localeCode(locale))}</span>
                 </div>

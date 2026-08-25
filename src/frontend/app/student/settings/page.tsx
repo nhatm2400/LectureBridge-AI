@@ -25,6 +25,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { StatePanel } from '@/components/ui/StatePanel';
 import { Surface } from '@/components/ui/Surface';
 import { api, type StudentProfileData } from '@/lib/api';
+import { localizeCourseTitle } from '@/lib/course-content-i18n';
 import { localeCode, type Translate, useI18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/useAppStore';
@@ -280,7 +281,7 @@ function SettingsPageContent() {
                           <Award size={19} />
                         </span>
                         <div className="min-w-0">
-                          <h3 className="truncate text-base">{cert.course_title}</h3>
+                          <h3 className="truncate text-base">{localizeCourseTitle(cert.course_title, locale)}</h3>
                           <p className="mt-1 text-xs leading-5 text-[var(--lb-muted)]">ID: {cert.cert_id} · {t('Cấp ngày', 'Issued')} {new Date(cert.issue_date).toLocaleDateString(localeCode(locale))}</p>
                         </div>
                       </div>

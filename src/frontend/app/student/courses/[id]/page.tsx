@@ -19,6 +19,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { CourseThumbnail } from '@/components/ui/CourseThumbnail';
 import { api, CourseReview, StudentCourseDetail, StudentCourseDetailLesson } from '@/lib/api';
+import { localizeCourseTitle } from '@/lib/course-content-i18n';
 import { localeCode, useI18n } from '@/lib/i18n';
 import { getFullImageUrl } from '@/lib/utils';
 
@@ -111,6 +112,7 @@ export default function CourseDetailPage() {
 
   const { course, stats, user_context, modules } = detail;
   const courseImage = getFullImageUrl(course.thumbnail_url);
+  const courseTitle = localizeCourseTitle(course.title, locale);
 
   const handleSubmitReview = async () => {
     if (!user_context.is_enrolled) return;
@@ -140,7 +142,7 @@ export default function CourseDetailPage() {
               <CheckCircle size={40} fill="currentColor" className="text-white" />
             </div>
             <h3 className="text-2xl font-extrabold text-slate-900 mb-2">{t('Đăng ký thành công!', 'Enrolled successfully!')}</h3>
-            <p className="text-sm font-bold text-slate-500 mb-8">{t('Bạn đã đăng ký khóa học', 'You have enrolled in')} <strong>{course.title}</strong>.</p>
+            <p className="text-sm font-bold text-slate-500 mb-8">{t('Bạn đã đăng ký khóa học', 'You have enrolled in')} <strong>{courseTitle}</strong>.</p>
             <button onClick={() => setShowEnrollModal(false)} className="w-full bg-slate-900 text-white py-4 rounded-xl font-extrabold text-sm uppercase tracking-widest">
               {t('Tiếp tục', 'Continue')}
             </button>
@@ -156,8 +158,8 @@ export default function CourseDetailPage() {
               <ArrowRight size={14} />
               <span className="text-white/60">{t('Khóa học', 'Course')}</span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight">{course.title}</h1>
-            <p className="text-lg text-white/80 font-medium max-w-2xl">{course.description || t(`Nội dung khóa học ${course.title}`, `${course.title} course content`)}</p>
+            <h1 className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight">{courseTitle}</h1>
+            <p className="text-lg text-white/80 font-medium max-w-2xl">{course.description || t(`Nội dung khóa học ${courseTitle}`, `${courseTitle} course content`)}</p>
             <div className="flex flex-wrap items-center gap-6 text-sm font-bold text-white/80">
               <div>{stats.students_enrolled} {t('học viên đã đăng ký', 'students enrolled')}</div>
               <div>{stats.total_lessons} {t('bài học', 'lessons')}</div>
@@ -320,7 +322,7 @@ export default function CourseDetailPage() {
           <div className="lg:col-span-4">
             <div className="lg:sticky lg:top-8 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
               <div className="relative aspect-video group cursor-pointer">
-                <CourseThumbnail src={courseImage} alt={course.title} />
+                <CourseThumbnail src={courseImage} alt={courseTitle} />
                 <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
                   <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-slate-900"><Play size={24} fill="currentColor" /></div>
                 </div>

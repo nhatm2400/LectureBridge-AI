@@ -10,6 +10,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { StatePanel } from '@/components/ui/StatePanel';
 import { Surface } from '@/components/ui/Surface';
 import { api, type Course, type StudentDashboard } from '@/lib/api';
+import { localizeCourseTitle, localizeEnrollmentStatus } from '@/lib/course-content-i18n';
 import { type Translate, useI18n } from '@/lib/i18n';
 import { getFullImageUrl } from '@/lib/utils';
 
@@ -34,7 +35,7 @@ function formatPosition(seconds: number) {
 }
 
 export default function StudentDashboardPage() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const [dashboard, setDashboard] = useState<StudentDashboard | null>(null);
   const [publicCourses, setPublicCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -172,28 +173,31 @@ export default function StudentDashboardPage() {
                   <StatePanel state="empty" title={t('Bạn chưa có khóa học', 'No courses yet')} description={t('Các khóa bạn đăng ký sẽ xuất hiện tại đây.', 'Courses you enroll in will appear here.')} />
                 ) : (
                   <div className="grid gap-5 md:grid-cols-2">
-                    {dashboard.courses.map((course) => (
+                    {dashboard.courses.map((course) => {
+                      const courseTitle = localizeCourseTitle(course.title, locale);
+                      return (
                       <Surface key={course.course_id} as="article" className="overflow-hidden">
                         <div className="relative aspect-[16/8.5] border-b border-[var(--lb-border)]">
-                          <CourseThumbnail src={getFullImageUrl(course.thumbnail_url)} alt={course.title} />
+                          <CourseThumbnail src={getFullImageUrl(course.thumbnail_url)} alt={courseTitle} />
                         </div>
                         <div className="p-5">
                           <div className="flex items-start justify-between gap-3">
-                            <h3 className="line-clamp-2 text-lg leading-snug">{course.title}</h3>
-                            <span className="shrink-0 rounded-full bg-[var(--lb-accent-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--lb-accent)]">{course.enrollment_status}</span>
+                            <h3 className="line-clamp-2 text-lg leading-snug">{courseTitle}</h3>
+                            <span className="shrink-0 whitespace-nowrap rounded-full bg-[var(--lb-accent-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--lb-accent)]">{localizeEnrollmentStatus(course.enrollment_status, locale)}</span>
                           </div>
                           <div className="mt-5">
                             <div className="mb-2 flex justify-between text-xs text-[var(--lb-muted)]">
                               <span>{course.completed_lessons}/{course.total_lessons} {t('bài', 'lessons')}</span><span>{course.progress_percent}%</span>
                             </div>
-                            <div className="h-1.5 overflow-hidden rounded-full bg-[var(--lb-border)]" role="progressbar" aria-label={t(`Tiến độ ${course.title}`, `${course.title} progress`)} aria-valuenow={course.progress_percent} aria-valuemin={0} aria-valuemax={100}>
+                            <div className="h-1.5 overflow-hidden rounded-full bg-[var(--lb-border)]" role="progressbar" aria-label={t(`Tiến độ ${courseTitle}`, `${courseTitle} progress`)} aria-valuenow={course.progress_percent} aria-valuemin={0} aria-valuemax={100}>
                               <div className="h-full rounded-full bg-[var(--lb-accent)]" style={{ width: `${course.progress_percent}%` }} />
                             </div>
                           </div>
                           <Link href={`/student/courses/${course.course_id}`} className={buttonClassName({ variant: 'secondary', className: 'mt-5 w-full' })}>{t('Xem khóa học', 'View course')}</Link>
                         </div>
                       </Surface>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </section>
@@ -236,10 +240,10 @@ export default function StudentDashboardPage() {
                   {availableCourses.map((course) => (
                     <Surface key={course.id} as="article" className="overflow-hidden">
                       <div className="relative aspect-video border-b border-[var(--lb-border)]">
-                        <CourseThumbnail src={getFullImageUrl(course.thumbnail_url || course.cover_image_url || course.thumb)} alt={course.title} />
+                        <CourseThumbnail src={getFullImageUrl(course.thumbnail_url || course.cover_image_url || course.thumb)} alt={localizeCourseTitle(course.title, locale)} />
                       </div>
                       <div className="p-5">
-                        <h3 className="line-clamp-2 text-lg">{course.title}</h3>
+                        <h3 className="line-clamp-2 text-lg">{localizeCourseTitle(course.title, locale)}</h3>
                         {course.description && <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--lb-muted)]">{normalizeCourseDescription(course.description, t)}</p>}
                         <Link href={`/student/courses/${course.id}`} className={buttonClassName({ variant: 'secondary', className: 'mt-5 w-full' })}>{t('Xem và đăng ký', 'View and enroll')}</Link>
                       </div>
