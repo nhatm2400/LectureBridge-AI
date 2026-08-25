@@ -34,7 +34,9 @@ def test_build_ai_analysis_normalizes_canonical_artifacts_and_marks_ready():
         "flashcards",
         "quizzes",
         "artifact_status",
+        "output_language",
     }
+    assert result["output_language"] == "vi"
     assert result["artifact_status"]["summary"]["status"] == "ready"
     assert result["artifact_status"]["quizzes"]["status"] == "ready"
 

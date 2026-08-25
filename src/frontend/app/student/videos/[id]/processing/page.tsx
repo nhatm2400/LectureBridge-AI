@@ -19,23 +19,25 @@ import { useParams, useRouter } from 'next/navigation';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { api } from '@/lib/api';
+import { type Translate, useI18n } from '@/lib/i18n';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-function mapStatusToUI(status: string) {
-  if (status === 'queued') return { step: 1, progress: 10, label: 'Đang chờ trong hàng đợi xử lý...' };
-  if (status === 'extracting_audio') return { step: 2, progress: 35, label: 'Đang trích xuất âm thanh chất lượng cao...' };
-  if (status === 'transcribing') return { step: 3, progress: 70, label: 'AI đang chép lời và phân tích bài giảng...' };
-  if (status === 'completed') return { step: 4, progress: 100, label: 'Hoàn tất. Bài học của bạn đã sẵn sàng.' };
+function mapStatusToUI(status: string, t: Translate) {
+  if (status === 'queued') return { step: 1, progress: 10, label: t('Đang chờ trong hàng đợi xử lý...', 'Waiting in the processing queue...') };
+  if (status === 'extracting_audio') return { step: 2, progress: 35, label: t('Đang trích xuất âm thanh chất lượng cao...', 'Extracting high-quality audio...') };
+  if (status === 'transcribing') return { step: 3, progress: 70, label: t('AI đang chép lời và phân tích bài giảng...', 'AI is transcribing and analyzing the lecture...') };
+  if (status === 'completed') return { step: 4, progress: 100, label: t('Hoàn tất. Bài học của bạn đã sẵn sàng.', 'Complete. Your lesson is ready.') };
   if (status?.startsWith('failed')) return { step: -1, progress: 0, label: status };
-  return { step: 0, progress: 5, label: 'Đang khởi tạo tiến trình xử lý...' };
+  return { step: 0, progress: 5, label: t('Đang khởi tạo tiến trình xử lý...', 'Starting the processing workflow...') };
 }
 
 export default function VideoProcessingPage() {
   const params = useParams();
   const router = useRouter();
+  const { t } = useI18n();
   const videoId = params.id as string;
   
   const [progress, setProgress] = useState(5);
@@ -57,7 +59,7 @@ export default function VideoProcessingPage() {
         const status = data.status;
         setCurrentStatus(status);
 
-        const ui = mapStatusToUI(status);
+        const ui = mapStatusToUI(status, t);
 
         if (status === 'completed') {
           setProgress(100);
@@ -82,15 +84,15 @@ export default function VideoProcessingPage() {
 
     pollStatus();
     return () => { cancelled = true; clearTimeout(timeoutId); };
-  }, [videoId]);
+  }, [t, videoId]);
 
   const isComplete = progress === 100 && currentStatus === 'completed';
 
   const pipelineSteps = [
-    { id: 1, icon: Film, title: 'Chuẩn bị tệp', desc: 'Kiểm tra và tối ưu video đã tải lên.' },
-    { id: 2, icon: Music, title: 'Tách âm thanh', desc: 'Tạo bản âm thanh sạch để chép lời.' },
-    { id: 3, icon: Zap, title: 'AI Whisper', desc: 'Chép lời và phân tích nội dung bài giảng.' },
-    { id: 4, icon: FileText, title: 'Hoàn thiện', desc: 'Tạo phụ đề, tóm tắt và tài nguyên học tập.' }
+    { id: 1, icon: Film, title: t('Chuẩn bị tệp', 'Prepare file'), desc: t('Kiểm tra và tối ưu video đã tải lên.', 'Check and optimize the uploaded video.') },
+    { id: 2, icon: Music, title: t('Tách âm thanh', 'Extract audio'), desc: t('Tạo bản âm thanh sạch để chép lời.', 'Create clean audio for transcription.') },
+    { id: 3, icon: Zap, title: 'AI Whisper', desc: t('Chép lời và phân tích nội dung bài giảng.', 'Transcribe and analyze the lecture.') },
+    { id: 4, icon: FileText, title: t('Hoàn thiện', 'Finalize'), desc: t('Tạo phụ đề, tóm tắt và tài nguyên học tập.', 'Create captions, a summary, and study resources.') }
   ];
 
   return (
@@ -103,7 +105,7 @@ export default function VideoProcessingPage() {
           className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-slate-400 hover:text-[#FF4F6E] transition-colors"
         >
           <ChevronLeft size={16} />
-          <span>Quay lại trang tải lên</span>
+          <span>{t('Quay lại trang tải lên', 'Back to uploads')}</span>
         </button>
 
         <div className="bg-white rounded-[40px] border border-slate-50 shadow-2xl shadow-slate-200/50 overflow-hidden relative">
@@ -123,12 +125,12 @@ export default function VideoProcessingPage() {
                       ID: {videoId.slice(0, 8)}
                    </div>
                    <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
-                     {isComplete ? 'Xử lý hoàn tất!' : isFailed ? 'Xử lý thất bại' : 'AI đang xử lý bài giảng'}
+                     {isComplete ? t('Xử lý hoàn tất!', 'Processing complete!') : isFailed ? t('Xử lý thất bại', 'Processing failed') : t('AI đang xử lý bài giảng', 'AI is processing the lecture')}
                    </h1>
                    <p className="text-sm font-bold text-slate-400 max-w-md">
-                     {isComplete ? 'Hệ thống đã hoàn tất trích xuất và tối ưu bài giảng của bạn.'
-                       : isFailed ? 'Có lỗi xảy ra khi xử lý video. Vui lòng xem thông báo lỗi bên dưới.'
-                       : 'Hệ thống đang dùng AI để tạo phụ đề, tóm tắt và tài nguyên học tập. Bạn có thể đóng trình duyệt, tiến trình vẫn ở BE.'}
+                     {isComplete ? t('Hệ thống đã hoàn tất trích xuất và tối ưu bài giảng của bạn.', 'The system has finished extracting and optimizing your lecture.')
+                       : isFailed ? t('Có lỗi xảy ra khi xử lý video. Vui lòng xem thông báo lỗi bên dưới.', 'An error occurred while processing the video. See the details below.')
+                       : t('Hệ thống đang dùng AI để tạo phụ đề, tóm tắt và tài nguyên học tập. Bạn có thể đóng trình duyệt, tiến trình vẫn tiếp tục.', 'The system is using AI to create captions, a summary, and study resources. You may close the browser; processing will continue.')}
                    </p>
                 </div>
 
@@ -192,15 +194,15 @@ export default function VideoProcessingPage() {
                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto text-red-500 shadow-sm mb-6">
                     <AlertTriangle size={24} />
                  </div>
-                 <h3 className="text-xl font-extrabold text-red-600">Lỗi kỹ thuật khi xử lý</h3>
+                 <h3 className="text-xl font-extrabold text-red-600">{t('Lỗi kỹ thuật khi xử lý', 'Technical processing error')}</h3>
                  <p className="text-red-500/80 font-bold text-sm max-w-md mx-auto">{failMessage}</p>
-                 <p className="text-[11px] font-extrabold uppercase tracking-widest text-red-400 pt-4">Gợi ý: kiểm tra FFmpeg trên máy chủ hoặc thử định dạng video khác.</p>
+                 <p className="text-[11px] font-extrabold uppercase tracking-widest text-red-400 pt-4">{t('Gợi ý: kiểm tra FFmpeg trên máy chủ hoặc thử định dạng video khác.', 'Tip: check FFmpeg on the server or try another video format.')}</p>
               </div>
             ) : (
               <div className="text-center p-6 bg-slate-50 rounded-3xl border border-slate-100">
                  <div className="flex items-center justify-center gap-3">
                     {isComplete ? <Sparkles size={20} className="text-emerald-500" /> : <Activity size={20} className="text-[#FF4F6E] animate-pulse" />}
-                    <span className="text-sm font-extrabold text-slate-600">{mapStatusToUI(currentStatus).label}</span>
+                    <span className="text-sm font-extrabold text-slate-600">{mapStatusToUI(currentStatus, t).label}</span>
                  </div>
               </div>
             )}
@@ -214,14 +216,14 @@ export default function VideoProcessingPage() {
                      suppressHydrationWarning
                      className="flex-1 py-5 bg-[#FF4F6E] text-white rounded-[20px] font-extrabold text-sm uppercase tracking-widest shadow-xl shadow-[#FF4F6E]/20 hover:bg-[#e64663] transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3"
                    >
-                     Vào bài học <ArrowRight size={18} />
+                     {t('Vào bài học', 'Open lesson')} <ArrowRight size={18} />
                    </button>
                    <button 
                      onClick={() => router.push('/student/documents')}
                      suppressHydrationWarning
                      className="px-8 py-5 bg-white text-slate-900 border border-slate-200 rounded-[20px] font-extrabold text-sm uppercase tracking-widest hover:bg-slate-50 transition-all"
                    >
-                     Quay lại khóa học
+                     {t('Quay lại khóa học', 'Back to courses')}
                    </button>
                  </>
                ) : isFailed ? (
@@ -230,11 +232,11 @@ export default function VideoProcessingPage() {
                    suppressHydrationWarning
                    className="w-full py-5 bg-slate-900 text-white rounded-[20px] font-extrabold text-sm uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3"
                  >
-                   Quay lại trang tải lên
+                   {t('Quay lại trang tải lên', 'Back to uploads')}
                  </button>
                ) : (
                  <div className="w-full flex items-center justify-center gap-2 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">
-                    <Info size={14} /> Bạn có thể đóng trình duyệt, tiến trình vẫn ở BE.
+                    <Info size={14} /> {t('Bạn có thể đóng trình duyệt, tiến trình vẫn tiếp tục.', 'You may close the browser; processing will continue.')}
                  </div>
                )}
             </div>

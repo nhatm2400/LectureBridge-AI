@@ -207,6 +207,30 @@ def _get_content_metadata(video_id: str, session: Session) -> ContentMetadata | 
     ).first()
 
 
+def _normalize_output_language(value: object) -> str:
+    output_language = str(value or "vi").strip().lower()
+    if output_language not in {"vi", "en"}:
+        raise HTTPException(
+            status_code=422,
+            detail="output_language must be 'vi' or 'en'.",
+        )
+    return output_language
+
+
+def _stored_output_language(content: ContentMetadata | None) -> str:
+    analysis = content.ai_analysis if content and isinstance(content.ai_analysis, dict) else {}
+    return _normalize_output_language(analysis.get("output_language", "vi"))
+
+
+def _set_stored_output_language(
+    content: ContentMetadata,
+    output_language: str,
+) -> None:
+    analysis = dict(content.ai_analysis) if isinstance(content.ai_analysis, dict) else {}
+    analysis["output_language"] = _normalize_output_language(output_language)
+    content.ai_analysis = analysis
+
+
 def _remove_owned_path(path: Path, root: Path) -> bool:
     """Remove a file/directory only when it resolves inside its artifact root."""
     if not _is_path_within(path, root):
@@ -375,9 +399,11 @@ async def _create_lesson_and_enqueue(
     session: Session,
     background_tasks: BackgroundTasks,
     video_title: str | None = None,
+    output_language: str = "vi",
 ) -> dict:
     lesson_uuid = uuid.uuid4()
     lesson_id = str(lesson_uuid)
+    output_language = _normalize_output_language(output_language)
     ext = os.path.splitext(file.filename)[1].lower()
     if ext not in config.ALLOWED_VIDEO_EXTENSIONS:
         raise HTTPException(status_code=400, detail=f"Unsupported file format for {file.filename}.")
@@ -412,6 +438,13 @@ async def _create_lesson_and_enqueue(
     if duration_seconds:
         lesson.duration_minutes = max(1, int(round(duration_seconds / 60)))
     session.add(lesson)
+    session.add(
+        ContentMetadata(
+            lesson_id=lesson_uuid,
+            video_url=str(video_path),
+            ai_analysis={"output_language": output_language},
+        )
+    )
     session.commit()
 
     if target_module is None and _role_name(current_user) == "student":
@@ -429,6 +462,7 @@ async def _create_lesson_and_enqueue(
     mode = enqueue_pipeline_job(
         video_id=lesson_id,
         video_path=str(video_path),
+        output_language=output_language,
         fallback_task_adder=background_tasks.add_task,
     )
     return {
@@ -437,6 +471,7 @@ async def _create_lesson_and_enqueue(
         "queue_mode": mode,
         "message": "Video uploaded and queued for processing.",
         "filename": file.filename,
+        "output_language": output_language,
     }
 
 
@@ -460,6 +495,7 @@ async def presign_upload(
     content_type = data.get("content_type", "video/mp4")
     module_id = data.get("module_id")
     video_title = (data.get("video_title") or "").strip() or filename
+    output_language = _normalize_output_language(data.get("output_language", "vi"))
 
     ext = os.path.splitext(filename)[1].lower()
     if ext not in config.ALLOWED_VIDEO_EXTENSIONS:
@@ -494,7 +530,13 @@ async def presign_upload(
         sort_order=0,
     )
     session.add(lesson)
-    session.add(ContentMetadata(lesson_id=lesson_uuid, video_url=s3_key))
+    session.add(
+        ContentMetadata(
+            lesson_id=lesson_uuid,
+            video_url=s3_key,
+            ai_analysis={"output_language": output_language},
+        )
+    )
 
     if target_module is None and _role_name(current_user) == "student":
         existing = session.exec(
@@ -507,7 +549,13 @@ async def presign_upload(
             session.add(Enrollment(user_id=current_user.id, course_id=module.course_id))
 
     session.commit()
-    return {"video_id": lesson_id, "upload_url": upload_url, "s3_key": s3_key, "expires_in": 3600}
+    return {
+        "video_id": lesson_id,
+        "upload_url": upload_url,
+        "s3_key": s3_key,
+        "expires_in": 3600,
+        "output_language": output_language,
+    }
 
 
 @router.post("/{video_id}/confirm-upload")
@@ -554,6 +602,7 @@ async def confirm_upload(
     mode = enqueue_pipeline_job(
         video_id=video_id,
         video_path=str(local_path),
+        output_language=_stored_output_language(content),
         fallback_task_adder=background_tasks.add_task,
     )
     return {
@@ -571,6 +620,7 @@ async def upload_video(
     file: UploadFile = File(...),
     module_id: str | None = Form(default=None),
     video_title: str | None = Form(default=None),
+    output_language: str = Form(default="vi", pattern="^(vi|en)$"),
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
@@ -582,6 +632,7 @@ async def upload_video(
             session=session,
             background_tasks=background_tasks,
             video_title=video_title,
+            output_language=output_language,
         )
     except HTTPException:
         raise
@@ -603,6 +654,7 @@ async def upload_videos_batch(
     files: list[UploadFile] = File(...),
     module_id: str | None = Form(default=None),
     video_titles: list[str] | None = Form(default=None),
+    output_language: str = Form(default="vi", pattern="^(vi|en)$"),
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
@@ -624,6 +676,7 @@ async def upload_videos_batch(
                 session=session,
                 background_tasks=background_tasks,
                 video_title=video_title,
+                output_language=output_language,
             )
             results.append({"ok": True, **res})
         except HTTPException as exc:
@@ -650,6 +703,7 @@ async def process_url(
     session: Session = Depends(get_session),
 ):
     url = validate_external_video_url(data.get("url"))
+    output_language = _normalize_output_language(data.get("output_language", "vi"))
     lesson_uuid = uuid.uuid4()
     lesson_id = str(lesson_uuid)
     
@@ -664,12 +718,19 @@ async def process_url(
         sort_order=0
     )
     session.add(lesson)
+    session.add(
+        ContentMetadata(
+            lesson_id=lesson_uuid,
+            ai_analysis={"output_language": output_language},
+        )
+    )
     session.commit()
     
     upsert_job_status(session, lesson_id=lesson_id, status="queued", progress=0)
     mode = enqueue_download_and_pipeline(
         video_id=lesson_id,
         url=url,
+        output_language=output_language,
         fallback_task_adder=background_tasks.add_task,
     )
     return {
@@ -735,6 +796,9 @@ async def reprocess_video(
     mode = enqueue_pipeline_job(
         video_id=video_id,
         video_path=str(video_path),
+        output_language=_stored_output_language(
+            _get_content_metadata(video_id, session)
+        ),
         fallback_task_adder=background_tasks.add_task,
     )
     return {
@@ -878,6 +942,14 @@ async def reprocess_lecture_events(
         )
     except TranscriptNotFoundError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+    content = _get_content_metadata(video_id, session)
+    if content:
+        _set_stored_output_language(content, output_language)
+        updated_analysis = dict(content.ai_analysis or {})
+        updated_analysis["lecture_event_output_language"] = output_language
+        content.ai_analysis = updated_analysis
+        session.add(content)
+        session.commit()
     return result.model_dump()
 
 
@@ -1083,6 +1155,7 @@ async def reprocess_learning_artifacts(
     mode = enqueue_pipeline_job(
         video_id=video_id,
         video_path=str(video_path),
+        output_language=_stored_output_language(content),
         fallback_task_adder=background_tasks.add_task,
     )
     return {

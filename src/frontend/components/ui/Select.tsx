@@ -5,6 +5,7 @@ import { ChevronDown, Search, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useI18n } from '@/lib/i18n';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -28,10 +29,11 @@ export function CustomSelect({
   options,
   value,
   onChange,
-  placeholder = 'Chọn một mục...',
+  placeholder,
   className,
   disabled = false,
 }: CustomSelectProps) {
+  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
@@ -66,7 +68,7 @@ export function CustomSelect({
         )}
       >
         <span className={cn('truncate', !selectedOption && 'text-slate-400')}>
-          {selectedOption ? selectedOption.title : placeholder}
+          {selectedOption ? selectedOption.title : (placeholder || t('Chọn một mục...', 'Select an option...'))}
         </span>
         <ChevronDown
           size={18}
@@ -90,7 +92,7 @@ export function CustomSelect({
                   <input
                     autoFocus
                     type="text"
-                    placeholder="Tìm kiếm..."
+                    placeholder={t('Tìm kiếm...', 'Search...')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#FF4F6E]/20"
@@ -123,7 +125,7 @@ export function CustomSelect({
                 ))
               ) : (
                 <div className="px-4 py-8 text-center text-xs font-bold text-slate-400">
-                  Không tìm thấy kết quả
+                  {t('Không tìm thấy kết quả', 'No results found')}
                 </div>
               )}
             </div>

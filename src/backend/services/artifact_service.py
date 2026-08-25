@@ -52,7 +52,11 @@ def normalize_flashcards(value: Any) -> list[dict[str, Any]]:
     return items
 
 
-def normalize_quizzes(value: Any) -> list[dict[str, Any]]:
+def normalize_quizzes(
+    value: Any,
+    *,
+    output_language: str = "vi",
+) -> list[dict[str, Any]]:
     if not isinstance(value, list):
         return []
     items: list[dict[str, Any]] = []
@@ -70,7 +74,12 @@ def normalize_quizzes(value: Any) -> list[dict[str, Any]]:
                 "options": options,
                 "correct_answer": correct_answer,
                 "explanation": str(item.get("explanation", "")).strip(),
-                "difficulty": str(item.get("difficulty", "Trung binh")).strip(),
+                "difficulty": str(
+                    item.get(
+                        "difficulty",
+                        "Medium" if output_language == "en" else "Trung binh",
+                    )
+                ).strip(),
                 "source_segment_ids": list(item.get("source_segment_ids", [])),
                 "source_event_ids": list(item.get("source_event_ids", [])),
             }
@@ -86,6 +95,7 @@ def build_ai_analysis(
     quizzes: Any,
     errors: dict[str, str | None] | None = None,
     require_source_evidence: bool = False,
+    output_language: str = "vi",
 ) -> dict[str, Any]:
     """Build the single canonical learning-artifact payload stored with a lesson."""
     errors = errors or {}
@@ -113,7 +123,11 @@ def build_ai_analysis(
         "transcript": transcript,
         "summary": normalize_summary(summary),
         "flashcards": normalize_flashcards(grounded_flashcards),
-        "quizzes": normalize_quizzes(grounded_quizzes),
+        "quizzes": normalize_quizzes(
+            grounded_quizzes,
+            output_language=output_language,
+        ),
+        "output_language": output_language,
     }
     normalized["artifact_status"] = {
         "transcript": {"status": "ready", "error": None},

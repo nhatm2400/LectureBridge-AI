@@ -28,6 +28,8 @@ import {
   type LectureEventRelation,
   type LectureEventType,
 } from '@/lib/api';
+import { type Translate, useI18n } from '@/lib/i18n';
+import { localizeLectureContent } from '@/lib/lecture-content-i18n';
 import { cn } from '@/lib/utils';
 
 interface SemanticTimelineProps {
@@ -42,23 +44,23 @@ interface EventMeta {
   tone: string;
 }
 
-const EVENT_META: Record<LectureEventType, EventMeta> = {
-  QUESTION: { label: 'Câu hỏi', icon: CircleHelp, tone: 'bg-[var(--lb-info-soft)] text-[var(--lb-info)]' },
-  ANSWER: { label: 'Trả lời', icon: MessageCircle, tone: 'bg-[var(--lb-success-soft)] text-[var(--lb-success)]' },
-  EXAMPLE: { label: 'Ví dụ', icon: FlaskConical, tone: 'bg-[var(--lb-accent-soft)] text-[var(--lb-accent)]' },
-  TOPIC_CHANGE: { label: 'Chuyển chủ đề', icon: ArrowRightLeft, tone: 'bg-[var(--lb-info-soft)] text-[var(--lb-info)]' },
-  IMPORTANT: { label: 'Quan trọng', icon: Star, tone: 'bg-[var(--lb-warning-soft)] text-[var(--lb-warning)]' },
-  ACTION: { label: 'Việc cần làm', icon: Check, tone: 'bg-[var(--lb-success-soft)] text-[var(--lb-success)]' },
-  DEADLINE: { label: 'Hạn chót', icon: CalendarClock, tone: 'bg-[var(--lb-danger-soft)] text-[var(--lb-danger)]' },
-  EXAM_CUE: { label: 'Gợi ý ôn tập', icon: GraduationCap, tone: 'bg-[var(--lb-warning-soft)] text-[var(--lb-warning)]' },
-};
+const getEventMeta = (t: Translate): Record<LectureEventType, EventMeta> => ({
+  QUESTION: { label: t('Câu hỏi', 'Question'), icon: CircleHelp, tone: 'bg-[var(--lb-info-soft)] text-[var(--lb-info)]' },
+  ANSWER: { label: t('Trả lời', 'Answer'), icon: MessageCircle, tone: 'bg-[var(--lb-success-soft)] text-[var(--lb-success)]' },
+  EXAMPLE: { label: t('Ví dụ', 'Example'), icon: FlaskConical, tone: 'bg-[var(--lb-accent-soft)] text-[var(--lb-accent)]' },
+  TOPIC_CHANGE: { label: t('Chuyển chủ đề', 'Topic shift'), icon: ArrowRightLeft, tone: 'bg-[var(--lb-info-soft)] text-[var(--lb-info)]' },
+  IMPORTANT: { label: t('Quan trọng', 'Important'), icon: Star, tone: 'bg-[var(--lb-warning-soft)] text-[var(--lb-warning)]' },
+  ACTION: { label: t('Việc cần làm', 'Action'), icon: Check, tone: 'bg-[var(--lb-success-soft)] text-[var(--lb-success)]' },
+  DEADLINE: { label: t('Hạn chót', 'Deadline'), icon: CalendarClock, tone: 'bg-[var(--lb-danger-soft)] text-[var(--lb-danger)]' },
+  EXAM_CUE: { label: t('Gợi ý ôn tập', 'Study cue'), icon: GraduationCap, tone: 'bg-[var(--lb-warning-soft)] text-[var(--lb-warning)]' },
+});
 
-const REVIEW_LABELS: Record<string, string> = {
-  UNREVIEWED: 'Chưa duyệt',
-  CONFIRMED: 'Đã xác nhận',
-  CORRECTED: 'Đã hiệu chỉnh',
-  REJECTED: 'Đã từ chối',
-};
+const getReviewLabels = (t: Translate): Record<string, string> => ({
+  UNREVIEWED: t('Chưa duyệt', 'Unreviewed'),
+  CONFIRMED: t('Đã xác nhận', 'Confirmed'),
+  CORRECTED: t('Đã hiệu chỉnh', 'Corrected'),
+  REJECTED: t('Đã từ chối', 'Rejected'),
+});
 
 function formatTime(seconds: number): string {
   const safeSeconds = Math.max(0, Math.floor(seconds));
@@ -70,18 +72,24 @@ function formatTime(seconds: number): string {
     : `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-function spokenTime(seconds: number): string {
+function spokenTime(seconds: number, t: Translate): string {
   const safeSeconds = Math.max(0, Math.floor(seconds));
-  return `${Math.floor(safeSeconds / 60)} phút ${safeSeconds % 60} giây`;
+  return t(
+    `${Math.floor(safeSeconds / 60)} phút ${safeSeconds % 60} giây`,
+    `${Math.floor(safeSeconds / 60)} minutes ${safeSeconds % 60} seconds`,
+  );
 }
 
-function confidenceLabel(confidence: number): string {
-  if (confidence >= 0.85) return 'Cao';
-  if (confidence >= 0.7) return 'Trung bình';
-  return 'Thấp';
+function confidenceLabel(confidence: number, t: Translate): string {
+  if (confidence >= 0.85) return t('Cao', 'High');
+  if (confidence >= 0.7) return t('Trung bình', 'Medium');
+  return t('Thấp', 'Low');
 }
 
 export function SemanticTimeline({ videoId, currentTime, onSeek }: SemanticTimelineProps) {
+  const { locale, t } = useI18n();
+  const eventMeta = useMemo(() => getEventMeta(t), [t]);
+  const reviewLabels = useMemo(() => getReviewLabels(t), [t]);
   const [events, setEvents] = useState<LectureEvent[]>([]);
   const [relations, setRelations] = useState<LectureEventRelation[]>([]);
   const [canReview, setCanReview] = useState(false);
@@ -113,15 +121,19 @@ export function SemanticTimeline({ videoId, currentTime, onSeek }: SemanticTimel
       setCanReview(access.can_review);
       setSelectedEventId((current) => current && sortedEvents.some((event) => event.id === current) ? current : sortedEvents[0]?.id || null);
     } catch {
-      setError('Không thể tải dòng thời gian ngữ nghĩa. Vui lòng thử lại sau.');
+      setError(t('Không thể tải dòng thời gian ngữ nghĩa. Vui lòng thử lại sau.', 'Could not load the semantic timeline. Please try again later.'));
     } finally {
       if (showLoading) setLoading(false);
     }
-  }, [videoId]);
+  }, [t, videoId]);
 
   useEffect(() => { void loadTimeline(); }, [loadTimeline]);
 
   const selectedEvent = useMemo(() => events.find((event) => event.id === selectedEventId) || null, [events, selectedEventId]);
+  const localizedEventText = useCallback(
+    (value: string) => localizeLectureContent(value, locale),
+    [locale],
+  );
 
   useEffect(() => {
     if (!selectedEvent) return;
@@ -165,9 +177,9 @@ export function SemanticTimeline({ videoId, currentTime, onSeek }: SemanticTimel
     try {
       const updated = await api.videos.reviewLectureEvent(videoId, selectedEvent.id, { review_status: reviewStatus });
       setEvents((current) => current.map((event) => event.id === updated.id ? updated : event));
-      setStatusMessage(reviewStatus === 'CONFIRMED' ? 'Đã xác nhận sự kiện.' : 'Đã từ chối sự kiện.');
+      setStatusMessage(reviewStatus === 'CONFIRMED' ? t('Đã xác nhận sự kiện.', 'Event confirmed.') : t('Đã từ chối sự kiện.', 'Event rejected.'));
     } catch {
-      setStatusMessage('Không thể lưu đánh giá sự kiện lúc này.');
+      setStatusMessage(t('Không thể lưu đánh giá sự kiện lúc này.', 'Could not save the event review right now.'));
     } finally { setBusy(false); }
   };
 
@@ -180,9 +192,9 @@ export function SemanticTimeline({ videoId, currentTime, onSeek }: SemanticTimel
       });
       setEvents((current) => current.map((event) => event.id === updated.id ? updated : event));
       setEditing(false);
-      setStatusMessage('Đã lưu nội dung hiệu chỉnh và giữ lại dấu vết AI ban đầu.');
+      setStatusMessage(t('Đã lưu nội dung hiệu chỉnh và giữ lại dấu vết AI ban đầu.', 'Correction saved while preserving the original AI provenance.'));
     } catch {
-      setStatusMessage('Không thể lưu nội dung hiệu chỉnh lúc này.');
+      setStatusMessage(t('Không thể lưu nội dung hiệu chỉnh lúc này.', 'Could not save the correction right now.'));
     } finally { setBusy(false); }
   };
 
@@ -195,9 +207,9 @@ export function SemanticTimeline({ videoId, currentTime, onSeek }: SemanticTimel
         ...(targetEventId ? { target_event_id: targetEventId } : {}),
       });
       setRelations((current) => current.map((item) => item.id === updated.id ? updated : item));
-      setStatusMessage('Đã cập nhật đánh giá liên kết hỏi đáp.');
+      setStatusMessage(t('Đã cập nhật đánh giá liên kết hỏi đáp.', 'Q&A link review updated.'));
     } catch {
-      setStatusMessage('Không thể cập nhật liên kết hỏi đáp lúc này.');
+      setStatusMessage(t('Không thể cập nhật liên kết hỏi đáp lúc này.', 'Could not update the Q&A link right now.'));
     } finally { setBusy(false); }
   };
 
@@ -208,9 +220,9 @@ export function SemanticTimeline({ videoId, currentTime, onSeek }: SemanticTimel
       const relation = await api.videos.createLectureEventRelation(videoId, selectedEvent.id, manualAnswerId);
       setRelations((current) => [...current, relation]);
       setManualAnswerId('');
-      setStatusMessage('Đã tạo liên kết hỏi đáp thủ công.');
+      setStatusMessage(t('Đã tạo liên kết hỏi đáp thủ công.', 'Manual Q&A link created.'));
     } catch {
-      setStatusMessage('Không thể tạo liên kết hỏi đáp này.');
+      setStatusMessage(t('Không thể tạo liên kết hỏi đáp này.', 'Could not create this Q&A link.'));
     } finally { setBusy(false); }
   };
 
@@ -218,24 +230,27 @@ export function SemanticTimeline({ videoId, currentTime, onSeek }: SemanticTimel
     if (busy) return;
     setBusy(true);
     try {
-      const eventMetrics = await api.videos.reprocessLectureEvents(videoId);
+      const eventMetrics = await api.videos.reprocessLectureEvents(videoId, locale);
       const relationMetrics = await api.videos.reprocessLectureEventRelations(videoId);
       await loadTimeline(false);
-      setStatusMessage(`Đã tạo ${eventMetrics.events_created} sự kiện và ${relationMetrics.relations_created} liên kết hỏi đáp; ${eventMetrics.failed_chunks} chunk lỗi.`);
+      setStatusMessage(t(
+        `Đã tạo ${eventMetrics.events_created} sự kiện và ${relationMetrics.relations_created} liên kết hỏi đáp; ${eventMetrics.failed_chunks} chunk lỗi.`,
+        `Created ${eventMetrics.events_created} events and ${relationMetrics.relations_created} Q&A links; ${eventMetrics.failed_chunks} failed chunks.`,
+      ));
     } catch {
-      setStatusMessage('Không thể phân tích lại Lecture Intelligence lúc này.');
+      setStatusMessage(t('Không thể phân tích lại Lecture Intelligence lúc này.', 'Could not reprocess Lecture Intelligence right now.'));
     } finally { setBusy(false); }
   };
 
-  if (loading) return <StatePanel state="loading" title="Đang tải dòng thời gian" description="LectureBridge đang sắp xếp sự kiện theo mốc bài giảng." />;
-  if (error) return <StatePanel state="error" title="Không thể tải dòng thời gian" description={error} action={<Button variant="secondary" onClick={() => void loadTimeline()}>Thử tải lại</Button>} />;
+  if (loading) return <StatePanel state="loading" title={t('Đang tải dòng thời gian', 'Loading timeline')} description={t('LectureBridge đang sắp xếp sự kiện theo mốc bài giảng.', 'LectureBridge is arranging events along the lecture timeline.')} />;
+  if (error) return <StatePanel state="error" title={t('Không thể tải dòng thời gian', 'Could not load timeline')} description={error} action={<Button variant="secondary" onClick={() => void loadTimeline()}>{t('Thử tải lại', 'Try again')}</Button>} />;
   if (events.length === 0) {
     return (
       <StatePanel
         state="empty"
-        title="Chưa có sự kiện ngữ nghĩa"
-        description="Bài giảng chưa được xử lý thành timeline sự kiện."
-        action={canReview ? <Button disabled={busy} onClick={() => void handleReprocess()}>Phân tích bài giảng</Button> : undefined}
+        title={t('Chưa có sự kiện ngữ nghĩa', 'No semantic events yet')}
+        description={t('Bài giảng chưa được xử lý thành timeline sự kiện.', 'This lecture has not been processed into an event timeline.')}
+        action={canReview ? <Button disabled={busy} onClick={() => void handleReprocess()}>{t('Phân tích bài giảng', 'Analyze lecture')}</Button> : undefined}
       />
     );
   }
@@ -246,25 +261,25 @@ export function SemanticTimeline({ videoId, currentTime, onSeek }: SemanticTimel
         <div className="flex items-start gap-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-[var(--lb-accent-soft)] text-[var(--lb-accent)]"><BookOpenText size={21} aria-hidden="true" /></span>
           <div>
-            <h2 id="semantic-timeline-heading" className="text-xl">Dòng thời gian ngữ nghĩa</h2>
-            <p className="mt-1 text-sm leading-6 text-[var(--lb-muted)]">Sự kiện, mốc nguồn và quan hệ câu hỏi → trả lời trong bài giảng.</p>
+            <h2 id="semantic-timeline-heading" className="text-xl">{t('Dòng thời gian ngữ nghĩa', 'Semantic timeline')}</h2>
+            <p className="mt-1 text-sm leading-6 text-[var(--lb-muted)]">{t('Sự kiện, mốc nguồn và quan hệ câu hỏi → trả lời trong bài giảng.', 'Events, source timestamps, and question → answer relationships in the lecture.')}</p>
           </div>
         </div>
         {canReview && (
           <Button variant="secondary" disabled={busy} onClick={() => void handleReprocess()}>
-            <RefreshCw size={16} className={cn(busy && 'animate-spin')} aria-hidden="true" /> Phân tích lại
+            <RefreshCw size={16} className={cn(busy && 'animate-spin')} aria-hidden="true" /> {t('Phân tích lại', 'Reprocess')}
           </Button>
         )}
       </div>
 
-      <div role="group" aria-label="Lọc theo loại sự kiện" className="my-5 flex flex-wrap gap-2">
+      <div role="group" aria-label={t('Lọc theo loại sự kiện', 'Filter by event type')} className="my-5 flex flex-wrap gap-2">
         <button type="button" aria-pressed={filter === 'ALL'} onClick={() => setFilter('ALL')} className={cn('min-h-11 rounded-md border px-3 text-xs font-bold', filter === 'ALL' ? 'border-[var(--lb-accent)] bg-[var(--lb-accent-soft)] text-[var(--lb-accent)]' : 'border-[var(--lb-border)] bg-[var(--lb-elevated)] text-[var(--lb-muted)]')}>
-          Tất cả ({events.filter((event) => canReview || event.review_status !== 'REJECTED').length})
+          {t('Tất cả', 'All')} ({events.filter((event) => canReview || event.review_status !== 'REJECTED').length})
         </button>
-        {(Object.keys(EVENT_META) as LectureEventType[]).map((eventType) => {
+        {(Object.keys(eventMeta) as LectureEventType[]).map((eventType) => {
           const count = events.filter((event) => event.event_type === eventType && (canReview || event.review_status !== 'REJECTED')).length;
           if (count === 0) return null;
-          const meta = EVENT_META[eventType];
+          const meta = eventMeta[eventType];
           const Icon = meta.icon;
           return (
             <button key={eventType} type="button" aria-pressed={filter === eventType} onClick={() => setFilter(eventType)} className={cn('inline-flex min-h-11 items-center gap-2 rounded-md border px-3 text-xs font-bold', filter === eventType ? `border-[var(--lb-accent)] ${meta.tone}` : 'border-[var(--lb-border)] bg-[var(--lb-elevated)] text-[var(--lb-muted)]')}>
@@ -275,10 +290,10 @@ export function SemanticTimeline({ videoId, currentTime, onSeek }: SemanticTimel
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,.95fr)]">
-        <ol aria-label="Các sự kiện của bài giảng" className="space-y-2">
-          {visibleEvents.length === 0 && <li className="rounded-[10px] border border-dashed border-[var(--lb-border-strong)] p-8 text-center text-sm text-[var(--lb-muted)]">Không có sự kiện thuộc bộ lọc này.</li>}
+        <ol aria-label={t('Các sự kiện của bài giảng', 'Lecture events')} className="space-y-2">
+          {visibleEvents.length === 0 && <li className="rounded-[10px] border border-dashed border-[var(--lb-border-strong)] p-8 text-center text-sm text-[var(--lb-muted)]">{t('Không có sự kiện thuộc bộ lọc này.', 'No events match this filter.')}</li>}
           {visibleEvents.map((event) => {
-            const meta = EVENT_META[event.event_type];
+            const meta = eventMeta[event.event_type];
             const Icon = meta.icon;
             const isActive = event.id === activeEventId;
             const isSelected = event.id === selectedEventId;
@@ -288,7 +303,7 @@ export function SemanticTimeline({ videoId, currentTime, onSeek }: SemanticTimel
                 <button
                   type="button"
                   aria-current={isActive ? 'true' : undefined}
-                  aria-label={`${meta.label} tại ${spokenTime(event.start_time)}: ${event.title}`}
+                  aria-label={t(`${meta.label} tại ${spokenTime(event.start_time, t)}: ${localizedEventText(event.title)}`, `${meta.label} at ${spokenTime(event.start_time, t)}: ${localizedEventText(event.title)}`)}
                   onClick={() => { setSelectedEventId(event.id); onSeek(event.start_time); }}
                   className="flex min-h-16 w-full items-start gap-3 rounded-md p-2 text-left hover:bg-[var(--lb-elevated)]"
                 >
@@ -297,23 +312,23 @@ export function SemanticTimeline({ videoId, currentTime, onSeek }: SemanticTimel
                     <span className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-xs font-bold text-[var(--lb-accent)]">{formatTime(event.start_time)}</span>
                       <span className="text-xs font-semibold text-[var(--lb-muted)]">{meta.label}</span>
-                      {event.inference_type === 'INFERRED' && <span className="rounded-full border border-[var(--lb-border)] px-2 py-0.5 text-[10px] font-semibold text-[var(--lb-muted)]">AI suy luận</span>}
-                      {isActive && <span className="rounded-full bg-[var(--lb-accent-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--lb-accent)]">Đang phát</span>}
+                      {event.inference_type === 'INFERRED' && <span className="rounded-full border border-[var(--lb-border)] px-2 py-0.5 text-[10px] font-semibold text-[var(--lb-muted)]">{t('AI suy luận', 'AI inferred')}</span>}
+                      {isActive && <span className="rounded-full bg-[var(--lb-accent-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--lb-accent)]">{t('Đang phát', 'Playing')}</span>}
                     </span>
-                    <span className="mt-1 block text-sm font-semibold leading-5 text-[var(--lb-ink)]">{event.title}</span>
+                    <span className="mt-1 block text-sm font-semibold leading-5 text-[var(--lb-ink)]">{localizedEventText(event.title)}</span>
                   </span>
                 </button>
 
                 {event.event_type === 'QUESTION' && (
                   <div className="ml-[3.75rem] border-l border-[var(--lb-border)] pl-3">
                     {outgoing.length === 0 ? (
-                      <p className="py-2 text-xs text-[var(--lb-muted)]">Chưa có câu trả lời liên kết đủ tin cậy.</p>
+                      <p className="py-2 text-xs text-[var(--lb-muted)]">{t('Chưa có câu trả lời liên kết đủ tin cậy.', 'No linked answer is reliable enough yet.')}</p>
                     ) : outgoing.map((relation) => {
                       const answer = eventsById.get(relation.target_event_id);
                       if (!answer) return null;
                       return (
-                        <button key={relation.id} type="button" onClick={() => { setSelectedEventId(answer.id); onSeek(answer.start_time); }} aria-label={`Đi tới câu trả lời tại ${spokenTime(answer.start_time)}: ${answer.title}`} className="flex min-h-11 w-full items-center gap-2 rounded-md px-2 text-left text-xs font-semibold text-[var(--lb-accent)] hover:bg-[var(--lb-accent-soft)]">
-                          <ArrowRight size={15} aria-hidden="true" /> Trả lời tại {formatTime(answer.start_time)} · {answer.title}
+                        <button key={relation.id} type="button" onClick={() => { setSelectedEventId(answer.id); onSeek(answer.start_time); }} aria-label={t(`Đi tới câu trả lời tại ${spokenTime(answer.start_time, t)}: ${localizedEventText(answer.title)}`, `Go to answer at ${spokenTime(answer.start_time, t)}: ${localizedEventText(answer.title)}`)} className="flex min-h-11 w-full items-center gap-2 rounded-md px-2 text-left text-xs font-semibold text-[var(--lb-accent)] hover:bg-[var(--lb-accent-soft)]">
+                          <ArrowRight size={15} aria-hidden="true" /> {t('Trả lời tại', 'Answer at')} {formatTime(answer.start_time)} · {localizedEventText(answer.title)}
                         </button>
                       );
                     })}
@@ -329,26 +344,26 @@ export function SemanticTimeline({ videoId, currentTime, onSeek }: SemanticTimel
             <>
               <div className="border-b border-[var(--lb-border)] p-5">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className={cn('rounded-full px-2.5 py-1 text-xs font-bold', EVENT_META[selectedEvent.event_type].tone)}>{EVENT_META[selectedEvent.event_type].label}</span>
+                  <span className={cn('rounded-full px-2.5 py-1 text-xs font-bold', eventMeta[selectedEvent.event_type].tone)}>{eventMeta[selectedEvent.event_type].label}</span>
                   <span className="font-mono text-xs font-bold text-[var(--lb-accent)]">{formatTime(selectedEvent.start_time)}–{formatTime(selectedEvent.end_time)}</span>
-                  <span className="rounded-full border border-[var(--lb-border)] px-2.5 py-1 text-xs text-[var(--lb-muted)]">{REVIEW_LABELS[selectedEvent.review_status]}</span>
+                  <span className="rounded-full border border-[var(--lb-border)] px-2.5 py-1 text-xs text-[var(--lb-muted)]">{reviewLabels[selectedEvent.review_status]}</span>
                 </div>
-                <h3 className="mt-4 text-xl leading-snug">{selectedEvent.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-[var(--lb-muted)]">{selectedEvent.description}</p>
+                <h3 className="mt-4 text-xl leading-snug">{localizedEventText(selectedEvent.title)}</h3>
+                <p className="mt-3 text-sm leading-7 text-[var(--lb-muted)]">{localizedEventText(selectedEvent.description)}</p>
                 <button type="button" onClick={() => onSeek(selectedEvent.start_time)} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-bold text-[var(--lb-accent)] hover:underline">
-                  <Link2 size={16} aria-hidden="true" /> Mở nguồn tại {formatTime(selectedEvent.start_time)}
+                  <Link2 size={16} aria-hidden="true" /> {t('Mở nguồn tại', 'Open source at')} {formatTime(selectedEvent.start_time)}
                 </button>
               </div>
 
               <div className="space-y-5 p-5">
                 <dl className="grid grid-cols-2 gap-3 text-xs">
-                  <div><dt className="text-[var(--lb-muted)]">Độ tin cậy</dt><dd className="mt-1 font-semibold text-[var(--lb-ink)]">{confidenceLabel(selectedEvent.confidence)} · {Math.round(selectedEvent.confidence * 100)}%</dd></div>
-                  <div><dt className="text-[var(--lb-muted)]">Nguồn tạo</dt><dd className="mt-1 font-semibold text-[var(--lb-ink)]">{selectedEvent.created_by === 'AI' ? 'AI đề xuất' : 'Con người'}</dd></div>
+                  <div><dt className="text-[var(--lb-muted)]">{t('Độ tin cậy', 'Confidence')}</dt><dd className="mt-1 font-semibold text-[var(--lb-ink)]">{confidenceLabel(selectedEvent.confidence, t)} · {Math.round(selectedEvent.confidence * 100)}%</dd></div>
+                  <div><dt className="text-[var(--lb-muted)]">{t('Nguồn tạo', 'Created by')}</dt><dd className="mt-1 font-semibold text-[var(--lb-ink)]">{selectedEvent.created_by === 'AI' ? t('AI đề xuất', 'AI proposed') : t('Con người', 'Human')}</dd></div>
                 </dl>
 
                 {[...linkedFromSelected, ...linkedToSelected].length > 0 && (
                   <section aria-labelledby="relations-heading">
-                    <h4 id="relations-heading" className="text-sm font-bold">Quan hệ câu hỏi → trả lời</h4>
+                    <h4 id="relations-heading" className="text-sm font-bold">{t('Quan hệ câu hỏi → trả lời', 'Question → answer relationships')}</h4>
                     <div className="mt-2 space-y-2">
                       {[...linkedFromSelected, ...linkedToSelected].map((relation) => {
                         const counterpartId = relation.source_event_id === selectedEvent.id ? relation.target_event_id : relation.source_event_id;
@@ -358,22 +373,22 @@ export function SemanticTimeline({ videoId, currentTime, onSeek }: SemanticTimel
                         return (
                           <div key={relation.id} className="rounded-md border border-[var(--lb-border)] bg-[var(--lb-elevated)] p-3 text-xs">
                             <button type="button" onClick={() => { setSelectedEventId(counterpart.id); onSeek(counterpart.start_time); }} className="min-h-11 text-left font-semibold leading-5 text-[var(--lb-accent)] hover:underline">
-                              {EVENT_META[counterpart.event_type].label} · {formatTime(counterpart.start_time)} · {counterpart.title}
+                              {eventMeta[counterpart.event_type].label} · {formatTime(counterpart.start_time)} · {localizedEventText(counterpart.title)}
                             </button>
-                            <p className="text-[var(--lb-muted)]">{REVIEW_LABELS[relation.review_status]} · {relation.created_by}</p>
+                            <p className="text-[var(--lb-muted)]">{reviewLabels[relation.review_status]} · {relation.created_by}</p>
                             {canReview && (
                               <div className="mt-3 space-y-2 border-t border-[var(--lb-border)] pt-3">
                                 <div className="flex flex-wrap gap-2">
-                                  <Button size="sm" variant="secondary" disabled={busy} onClick={() => void handleRelationReview(relation, 'CONFIRMED')}>Xác nhận</Button>
-                                  <Button size="sm" variant="ghost" disabled={busy} onClick={() => void handleRelationReview(relation, 'REJECTED')}>Từ chối</Button>
+                                  <Button size="sm" variant="secondary" disabled={busy} onClick={() => void handleRelationReview(relation, 'CONFIRMED')}>{t('Xác nhận', 'Confirm')}</Button>
+                                  <Button size="sm" variant="ghost" disabled={busy} onClick={() => void handleRelationReview(relation, 'REJECTED')}>{t('Từ chối', 'Reject')}</Button>
                                 </div>
                                 {relation.source_event_id === selectedEvent.id && answerOptions.length > 0 && (
                                   <div className="space-y-2">
-                                    <label htmlFor={`relation-target-${relation.id}`} className="font-semibold text-[var(--lb-muted)]">Sửa câu trả lời đích</label>
+                                    <label htmlFor={`relation-target-${relation.id}`} className="font-semibold text-[var(--lb-muted)]">{t('Sửa câu trả lời đích', 'Change target answer')}</label>
                                     <select id={`relation-target-${relation.id}`} value={selectedTarget} onChange={(event) => setRelationTargets((current) => ({ ...current, [relation.id]: event.target.value }))} className="lb-field text-xs">
-                                      {answerOptions.map((answer) => <option key={answer.id} value={answer.id}>{formatTime(answer.start_time)} · {answer.title}</option>)}
+                                      {answerOptions.map((answer) => <option key={answer.id} value={answer.id}>{formatTime(answer.start_time)} · {localizedEventText(answer.title)}</option>)}
                                     </select>
-                                    <Button size="sm" disabled={busy || selectedTarget === relation.target_event_id} onClick={() => void handleRelationReview(relation, 'CORRECTED', selectedTarget)}>Lưu liên kết</Button>
+                                    <Button size="sm" disabled={busy || selectedTarget === relation.target_event_id} onClick={() => void handleRelationReview(relation, 'CORRECTED', selectedTarget)}>{t('Lưu liên kết', 'Save link')}</Button>
                                   </div>
                                 )}
                               </div>
@@ -387,38 +402,38 @@ export function SemanticTimeline({ videoId, currentTime, onSeek }: SemanticTimel
 
                 {canReview && selectedEvent.event_type === 'QUESTION' && manualAnswerOptions.length > 0 && (
                   <section className="space-y-2 border-t border-[var(--lb-border)] pt-4">
-                    <label htmlFor="manual-answer-link" className="text-sm font-bold">Tạo liên kết thủ công</label>
+                    <label htmlFor="manual-answer-link" className="text-sm font-bold">{t('Tạo liên kết thủ công', 'Create a manual link')}</label>
                     <select id="manual-answer-link" value={manualAnswerId} onChange={(event) => setManualAnswerId(event.target.value)} className="lb-field text-sm">
-                      <option value="">Chọn câu trả lời…</option>
-                      {manualAnswerOptions.map((answer) => <option key={answer.id} value={answer.id}>{formatTime(answer.start_time)} · {answer.title}</option>)}
+                      <option value="">{t('Chọn câu trả lời…', 'Choose an answer…')}</option>
+                      {manualAnswerOptions.map((answer) => <option key={answer.id} value={answer.id}>{formatTime(answer.start_time)} · {localizedEventText(answer.title)}</option>)}
                     </select>
-                    <Button size="sm" disabled={busy || !manualAnswerId} onClick={() => void handleManualLink()}>Tạo liên kết Q→A</Button>
+                    <Button size="sm" disabled={busy || !manualAnswerId} onClick={() => void handleManualLink()}>{t('Tạo liên kết Q→A', 'Create Q→A link')}</Button>
                   </section>
                 )}
 
                 {canReview && (
-                  <section className="border-t border-[var(--lb-border)] pt-4" aria-label="Kiểm duyệt sự kiện">
+                  <section className="border-t border-[var(--lb-border)] pt-4" aria-label={t('Kiểm duyệt sự kiện', 'Event review')}>
                     {!editing ? (
                       <div className="flex flex-wrap gap-2">
-                        <Button size="sm" disabled={busy} onClick={() => void handleEventReview('CONFIRMED')}><Check size={16} /> Xác nhận</Button>
-                        <Button size="sm" variant="secondary" disabled={busy} onClick={() => setEditing(true)}><Pencil size={16} /> Hiệu chỉnh</Button>
-                        <Button size="sm" variant="ghost" disabled={busy} onClick={() => void handleEventReview('REJECTED')}><X size={16} /> Từ chối</Button>
+                        <Button size="sm" disabled={busy} onClick={() => void handleEventReview('CONFIRMED')}><Check size={16} /> {t('Xác nhận', 'Confirm')}</Button>
+                        <Button size="sm" variant="secondary" disabled={busy} onClick={() => setEditing(true)}><Pencil size={16} /> {t('Hiệu chỉnh', 'Correct')}</Button>
+                        <Button size="sm" variant="ghost" disabled={busy} onClick={() => void handleEventReview('REJECTED')}><X size={16} /> {t('Từ chối', 'Reject')}</Button>
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        <label className="block text-sm font-semibold">Loại sự kiện<select value={editType} onChange={(event) => setEditType(event.target.value as LectureEventType)} className="lb-field mt-1">
-                          {(Object.keys(EVENT_META) as LectureEventType[]).map((eventType) => <option key={eventType} value={eventType}>{EVENT_META[eventType].label}</option>)}
+                        <label className="block text-sm font-semibold">{t('Loại sự kiện', 'Event type')}<select value={editType} onChange={(event) => setEditType(event.target.value as LectureEventType)} className="lb-field mt-1">
+                          {(Object.keys(eventMeta) as LectureEventType[]).map((eventType) => <option key={eventType} value={eventType}>{eventMeta[eventType].label}</option>)}
                         </select></label>
-                        <label className="block text-sm font-semibold">Tiêu đề<input value={editTitle} onChange={(event) => setEditTitle(event.target.value)} className="lb-field mt-1" /></label>
-                        <label className="block text-sm font-semibold">Mô tả<textarea value={editDescription} onChange={(event) => setEditDescription(event.target.value)} rows={4} className="lb-field mt-1 resize-y" /></label>
-                        <div className="flex gap-2"><Button size="sm" disabled={busy || !editTitle.trim()} onClick={() => void handleCorrection()}>Lưu hiệu chỉnh</Button><Button size="sm" variant="ghost" onClick={() => setEditing(false)}>Hủy</Button></div>
+                        <label className="block text-sm font-semibold">{t('Tiêu đề', 'Title')}<input value={editTitle} onChange={(event) => setEditTitle(event.target.value)} className="lb-field mt-1" /></label>
+                        <label className="block text-sm font-semibold">{t('Mô tả', 'Description')}<textarea value={editDescription} onChange={(event) => setEditDescription(event.target.value)} rows={4} className="lb-field mt-1 resize-y" /></label>
+                        <div className="flex gap-2"><Button size="sm" disabled={busy || !editTitle.trim()} onClick={() => void handleCorrection()}>{t('Lưu hiệu chỉnh', 'Save correction')}</Button><Button size="sm" variant="ghost" onClick={() => setEditing(false)}>{t('Hủy', 'Cancel')}</Button></div>
                       </div>
                     )}
                   </section>
                 )}
               </div>
             </>
-          ) : <p className="p-5 text-sm text-[var(--lb-muted)]">Chọn một sự kiện để xem chi tiết.</p>}
+          ) : <p className="p-5 text-sm text-[var(--lb-muted)]">{t('Chọn một sự kiện để xem chi tiết.', 'Select an event to view details.')}</p>}
         </Surface>
       </div>
       <p className="sr-only" role="status" aria-live="polite">{statusMessage}</p>

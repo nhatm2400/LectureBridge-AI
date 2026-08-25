@@ -19,6 +19,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { CourseThumbnail } from '@/components/ui/CourseThumbnail';
 import { api, CourseReview, StudentCourseDetail, StudentCourseDetailLesson } from '@/lib/api';
+import { localeCode, useI18n } from '@/lib/i18n';
 import { getFullImageUrl } from '@/lib/utils';
 
 function formatDuration(minutes: number): string {
@@ -39,6 +40,7 @@ function naturalLessonCompare(a: StudentCourseDetailLesson, b: StudentCourseDeta
 export default function CourseDetailPage() {
   const params = useParams();
   const courseId = params.id as string;
+  const { locale, t } = useI18n();
 
   const [detail, setDetail] = useState<StudentCourseDetail | null>(null);
   const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
@@ -87,25 +89,25 @@ export default function CourseDetailPage() {
   }, [detail]);
 
   const cta = useMemo(() => {
-    if (!detail) return { label: 'Enroll Now', href: '', enrolled: false };
+    if (!detail) return { label: t('Đăng ký ngay', 'Enroll now'), href: '', enrolled: false };
     if (!detail.user_context.is_enrolled) {
-      return { label: 'Enroll Now', href: '', enrolled: false };
+      return { label: t('Đăng ký ngay', 'Enroll now'), href: '', enrolled: false };
     }
     if (detail.user_context.is_course_completed) {
       return {
-        label: 'Review Course',
+        label: t('Xem lại khóa học', 'Review course'),
         href: detail.user_context.first_lesson_id ? `/student/videos/${detail.user_context.first_lesson_id}` : '',
         enrolled: true,
       };
     }
     if (detail.user_context.progress_percent > 0) {
-      return { label: 'Continue Learning', href: nextLessonUrl, enrolled: true };
+      return { label: t('Học tiếp', 'Continue learning'), href: nextLessonUrl, enrolled: true };
     }
-    return { label: 'Start Learning', href: nextLessonUrl, enrolled: true };
-  }, [detail, nextLessonUrl]);
+    return { label: t('Bắt đầu học', 'Start learning'), href: nextLessonUrl, enrolled: true };
+  }, [detail, nextLessonUrl, t]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center font-extrabold text-slate-400">Loading course...</div>;
-  if (!detail) return <div className="min-h-screen flex items-center justify-center font-extrabold text-rose-500">Course not found.</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center font-extrabold text-slate-400">{t('Đang tải khóa học...', 'Loading course...')}</div>;
+  if (!detail) return <div className="min-h-screen flex items-center justify-center font-extrabold text-rose-500">{t('Không tìm thấy khóa học.', 'Course not found.')}</div>;
 
   const { course, stats, user_context, modules } = detail;
   const courseImage = getFullImageUrl(course.thumbnail_url);
@@ -137,10 +139,10 @@ export default function CourseDetailPage() {
             <div className="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle size={40} fill="currentColor" className="text-white" />
             </div>
-            <h3 className="text-2xl font-extrabold text-slate-900 mb-2">Enrolled Successfully!</h3>
-            <p className="text-sm font-bold text-slate-500 mb-8">Bạn đã đăng ký khóa học <strong>{course.title}</strong>.</p>
+            <h3 className="text-2xl font-extrabold text-slate-900 mb-2">{t('Đăng ký thành công!', 'Enrolled successfully!')}</h3>
+            <p className="text-sm font-bold text-slate-500 mb-8">{t('Bạn đã đăng ký khóa học', 'You have enrolled in')} <strong>{course.title}</strong>.</p>
             <button onClick={() => setShowEnrollModal(false)} className="w-full bg-slate-900 text-white py-4 rounded-xl font-extrabold text-sm uppercase tracking-widest">
-              Continue
+              {t('Tiếp tục', 'Continue')}
             </button>
           </div>
         </div>
@@ -150,19 +152,19 @@ export default function CourseDetailPage() {
         <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12">
           <div className="lg:col-span-8 space-y-6">
             <div className="flex items-center gap-2 text-sm font-bold text-primary">
-              <Link href="/student/library" className="hover:underline">Dashboard</Link>
+              <Link href="/student/library" className="hover:underline">{t('Tổng quan', 'Dashboard')}</Link>
               <ArrowRight size={14} />
-              <span className="text-white/60">Khóa học</span>
+              <span className="text-white/60">{t('Khóa học', 'Course')}</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight">{course.title}</h1>
-            <p className="text-lg text-white/80 font-medium max-w-2xl">{course.description || `Nội dung khóa học ${course.title}`}</p>
+            <p className="text-lg text-white/80 font-medium max-w-2xl">{course.description || t(`Nội dung khóa học ${course.title}`, `${course.title} course content`)}</p>
             <div className="flex flex-wrap items-center gap-6 text-sm font-bold text-white/80">
-              <div>{stats.students_enrolled} students enrolled</div>
-              <div>{stats.total_lessons} lessons</div>
-              <div>{formatDuration(stats.total_duration_minutes)} total length</div>
+              <div>{stats.students_enrolled} {t('học viên đã đăng ký', 'students enrolled')}</div>
+              <div>{stats.total_lessons} {t('bài học', 'lessons')}</div>
+              <div>{formatDuration(stats.total_duration_minutes)} {t('tổng thời lượng', 'total length')}</div>
             </div>
             <div className="flex items-center gap-4 text-sm font-bold">
-              <div className="flex items-center gap-2"><UserIcon size={16} /><span>Instructor ID: <span className="text-primary underline">{course.instructor_id || 'N/A'}</span></span></div>
+              <div className="flex items-center gap-2"><UserIcon size={16} /><span>{t('Mã giảng viên', 'Instructor ID')}: <span className="text-primary underline">{course.instructor_id || 'N/A'}</span></span></div>
               <div className="flex items-center gap-2"><Globe size={16} /><span>{(course.language || 'vi').toUpperCase()}</span></div>
             </div>
           </div>
@@ -173,20 +175,20 @@ export default function CourseDetailPage() {
         <div className="grid lg:grid-cols-12 gap-12">
           <div className="lg:col-span-8 space-y-10">
             <div className="border-2 border-slate-100 rounded-2xl p-8 space-y-4">
-              <h2 className="text-xl font-extrabold text-slate-900">Tóm tắt khóa học</h2>
+              <h2 className="text-xl font-extrabold text-slate-900">{t('Tóm tắt khóa học', 'Course overview')}</h2>
               <div className="grid md:grid-cols-2 gap-4 text-sm font-bold text-slate-600">
-                <div className="flex gap-3"><CheckCircle size={18} className="text-slate-400 shrink-0" />{stats.total_modules} chương</div>
-                <div className="flex gap-3"><CheckCircle size={18} className="text-slate-400 shrink-0" />{stats.total_lessons} bài học</div>
-                <div className="flex gap-3"><CheckCircle size={18} className="text-slate-400 shrink-0" />{formatDuration(stats.total_duration_minutes)} thời lượng</div>
-                <div className="flex gap-3"><CheckCircle size={18} className="text-slate-400 shrink-0" />Tiến trình: {user_context.progress_percent}%</div>
+                <div className="flex gap-3"><CheckCircle size={18} className="text-slate-400 shrink-0" />{stats.total_modules} {t('chương', 'chapters')}</div>
+                <div className="flex gap-3"><CheckCircle size={18} className="text-slate-400 shrink-0" />{stats.total_lessons} {t('bài học', 'lessons')}</div>
+                <div className="flex gap-3"><CheckCircle size={18} className="text-slate-400 shrink-0" />{formatDuration(stats.total_duration_minutes)} {t('thời lượng', 'duration')}</div>
+                <div className="flex gap-3"><CheckCircle size={18} className="text-slate-400 shrink-0" />{t('Tiến trình', 'Progress')}: {user_context.progress_percent}%</div>
               </div>
             </div>
 
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-extrabold text-slate-900">Course content</h2>
+                  <h2 className="text-xl font-extrabold text-slate-900">{t('Nội dung khóa học', 'Course content')}</h2>
                 <div className="text-sm font-bold text-slate-500">
-                  {stats.total_lessons} lectures • {formatDuration(stats.total_duration_minutes)} • {user_context.completed_lessons}/{stats.total_lessons} completed
+                  {stats.total_lessons} {t('bài giảng', 'lectures')} • {formatDuration(stats.total_duration_minutes)} • {user_context.completed_lessons}/{stats.total_lessons} {t('đã hoàn thành', 'completed')}
                 </div>
               </div>
               <div className="border border-slate-200 rounded-xl overflow-hidden">
@@ -202,7 +204,7 @@ export default function CourseDetailPage() {
                         <ChevronDown size={18} className={activeAccordion === module.id ? 'rotate-180 transition-transform' : 'transition-transform'} />
                         {module.title}
                       </div>
-                      <div className="text-xs font-bold text-slate-500">{module.lessons.length} bài học</div>
+                      <div className="text-xs font-bold text-slate-500">{module.lessons.length} {t('bài học', 'lessons')}</div>
                     </button>
                     {activeAccordion === module.id && (
                       <div id={`module-panel-${module.id}`} className="divide-y divide-slate-100 bg-white">
@@ -210,7 +212,7 @@ export default function CourseDetailPage() {
                           <div key={lesson.id} className="p-4 flex items-center justify-between group">
                             <div className="flex items-center gap-3">
                               <MonitorPlay size={16} className="text-slate-400" />
-                              <Link href={`/student/videos/${lesson.id}`} aria-label={`Mo bai hoc ${lesson.title}`} className="text-sm font-bold text-slate-600 group-hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded">
+                              <Link href={`/student/videos/${lesson.id}`} aria-label={t(`Mở bài học ${lesson.title}`, `Open lesson ${lesson.title}`)} className="text-sm font-bold text-slate-600 group-hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded">
                                 {idx + 1}. {lesson.title}
                               </Link>
                             </div>
@@ -218,7 +220,7 @@ export default function CourseDetailPage() {
                               <span className="px-2 py-0.5 bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-400 border border-slate-100 rounded">{lesson.content_type}</span>
                               <span className="text-xs font-bold text-slate-400">{lesson.duration_minutes || 0}m</span>
                               <span className="text-xs font-bold text-slate-400">
-                                {lesson.is_completed ? 'completed' : `${lesson.progress_percent || 0}%`}
+                                {lesson.is_completed ? t('đã hoàn thành', 'completed') : `${lesson.progress_percent || 0}%`}
                               </span>
                             </div>
                           </div>
@@ -231,7 +233,7 @@ export default function CourseDetailPage() {
             </div>
 
             <div className="space-y-6 border-t border-slate-100 pt-10">
-              <h2 className="text-xl font-extrabold text-slate-900">Student feedback</h2>
+              <h2 className="text-xl font-extrabold text-slate-900">{t('Đánh giá của học viên', 'Student feedback')}</h2>
               <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6">
                 <div className="flex items-center justify-between gap-4 flex-wrap">
                   <div className="flex items-center gap-4">
@@ -242,10 +244,10 @@ export default function CourseDetailPage() {
                           <Star key={i} size={16} fill={i <= Math.round(stats.rating_avg) ? 'currentColor' : 'none'} className={i <= Math.round(stats.rating_avg) ? '' : 'text-slate-300'} />
                         ))}
                       </div>
-                      <div className="text-xs font-bold text-slate-500">{stats.rating_count} đánh giá</div>
+                      <div className="text-xs font-bold text-slate-500">{stats.rating_count} {t('đánh giá', 'reviews')}</div>
                     </div>
                   </div>
-                  <div className="text-sm font-bold text-slate-500">Đã đăng ký mới được đánh giá</div>
+                  <div className="text-sm font-bold text-slate-500">{t('Đã đăng ký mới được đánh giá', 'Enroll to leave a review')}</div>
                 </div>
                 <div className="mt-4 space-y-2">
                   {[5, 4, 3, 2, 1].map((star) => {
@@ -266,10 +268,10 @@ export default function CourseDetailPage() {
 
               {user_context.is_enrolled && (
                 <div className="border border-slate-100 rounded-2xl p-6 space-y-4">
-                  <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">Gửi đánh giá của bạn</h3>
+                  <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">{t('Gửi đánh giá của bạn', 'Leave your review')}</h3>
                   <div className="flex items-center gap-2">
                     {[1, 2, 3, 4, 5].map((s) => (
-                      <button key={s} type="button" aria-label={`Chon ${s} sao`} onClick={() => setReviewRating(s)} className="text-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 rounded">
+                      <button key={s} type="button" aria-label={t(`Chọn ${s} sao`, `Choose ${s} stars`)} onClick={() => setReviewRating(s)} className="text-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 rounded">
                         <Star size={20} fill={s <= reviewRating ? 'currentColor' : 'none'} className={s <= reviewRating ? '' : 'text-slate-300'} />
                       </button>
                     ))}
@@ -278,7 +280,7 @@ export default function CourseDetailPage() {
                     value={reviewComment}
                     onChange={(e) => setReviewComment(e.target.value)}
                     maxLength={2000}
-                    placeholder="Nhận xét của bạn về khóa học..."
+                    placeholder={t('Nhận xét của bạn về khóa học...', 'Share your thoughts about the course...')}
                     className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 min-h-24"
                   />
                   <button
@@ -287,27 +289,27 @@ export default function CourseDetailPage() {
                     className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-900 text-white text-xs font-extrabold uppercase tracking-wider disabled:opacity-60"
                   >
                     <MessageSquare size={14} />
-                    {savingReview ? 'Đang gửi...' : 'Gửi đánh giá'}
+                    {savingReview ? t('Đang gửi...', 'Submitting...') : t('Gửi đánh giá', 'Submit review')}
                   </button>
                 </div>
               )}
 
               <div className="space-y-4">
                 {reviews.length === 0 ? (
-                  <div className="text-sm font-bold text-slate-500">Chưa có đánh giá nào.</div>
+                  <div className="text-sm font-bold text-slate-500">{t('Chưa có đánh giá nào.', 'No reviews yet.')}</div>
                 ) : (
                   reviews.map((review) => (
                     <div key={review.id} className="border-b border-slate-100 pb-4 last:border-0">
                       <div className="flex items-center justify-between">
                         <div className="text-sm font-extrabold text-slate-900">{review.user_name}</div>
-                        <div className="text-xs font-bold text-slate-400">{new Date(review.updated_at).toLocaleDateString('vi-VN')}</div>
+                        <div className="text-xs font-bold text-slate-400">{new Date(review.updated_at).toLocaleDateString(localeCode(locale))}</div>
                       </div>
                       <div className="flex items-center gap-1 text-amber-400 my-1">
                         {[1, 2, 3, 4, 5].map((i) => (
                           <Star key={i} size={13} fill={i <= review.rating ? 'currentColor' : 'none'} className={i <= review.rating ? '' : 'text-slate-300'} />
                         ))}
                       </div>
-                      <p className="text-sm font-medium text-slate-600 whitespace-pre-wrap">{review.comment || 'Không có nhận xét.'}</p>
+                      <p className="text-sm font-medium text-slate-600 whitespace-pre-wrap">{review.comment || t('Không có nhận xét.', 'No comment provided.')}</p>
                     </div>
                   ))
                 )}
@@ -332,32 +334,32 @@ export default function CourseDetailPage() {
                     </Link>
                   ) : (
                     <div className="block w-full py-4 rounded-xl bg-slate-200 text-slate-500 font-extrabold text-sm text-center uppercase tracking-widest">
-                      No lesson yet
+                      {t('Chưa có bài học', 'No lessons yet')}
                     </div>
                   )
                 ) : (
-                  <button onClick={handleEnroll} aria-label="Dang ky khoa hoc" className="block w-full py-4 rounded-xl bg-slate-900 text-white font-extrabold text-sm text-center uppercase tracking-widest focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-300">
-                    Enroll Now
+                  <button onClick={handleEnroll} aria-label={t('Đăng ký khóa học', 'Enroll in course')} className="block w-full py-4 rounded-xl bg-slate-900 text-white font-extrabold text-sm text-center uppercase tracking-widest focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-300">
+                    {t('Đăng ký ngay', 'Enroll now')}
                   </button>
                 )}
 
                 <div className="space-y-4">
-                  <h4 className="text-sm font-extrabold text-slate-900">This course includes:</h4>
+                  <h4 className="text-sm font-extrabold text-slate-900">{t('Khóa học này bao gồm:', 'This course includes:')}</h4>
                   <div className="space-y-3">
-                    <div className="flex items-center gap-3 text-xs font-bold text-slate-600"><MonitorPlay size={16} className="text-slate-400" />{stats.total_lessons} on-demand lessons</div>
-                    <div className="flex items-center gap-3 text-xs font-bold text-slate-600"><Clock size={16} className="text-slate-400" />Full lifetime access</div>
-                    <div className="flex items-center gap-3 text-xs font-bold text-slate-600"><Globe size={16} className="text-slate-400" />Language: {(course.language || 'vi').toUpperCase()}</div>
-                    <div className="flex items-center gap-3 text-xs font-bold text-slate-600"><CheckCircle size={16} className="text-slate-400" />Progress tracking enabled</div>
+                    <div className="flex items-center gap-3 text-xs font-bold text-slate-600"><MonitorPlay size={16} className="text-slate-400" />{stats.total_lessons} {t('bài học theo yêu cầu', 'on-demand lessons')}</div>
+                    <div className="flex items-center gap-3 text-xs font-bold text-slate-600"><Clock size={16} className="text-slate-400" />{t('Truy cập không giới hạn', 'Full lifetime access')}</div>
+                    <div className="flex items-center gap-3 text-xs font-bold text-slate-600"><Globe size={16} className="text-slate-400" />{t('Ngôn ngữ', 'Language')}: {(course.language || 'vi').toUpperCase()}</div>
+                    <div className="flex items-center gap-3 text-xs font-bold text-slate-600"><CheckCircle size={16} className="text-slate-400" />{t('Đã bật theo dõi tiến trình', 'Progress tracking enabled')}</div>
                   </div>
                 </div>
 
                 <div className="pt-6 border-t border-slate-100 space-y-4">
-                  <h4 className="text-sm font-extrabold text-slate-900">Course Features:</h4>
+                  <h4 className="text-sm font-extrabold text-slate-900">{t('Thông tin khóa học:', 'Course details:')}</h4>
                   <div className="space-y-3">
-                    <div className="flex items-center gap-3 text-xs font-bold text-slate-500"><Users size={16} className="text-primary" />Enrolled: {stats.students_enrolled}</div>
-                    <div className="flex items-center gap-3 text-xs font-bold text-slate-500"><Clock size={16} className="text-primary" />Duration: {formatDuration(stats.total_duration_minutes)}</div>
-                    <div className="flex items-center gap-3 text-xs font-bold text-slate-500"><Layers size={16} className="text-primary" />Chapters: {stats.total_modules}</div>
-                    <div className="flex items-center gap-3 text-xs font-bold text-slate-500"><Play size={16} className="text-primary" />Completed: {user_context.completed_lessons}/{stats.total_lessons}</div>
+                    <div className="flex items-center gap-3 text-xs font-bold text-slate-500"><Users size={16} className="text-primary" />{t('Đã đăng ký', 'Enrolled')}: {stats.students_enrolled}</div>
+                    <div className="flex items-center gap-3 text-xs font-bold text-slate-500"><Clock size={16} className="text-primary" />{t('Thời lượng', 'Duration')}: {formatDuration(stats.total_duration_minutes)}</div>
+                    <div className="flex items-center gap-3 text-xs font-bold text-slate-500"><Layers size={16} className="text-primary" />{t('Chương', 'Chapters')}: {stats.total_modules}</div>
+                    <div className="flex items-center gap-3 text-xs font-bold text-slate-500"><Play size={16} className="text-primary" />{t('Đã hoàn thành', 'Completed')}: {user_context.completed_lessons}/{stats.total_lessons}</div>
                   </div>
                 </div>
               </div>

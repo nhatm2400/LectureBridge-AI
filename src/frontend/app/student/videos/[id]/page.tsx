@@ -27,6 +27,8 @@ import Image from 'next/image';
 import { api, type UserProgress } from '@/lib/api';
 import { SemanticTimeline } from '@/components/lecture/SemanticTimeline';
 import { LectureGroundingPanel } from '@/components/lecture/LectureGroundingPanel';
+import { useI18n } from '@/lib/i18n';
+import { localizeLectureContent } from '@/lib/lecture-content-i18n';
 
 interface TranscriptSegment {
   start: number;
@@ -113,6 +115,7 @@ function naturalTitleCompare(aTitle?: string, bTitle?: string): number {
 }
 
 export default function VideoLessonPage() {
+  const { locale, t } = useI18n();
   const params = useParams();
   const router = useRouter();
   const videoId = params.id as string;
@@ -167,7 +170,7 @@ export default function VideoLessonPage() {
   const [savedProgress, setSavedProgress] = useState<UserProgress | null>(null);
   const [moduleLessons, setModuleLessons] = useState<ModuleLessonItem[]>([]);
   const [isLoadingModuleLessons, setIsLoadingModuleLessons] = useState(false);
-  const [lessonTitle, setLessonTitle] = useState('Bài giảng đang học');
+  const [lessonTitle, setLessonTitle] = useState('');
 
   const currentIndex = useMemo(() => moduleLessons.findIndex((l) => l.id === videoId), [moduleLessons, videoId]);
   const hasPrev = currentIndex > 0;
@@ -310,10 +313,10 @@ export default function VideoLessonPage() {
   useEffect(() => {
     const fetchModuleLessons = async () => {
       setIsLoadingModuleLessons(true);
-      setLessonTitle('Bài giảng đang học');
+      setLessonTitle('');
       try {
         const currentLesson = await api.courses.getLesson(videoId);
-        setLessonTitle(currentLesson.title || 'Bài giảng đang học');
+        setLessonTitle(currentLesson.title || '');
         const lessons = await api.courses.listLessons(currentLesson.module_id);
         const sortedByTitle = [...lessons].sort((a, b) => {
           const byOrder = (a.sort_order ?? 0) - (b.sort_order ?? 0);
@@ -604,11 +607,11 @@ export default function VideoLessonPage() {
       setFlashcards(v(flashcardsRes)?.flashcards || []);
     } catch (err) {
       console.error('Metadata fetch error:', err);
-      setMetadataError('Tài nguyên học tập chưa sẵn sàng. Vui lòng tải lại sau khi xử lý hoàn tất.');
+      setMetadataError(t('Tài nguyên học tập chưa sẵn sàng. Vui lòng tải lại sau khi xử lý hoàn tất.', 'Learning resources are not ready yet. Reload after processing completes.'));
     } finally {
       setIsLoadingMetadata(false);
     }
-  }, [videoId]);
+  }, [t, videoId]);
 
   useEffect(() => {
     if (!isLoadingTranscript && segments.length > 0) {
@@ -740,8 +743,8 @@ export default function VideoLessonPage() {
   );
 
   const currentLessonTitle = useMemo(
-    () => lessonTitle || moduleLessons.find((lesson) => lesson.id === videoId)?.title || 'Bài giảng đang học',
-    [lessonTitle, moduleLessons, videoId]
+    () => lessonTitle || moduleLessons.find((lesson) => lesson.id === videoId)?.title || t('Bài giảng đang học', 'Current lecture'),
+    [lessonTitle, moduleLessons, t, videoId]
   );
 
 
@@ -761,11 +764,11 @@ export default function VideoLessonPage() {
         {/* Header - Inclusive Title */}
         <div className="flex flex-col justify-between gap-5 border-b border-[var(--lb-border)] pb-6 md:flex-row md:items-end">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--lb-accent)]">Bài giảng đang học</p>
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--lb-accent)]">{t('Bài giảng đang học', 'Current lecture')}</p>
             <h1 className="mt-2 text-3xl leading-tight text-[var(--lb-ink)] md:text-4xl">
               {currentLessonTitle}
             </h1>
-            <p className="mt-2 text-sm text-[var(--lb-muted)]">Phát video, theo dõi transcript và khôi phục phần nội dung vừa bỏ lỡ.</p>
+            <p className="mt-2 text-sm text-[var(--lb-muted)]">{t('Phát video, theo dõi transcript và khôi phục phần nội dung vừa bỏ lỡ.', 'Play the video, follow the transcript, and recover the content you missed.')}</p>
           </div>
           <span className="w-fit rounded-full border border-[var(--lb-border)] bg-[var(--lb-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--lb-muted)]">{language.toUpperCase()} · {formatTime(currentTime)} / {formatTime(duration)}</span>
         </div>
@@ -784,7 +787,7 @@ export default function VideoLessonPage() {
               onMouseLeave={() => isPlaying && setShowControls(false)}
               onClick={togglePlay}
               role="region"
-              aria-label="Trình phát video bài học"
+              aria-label={t('Trình phát video bài học', 'Lesson video player')}
             >
               <video
                 key={videoId}
@@ -810,7 +813,7 @@ export default function VideoLessonPage() {
                 src={videoSrc}
                 preload="metadata"
                 playsInline
-                aria-label="Video bài học"
+                aria-label={t('Video bài học', 'Lesson video')}
                 onCanPlay={() => setVideoBroken(false)}
                 onError={() => {
                   setIsPlaying(false);
@@ -862,12 +865,12 @@ export default function VideoLessonPage() {
                       onClick={handlePrevVideo}
                       disabled={!hasPrev}
                       className="hidden h-11 w-11 items-center justify-center rounded-md text-white/80 transition-colors hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-30 sm:flex"
-                      aria-label="Bài trước"
+                      aria-label={t('Bài trước', 'Previous lesson')}
                     >
                       <SkipBack size={20} fill="currentColor" />
                     </button>
 
-                    <button onClick={togglePlay} className="flex h-11 w-11 items-center justify-center rounded-md text-white hover:bg-white/10" aria-label={isPlaying ? 'Tạm dừng video' : 'Phát video'}>
+                    <button onClick={togglePlay} className="flex h-11 w-11 items-center justify-center rounded-md text-white hover:bg-white/10" aria-label={isPlaying ? t('Tạm dừng video', 'Pause video') : t('Phát video', 'Play video')}>
                       {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
                     </button>
 
@@ -875,18 +878,18 @@ export default function VideoLessonPage() {
                       onClick={handleNextVideo}
                       disabled={!hasNext}
                       className="hidden h-11 w-11 items-center justify-center rounded-md text-white/80 transition-colors hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-30 sm:flex"
-                      aria-label="Bài tiếp theo"
+                      aria-label={t('Bài tiếp theo', 'Next lesson')}
                     >
                       <SkipForward size={20} fill="currentColor" />
                     </button>
 
                     <div className="flex items-center gap-1">
-                      <button onClick={toggleMute} className="flex h-11 w-11 items-center justify-center rounded-md text-white/80 transition-colors hover:bg-white/10 hover:text-white" aria-label={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}>
+                      <button onClick={toggleMute} className="flex h-11 w-11 items-center justify-center rounded-md text-white/80 transition-colors hover:bg-white/10 hover:text-white" aria-label={isMuted ? t('Bật âm thanh', 'Unmute') : t('Tắt âm thanh', 'Mute')}>
                         {isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
                       </button>
                       <input
                         type="range"
-                        aria-label="Âm lượng"
+                        aria-label={t('Âm lượng', 'Volume')}
                         min="0"
                         max="1"
                         step="0.1"
@@ -913,7 +916,7 @@ export default function VideoLessonPage() {
                         "flex h-11 w-11 items-center justify-center rounded-md transition-colors",
                         showCaptions ? "bg-white/20 text-white" : "text-white/60 hover:bg-white/10 hover:text-white"
                       )}
-                      aria-label={showCaptions ? 'Tắt phụ đề' : 'Bật phụ đề'}
+                      aria-label={showCaptions ? t('Tắt phụ đề', 'Turn captions off') : t('Bật phụ đề', 'Turn captions on')}
                     >
                       <Captions size={20} />
                     </button>
@@ -928,7 +931,7 @@ export default function VideoLessonPage() {
                           "hidden min-h-9 rounded-md px-2 text-[10px] font-bold uppercase transition-colors sm:block",
                           captionBackground ? "bg-white/20 text-white shadow-sm" : "text-white/40 hover:text-white/70"
                         )}
-                        title="Nền phụ đề"
+                        title={t('Nền phụ đề', 'Caption background')}
                       >
                         BG
                       </button>
@@ -972,7 +975,7 @@ export default function VideoLessonPage() {
                                   : "text-white/60 hover:bg-white/10 hover:text-white"
                               )}
                             >
-                              {speed === 1 ? 'Chuẩn' : `${speed}x`}
+                              {speed === 1 ? t('Chuẩn', 'Normal') : `${speed}x`}
                             </button>
                           ))}
                         </div>
@@ -984,13 +987,13 @@ export default function VideoLessonPage() {
                           setShowSpeedMenu(!showSpeedMenu);
                         }}
                         className="flex h-11 min-w-11 items-center justify-center rounded-md border border-white/20 bg-black/35 px-2 text-xs font-bold text-white/90 transition-colors hover:bg-white/10"
-                        aria-label="Chọn tốc độ phát"
+                        aria-label={t('Chọn tốc độ phát', 'Choose playback speed')}
                       >
                         {playbackSpeed === 1 ? '1x' : `${playbackSpeed}x`}
                       </button>
                     </div>
 
-                    <button onClick={toggleFullscreen} className="flex h-11 w-11 items-center justify-center rounded-md text-white/80 transition-colors hover:bg-white/10 hover:text-white" aria-label="Mở toàn màn hình">
+                    <button onClick={toggleFullscreen} className="flex h-11 w-11 items-center justify-center rounded-md text-white/80 transition-colors hover:bg-white/10 hover:text-white" aria-label={t('Mở toàn màn hình', 'Enter fullscreen')}>
                       <Maximize size={20} />
                     </button>
                   </div>
@@ -1047,8 +1050,8 @@ export default function VideoLessonPage() {
                 )}
               >
                 <Film size={64} className="mb-6 opacity-30" />
-                <p className="font-extrabold tracking-[0.2em] uppercase text-sm">Không thể phát video</p>
-                <p className="text-[11px] mt-3 max-w-xs text-center opacity-60 font-bold">Không tải được nguồn video đã xác thực. Hãy đăng nhập lại hoặc kiểm tra tệp video.</p>
+                <p className="font-extrabold tracking-[0.2em] uppercase text-sm">{t('Không thể phát video', 'Unable to play video')}</p>
+                <p className="text-[11px] mt-3 max-w-xs text-center opacity-60 font-bold">{t('Không tải được nguồn video đã xác thực. Hãy đăng nhập lại hoặc kiểm tra tệp video.', 'The authenticated video source could not be loaded. Sign in again or check the video file.')}</p>
               </div>
 
               {/* Visual Sound Pulse REMOVED per user request */}
@@ -1060,7 +1063,7 @@ export default function VideoLessonPage() {
             <div className="flex h-[32rem] flex-col overflow-hidden rounded-[14px] border border-[var(--lb-border)] bg-[var(--lb-surface)] lg:sticky lg:top-20 lg:h-[calc(100vh-96px)]">
 
               {/* Panel Tabs */}
-              <div className="flex border-b border-[var(--lb-border)]" role="tablist" aria-label="Bảng nội dung bên phải">
+              <div className="flex border-b border-[var(--lb-border)]" role="tablist" aria-label={t('Bảng nội dung bên phải', 'Right content panel')}>
                 <button
                   onClick={() => setRightPanelTab('transcript')}
                   role="tab"
@@ -1071,7 +1074,7 @@ export default function VideoLessonPage() {
                   )}
                 >
                   <FileText size={18} className={rightPanelTab === 'transcript' ? 'text-[var(--lb-accent)]' : ''} />
-                  <span>Transcript</span>
+                  <span>{t('Bản chép lời', 'Transcript')}</span>
                 </button>
                 <button
                   onClick={() => setRightPanelTab('lessons')}
@@ -1083,7 +1086,7 @@ export default function VideoLessonPage() {
                   )}
                 >
                   <List size={18} className={rightPanelTab === 'lessons' ? 'text-[var(--lb-accent)]' : ''} />
-                  <span>Bài học</span>
+                  <span>{t('Bài học', 'Lessons')}</span>
                 </button>
               </div>
 
@@ -1091,8 +1094,8 @@ export default function VideoLessonPage() {
               <div ref={transcriptPanelRef} className="custom-scrollbar flex-1 space-y-2 overflow-y-auto p-3 sm:p-4">
                 {rightPanelTab === 'transcript' ? (
                   <>
-                    {isLoadingTranscript && renderPanelState('Đang tải phụ đề...')}
-                    {!isLoadingTranscript && segments.length === 0 && renderPanelState('Chưa có phụ đề.')}
+                    {isLoadingTranscript && renderPanelState(t('Đang tải phụ đề...', 'Loading captions...'))}
+                    {!isLoadingTranscript && segments.length === 0 && renderPanelState(t('Chưa có phụ đề.', 'No captions available.'))}
                     {segments.map((s, i) => {
                       const isActive = currentTime >= s.start && currentTime <= s.end;
                       return (
@@ -1121,15 +1124,15 @@ export default function VideoLessonPage() {
                           )}>
                             {s.text}
                           </p>
-                          {isActive && <span className="absolute right-3 top-3 rounded-full bg-[var(--lb-accent)] px-2 py-0.5 text-[10px] font-bold text-[var(--lb-on-accent)]">Đang phát</span>}
+                          {isActive && <span className="absolute right-3 top-3 rounded-full bg-[var(--lb-accent)] px-2 py-0.5 text-[10px] font-bold text-[var(--lb-on-accent)]">{t('Đang phát', 'Playing')}</span>}
                         </button>
                       );
                     })}
                   </>
                 ) : (
                   <div className="space-y-2">
-                    {isLoadingModuleLessons && renderPanelState('Đang tải danh sách bài học...')}
-                    {!isLoadingModuleLessons && moduleLessons.length === 0 && renderPanelState('Chưa có video trong chương này.')}
+                    {isLoadingModuleLessons && renderPanelState(t('Đang tải danh sách bài học...', 'Loading lesson list...'))}
+                    {!isLoadingModuleLessons && moduleLessons.length === 0 && renderPanelState(t('Chưa có video trong chương này.', 'No videos in this module.'))}
                     {!isLoadingModuleLessons && moduleLessons.map((lesson, idx) => (
                       <button
                         type="button"
@@ -1166,7 +1169,7 @@ export default function VideoLessonPage() {
 
               <div className="border-t border-[var(--lb-border)] bg-[var(--lb-elevated)] p-3 text-center">
                 <div className="inline-flex items-center gap-2 rounded-full border border-[var(--lb-border)] px-3 py-1.5 text-xs font-semibold text-[var(--lb-muted)]">
-                  <Captions size={14} aria-hidden="true" /> Đồng bộ · {language.toUpperCase()}
+                  <Captions size={14} aria-hidden="true" /> {t('Đồng bộ', 'Synced')} · {language.toUpperCase()}
                 </div>
               </div>
             </div>
@@ -1174,16 +1177,16 @@ export default function VideoLessonPage() {
 
         </div>
 
-        <section aria-label="Khôi phục và hỏi theo ngữ cảnh">
+        <section aria-label={t('Khôi phục và hỏi theo ngữ cảnh', 'Context recovery and grounded questions')}>
           <LectureGroundingPanel
             videoId={videoId}
             currentTime={currentTime}
-            outputLanguage={language === 'en' ? 'en' : 'vi'}
+            outputLanguage={locale}
             onSeek={handleSeek}
           />
         </section>
 
-        <section className="rounded-[10px] border border-[var(--lb-border)] bg-[var(--lb-surface)] p-5 sm:p-6" aria-label="Cấu trúc bài giảng">
+        <section className="rounded-[10px] border border-[var(--lb-border)] bg-[var(--lb-surface)] p-5 sm:p-6" aria-label={t('Cấu trúc bài giảng', 'Lecture structure')}>
           <SemanticTimeline videoId={videoId} currentTime={currentTime} onSeek={handleSeek} />
         </section>
 
@@ -1193,15 +1196,15 @@ export default function VideoLessonPage() {
               {/* Visual Tabs Section */}
               <div className="rounded-[10px] border border-[var(--lb-border)] bg-[var(--lb-surface)] p-5 sm:p-6">
                 <div className="mb-6">
-                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--lb-muted)]">Công cụ học tập</p>
-                  <h2 className="mt-1 text-xl">Ôn tập sau khi đã khôi phục mạch bài</h2>
+                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--lb-muted)]">{t('Công cụ học tập', 'Study tools')}</p>
+                  <h2 className="mt-1 text-xl">{t('Ôn tập sau khi đã khôi phục mạch bài', 'Review after recovering the learning thread')}</h2>
                 </div>
-                <div className="mb-6 flex flex-wrap gap-2 border-b border-[var(--lb-border)] pb-4" role="tablist" aria-label="Công cụ học tập">
+                <div className="mb-6 flex flex-wrap gap-2 border-b border-[var(--lb-border)] pb-4" role="tablist" aria-label={t('Công cụ học tập', 'Study tools')}>
                   {[
-                    { id: 'summary', label: 'Tóm tắt', icon: FileText },
-                    { id: 'highlights', label: 'Điểm nhấn', icon: Zap },
+                    { id: 'summary', label: t('Tóm tắt', 'Summary'), icon: FileText },
+                    { id: 'highlights', label: t('Điểm nhấn', 'Highlights'), icon: Zap },
                     { id: 'quiz', label: 'Quiz', icon: ClipboardCheck },
-                    { id: 'flashcards', label: 'Thẻ ghi nhớ', icon: BookOpen },
+                    { id: 'flashcards', label: t('Thẻ ghi nhớ', 'Flashcards'), icon: BookOpen },
                   ].map((tab) => (
                     <button
                       type="button"
@@ -1225,34 +1228,34 @@ export default function VideoLessonPage() {
                     <div>
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                          <h3 className="text-lg">Tóm tắt bài học</h3>
-                          <p className="mt-1 text-sm text-[var(--lb-muted)]">Tạo bản tóm tắt ngắn sau khi đã xem nguồn và timeline.</p>
+                          <h3 className="text-lg">{t('Tóm tắt bài học', 'Lesson summary')}</h3>
+                          <p className="mt-1 text-sm text-[var(--lb-muted)]">{t('Tạo bản tóm tắt ngắn sau khi đã xem nguồn và timeline.', 'Create a concise summary after reviewing the sources and timeline.')}</p>
                         </div>
                         <button type="button" onClick={handleGetSummary} disabled={isLoadingSummary || summaryPoints.length > 0} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[var(--lb-accent)] px-4 text-sm font-bold text-[var(--lb-on-accent)] hover:bg-[var(--lb-accent-hover)] disabled:opacity-55">
                           {isLoadingSummary ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" /> : <FileText size={17} />}
-                          {isLoadingSummary ? 'Đang tạo tóm tắt…' : summaryPoints.length > 0 ? 'Đã tạo tóm tắt' : 'Tạo tóm tắt bài học'}
+                          {isLoadingSummary ? t('Đang tạo tóm tắt…', 'Creating summary…') : summaryPoints.length > 0 ? t('Đã tạo tóm tắt', 'Summary created') : t('Tạo tóm tắt bài học', 'Create lesson summary')}
                         </button>
                       </div>
                       {summaryPoints.length > 0 && (
                         <ul className="mt-5 divide-y divide-[var(--lb-border)] border-y border-[var(--lb-border)]">
-                          {summaryPoints.map((point, index) => <li key={index} className="flex gap-3 py-4 text-sm leading-6 text-[var(--lb-ink)]"><CheckCircle size={18} className="mt-0.5 shrink-0 text-[var(--lb-success)]" />{point}</li>)}
+                          {summaryPoints.map((point, index) => <li key={index} className="flex gap-3 py-4 text-sm leading-6 text-[var(--lb-ink)]"><CheckCircle size={18} className="mt-0.5 shrink-0 text-[var(--lb-success)]" />{localizeLectureContent(point, locale)}</li>)}
                         </ul>
                       )}
                     </div>
                   )}
 
                   {activeTab === 'highlights' && (
-                    isLoadingMetadata ? renderPanelState('Đang tải điểm nhấn...') : metadataError ? renderPanelState(metadataError) : highlights.length === 0 ? renderPanelState('Chưa có dữ liệu điểm nhấn.') : (
+                    isLoadingMetadata ? renderPanelState(t('Đang tải điểm nhấn...', 'Loading highlights...')) : metadataError ? renderPanelState(metadataError) : highlights.length === 0 ? renderPanelState(t('Chưa có dữ liệu điểm nhấn.', 'No highlight data yet.')) : (
                       <div className="divide-y divide-[var(--lb-border)] border-y border-[var(--lb-border)]">
                         {highlights.map((item, i) => (
                           <div key={i} className="grid gap-4 py-5 sm:grid-cols-[7rem_1fr]">
                             <div>
-                              <span className="text-xs font-bold text-[var(--lb-muted)]">Trọng tâm</span>
+                              <span className="text-xs font-bold text-[var(--lb-muted)]">{t('Trọng tâm', 'Key point')}</span>
                               <span className="mt-1 block font-mono text-lg font-bold text-[var(--lb-accent)]">{item.time}</span>
                             </div>
                             <div>
-                              <h4 className="text-lg leading-tight">{item.reason}</h4>
-                              <p className="mt-2 text-sm leading-6 text-[var(--lb-muted)]">&ldquo;{item.context}&rdquo;</p>
+                              <h4 className="text-lg leading-tight">{localizeLectureContent(item.reason, locale)}</h4>
+                              <p className="mt-2 text-sm leading-6 text-[var(--lb-muted)]">&ldquo;{localizeLectureContent(item.context, locale)}&rdquo;</p>
                             </div>
                           </div>
                         ))}
@@ -1262,8 +1265,8 @@ export default function VideoLessonPage() {
 
                   {activeTab === 'quiz' && (
                     <div className="space-y-6">
-                      {isLoadingQuizzes && renderPanelState('Đang tải quiz...')}
-                      {!isLoadingQuizzes && quizzes.length === 0 && renderPanelState('Bài học này chưa có quiz.')}
+                      {isLoadingQuizzes && renderPanelState(t('Đang tải quiz...', 'Loading quiz...'))}
+                      {!isLoadingQuizzes && quizzes.length === 0 && renderPanelState(t('Bài học này chưa có quiz.', 'This lesson has no quiz yet.'))}
                       {!isLoadingQuizzes && quizzes.length > 0 && (
                         <div className="space-y-6">
                           <div className="flex flex-wrap gap-2">
@@ -1288,13 +1291,13 @@ export default function VideoLessonPage() {
                           {activeQuiz && (
                             <div className="space-y-5">
                               <div className="rounded-md border border-[var(--lb-border)] bg-[var(--lb-elevated)] p-5">
-                                <p className="text-sm font-bold text-[var(--lb-ink)]">{activeQuiz.title}</p>
-                                <p className="mt-1 text-xs text-[var(--lb-muted)]">Điểm đạt: {activeQuiz.passing_score}%</p>
+                                <p className="text-sm font-bold text-[var(--lb-ink)]">{localizeLectureContent(activeQuiz.title, locale)}</p>
+                                <p className="mt-1 text-xs text-[var(--lb-muted)]">{t('Điểm đạt', 'Passing score')}: {activeQuiz.passing_score}%</p>
                               </div>
 
                               {(activeQuiz.questions ?? []).map((question, qIdx) => (
                                 <div key={question.id} className="rounded-[10px] border border-[var(--lb-border)] bg-[var(--lb-surface)] p-5">
-                                  <p className="mb-4 text-sm font-bold text-[var(--lb-ink)]">{qIdx + 1}. {question.question_text}</p>
+                                  <p className="mb-4 text-sm font-bold text-[var(--lb-ink)]">{qIdx + 1}. {localizeLectureContent(question.question_text, locale)}</p>
                                   <div className="space-y-2">
                                     {(question.options ?? []).map((opt) => (
                                       <label key={opt.id} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-md border border-[var(--lb-border)] p-3 hover:bg-[var(--lb-elevated)]">
@@ -1305,7 +1308,7 @@ export default function VideoLessonPage() {
                                           onChange={() => handleSelectQuizAnswer(question.id, opt.id)}
                                           disabled={!!quizSubmitResult}
                                         />
-                                        <span className="text-sm font-medium text-[var(--lb-ink)]">{opt.option_text}</span>
+                                        <span className="text-sm font-medium text-[var(--lb-ink)]">{localizeLectureContent(opt.option_text, locale)}</span>
                                       </label>
                                     ))}
                                   </div>
@@ -1322,9 +1325,9 @@ export default function VideoLessonPage() {
                                     {isSubmittingQuiz ? (
                                       <div className="flex items-center gap-2">
                                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        ĐANG NỘP BÀI...
+                                        {t('ĐANG NỘP BÀI...', 'SUBMITTING...')}
                                       </div>
-                                    ) : 'NỘP BÀI'}
+                                    ) : t('NỘP BÀI', 'SUBMIT')}
                                   </button>
                                 ) : quizSubmitResult.status === 'passed' ? (
                                   <div className="flex flex-col items-center gap-5 rounded-[10px] border border-[var(--lb-success)] bg-[var(--lb-success-soft)] p-6 md:flex-row">
@@ -1332,12 +1335,12 @@ export default function VideoLessonPage() {
                                       <CheckCircle size={32} />
                                     </div>
                                     <div className="text-center md:text-left flex-1">
-                                      <h4 className="text-xl text-[var(--lb-ink)]">Hoàn thành</h4>
+                                      <h4 className="text-xl text-[var(--lb-ink)]">{t('Hoàn thành', 'Completed')}</h4>
                                       <p className="mt-1 text-sm font-semibold text-[var(--lb-success)]">
-                                        Bạn đã vượt qua bài kiểm tra với {quizSubmitResult.score}% điểm
+                                        {t('Bạn đã vượt qua bài kiểm tra với', 'You passed the quiz with')} {quizSubmitResult.score}%
                                       </p>
                                       <p className="mt-2 text-xs text-[var(--lb-muted)]">
-                                        Đúng {quizSubmitResult.correct} trên tổng số {quizSubmitResult.total} câu hỏi.
+                                        {t('Đúng', 'Correct')}: {quizSubmitResult.correct}/{quizSubmitResult.total} {t('câu hỏi.', 'questions.')}
                                       </p>
                                     </div>
                                   </div>
@@ -1348,15 +1351,15 @@ export default function VideoLessonPage() {
                                         <Zap size={32} fill="currentColor" />
                                       </div>
                                       <div>
-                                        <h4 className="text-xl text-[var(--lb-ink)]">Kết quả chưa đạt</h4>
+                                        <h4 className="text-xl text-[var(--lb-ink)]">{t('Kết quả chưa đạt', 'Not passed yet')}</h4>
                                         <p className="mt-1 text-sm font-semibold text-[var(--lb-danger)]">
-                                          Điểm của bạn: {quizSubmitResult.score}% (Cần {activeQuiz?.passing_score}%)
+                                          {t('Điểm của bạn', 'Your score')}: {quizSubmitResult.score}% ({t('Cần', 'Required')} {activeQuiz?.passing_score}%)
                                         </p>
                                       </div>
                                     </div>
                                     <div className="h-px w-full bg-[var(--lb-border)]" />
                                     <p className="text-sm leading-relaxed text-[var(--lb-muted)]">
-                                      Đừng bỏ cuộc! Hãy xem lại nội dung bài giảng và thử sức lại một lần nữa để củng cố kiến thức nhé.
+                                      {t('Đừng bỏ cuộc! Hãy xem lại nội dung bài giảng và thử sức lại một lần nữa để củng cố kiến thức nhé.', 'Keep going. Review the lecture and try again to reinforce what you learned.')}
                                     </p>
                                     <button
                                       onClick={() => {
@@ -1365,7 +1368,7 @@ export default function VideoLessonPage() {
                                       }}
                                       className="min-h-11 w-full rounded-md border border-[var(--lb-danger)] bg-[var(--lb-elevated)] px-4 text-sm font-bold text-[var(--lb-danger)] hover:bg-[var(--lb-danger-soft)]"
                                     >
-                                      Làm lại
+                                      {t('Làm lại', 'Try again')}
                                     </button>
                                   </div>
                                 )}
@@ -1379,21 +1382,21 @@ export default function VideoLessonPage() {
 
                   {activeTab === 'flashcards' && (
                     <div className="space-y-5">
-                      {isLoadingMetadata && renderPanelState('Đang tải thẻ ghi nhớ...')}
+                      {isLoadingMetadata && renderPanelState(t('Đang tải thẻ ghi nhớ...', 'Loading flashcards...'))}
                       {!isLoadingMetadata && metadataError && renderPanelState(metadataError)}
-                      {!isLoadingMetadata && !metadataError && flashcards.length === 0 && renderPanelState('Chưa có thẻ ghi nhớ.')}
+                      {!isLoadingMetadata && !metadataError && flashcards.length === 0 && renderPanelState(t('Chưa có thẻ ghi nhớ.', 'No flashcards yet.'))}
                       {!isLoadingMetadata && !metadataError && flashcards.length > 0 && (
                         <>
                           <div className="flex items-center justify-between gap-3">
-                            <button type="button" aria-label="Thẻ trước" onClick={() => { setIsFlashcardFlipped(false); setCurrentFlashcardIndex((current) => (current - 1 + flashcards.length) % flashcards.length); }} className="flex h-11 w-11 items-center justify-center rounded-md border border-[var(--lb-border)] text-[var(--lb-muted)] hover:bg-[var(--lb-accent-soft)]"><ChevronLeft size={19} /></button>
-                            <p className="text-sm font-semibold text-[var(--lb-muted)]">Thẻ {currentFlashcardIndex + 1} / {flashcards.length}</p>
-                            <button type="button" aria-label="Thẻ tiếp theo" onClick={() => { setIsFlashcardFlipped(false); setCurrentFlashcardIndex((current) => (current + 1) % flashcards.length); }} className="flex h-11 w-11 items-center justify-center rounded-md border border-[var(--lb-border)] text-[var(--lb-muted)] hover:bg-[var(--lb-accent-soft)]"><ChevronRight size={19} /></button>
+                            <button type="button" aria-label={t('Thẻ trước', 'Previous card')} onClick={() => { setIsFlashcardFlipped(false); setCurrentFlashcardIndex((current) => (current - 1 + flashcards.length) % flashcards.length); }} className="flex h-11 w-11 items-center justify-center rounded-md border border-[var(--lb-border)] text-[var(--lb-muted)] hover:bg-[var(--lb-accent-soft)]"><ChevronLeft size={19} /></button>
+                            <p className="text-sm font-semibold text-[var(--lb-muted)]">{t('Thẻ', 'Card')} {currentFlashcardIndex + 1} / {flashcards.length}</p>
+                            <button type="button" aria-label={t('Thẻ tiếp theo', 'Next card')} onClick={() => { setIsFlashcardFlipped(false); setCurrentFlashcardIndex((current) => (current + 1) % flashcards.length); }} className="flex h-11 w-11 items-center justify-center rounded-md border border-[var(--lb-border)] text-[var(--lb-muted)] hover:bg-[var(--lb-accent-soft)]"><ChevronRight size={19} /></button>
                           </div>
-                          <button type="button" onClick={() => setIsFlashcardFlipped((current) => !current)} className="mx-auto flex min-h-[320px] w-full max-w-xl flex-col items-center justify-center rounded-[10px] border border-[var(--lb-border-strong)] bg-[var(--lb-elevated)] p-8 text-center hover:border-[var(--lb-accent)]" aria-label={isFlashcardFlipped ? 'Hiện mặt câu hỏi' : 'Hiện mặt đáp án'}>
-                            <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--lb-accent)]">{isFlashcardFlipped ? 'Đáp án' : 'Câu hỏi'}</span>
-                            <span className="mt-5 text-xl font-semibold leading-8 text-[var(--lb-ink)]">{isFlashcardFlipped ? flashcards[currentFlashcardIndex].back : flashcards[currentFlashcardIndex].front}</span>
-                            {!isFlashcardFlipped && flashcards[currentFlashcardIndex].hint && <span className="mt-8 text-sm text-[var(--lb-muted)]">Gợi ý: {flashcards[currentFlashcardIndex].hint}</span>}
-                            <span className="mt-8 text-xs font-semibold text-[var(--lb-muted)]">Nhấn để lật thẻ</span>
+                          <button type="button" onClick={() => setIsFlashcardFlipped((current) => !current)} className="mx-auto flex min-h-[320px] w-full max-w-xl flex-col items-center justify-center rounded-[10px] border border-[var(--lb-border-strong)] bg-[var(--lb-elevated)] p-8 text-center hover:border-[var(--lb-accent)]" aria-label={isFlashcardFlipped ? t('Hiện mặt câu hỏi', 'Show question side') : t('Hiện mặt đáp án', 'Show answer side')}>
+                            <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--lb-accent)]">{isFlashcardFlipped ? t('Đáp án', 'Answer') : t('Câu hỏi', 'Question')}</span>
+                            <span className="mt-5 text-xl font-semibold leading-8 text-[var(--lb-ink)]">{localizeLectureContent(isFlashcardFlipped ? flashcards[currentFlashcardIndex].back : flashcards[currentFlashcardIndex].front, locale)}</span>
+                            {!isFlashcardFlipped && flashcards[currentFlashcardIndex].hint && <span className="mt-8 text-sm text-[var(--lb-muted)]">{t('Gợi ý', 'Hint')}: {localizeLectureContent(flashcards[currentFlashcardIndex].hint, locale)}</span>}
+                            <span className="mt-8 text-xs font-semibold text-[var(--lb-muted)]">{t('Nhấn để lật thẻ', 'Press to flip the card')}</span>
                           </button>
 
                         </>

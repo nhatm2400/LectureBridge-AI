@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { CourseThumbnail } from '@/components/ui/CourseThumbnail';
 import { api, type Course, type StudentDashboard } from '@/lib/api';
+import { useI18n } from '@/lib/i18n';
 import { cn, getFullImageUrl } from '@/lib/utils';
 
 type CourseTab = 'enrolled' | 'active' | 'completed';
@@ -21,7 +22,6 @@ type CourseCard = {
 };
 
 const PAGE_SIZE = 6;
-const DEFAULT_INSTRUCTOR = 'Giảng viên';
 const DEFAULT_CATEGORY = 'Course';
 
 function normalizeCourseCards(dashboard: StudentDashboard, courses: Course[]): CourseCard[] {
@@ -31,7 +31,7 @@ function normalizeCourseCards(dashboard: StudentDashboard, courses: Course[]): C
     return {
       id: enrolled.course_id,
       title: enrolled.title,
-      instructor: DEFAULT_INSTRUCTOR,
+      instructor: '',
       category: detail?.cat || DEFAULT_CATEGORY,
       thumbnail: getFullImageUrl(
         detail?.thumbnail_url ||
@@ -48,6 +48,7 @@ function normalizeCourseCards(dashboard: StudentDashboard, courses: Course[]): C
 }
 
 export default function EnrolledCourses() {
+  const { t } = useI18n();
   const [mounted, setMounted] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [activeTab, setActiveTab] = React.useState<CourseTab>('enrolled');
@@ -129,13 +130,13 @@ export default function EnrolledCourses() {
       <div className="mx-auto max-w-7xl space-y-8 px-6 py-10 md:px-10">
         <div className="flex flex-col gap-6 border-b border-slate-100 pb-6 md:flex-row md:items-center md:justify-between">
           <h1 className="text-2xl font-extrabold text-slate-900 md:text-3xl">
-            {activeTab === 'enrolled' ? 'Đã đăng ký' : activeTab === 'active' ? 'Đang học' : 'Hoàn thành'}
+            {activeTab === 'enrolled' ? t('Đã đăng ký', 'Enrolled') : activeTab === 'active' ? t('Đang học', 'In progress') : t('Hoàn thành', 'Completed')}
           </h1>
           <div className="flex items-center gap-2">
             {[
-              { id: 'enrolled' as const, label: `Đã đăng ký (${tabCounts.enrolled})` },
-              { id: 'active' as const, label: `Đang học (${tabCounts.active})` },
-              { id: 'completed' as const, label: `Hoàn thành (${tabCounts.completed})` },
+              { id: 'enrolled' as const, label: `${t('Đã đăng ký', 'Enrolled')} (${tabCounts.enrolled})` },
+              { id: 'active' as const, label: `${t('Đang học', 'In progress')} (${tabCounts.active})` },
+              { id: 'completed' as const, label: `${t('Hoàn thành', 'Completed')} (${tabCounts.completed})` },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -161,9 +162,9 @@ export default function EnrolledCourses() {
           </div>
         ) : filteredCards.length === 0 ? (
           <div className="rounded-2xl border border-slate-100 bg-white p-12 text-center">
-            <p className="font-bold text-slate-400">Chưa có khóa học phù hợp trong mục này.</p>
+            <p className="font-bold text-slate-400">{t('Chưa có khóa học phù hợp trong mục này.', 'No courses match this section yet.')}</p>
             <Link href="/student/library" className="mt-4 inline-block font-extrabold text-[#FF4F6E] underline">
-              Đi tới thư viện khóa học
+              {t('Đi tới thư viện khóa học', 'Go to course library')}
             </Link>
           </div>
         ) : (
@@ -176,7 +177,7 @@ export default function EnrolledCourses() {
                   </div>
                   <div className="space-y-4 p-6">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-400">{course.instructor}</span>
+                      <span className="text-xs font-bold text-slate-400">{course.instructor || t('Giảng viên', 'Instructor')}</span>
                       <span className="rounded border border-slate-100 bg-slate-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                         {course.category}
                       </span>
@@ -185,7 +186,7 @@ export default function EnrolledCourses() {
                     <div>
                       <div className="mb-1 flex justify-between text-[11px] font-bold text-slate-500">
                         <span>
-                          {course.completedLessons}/{course.totalLessons} bài
+                          {course.completedLessons}/{course.totalLessons} {t('bài', 'lessons')}
                         </span>
                         <span>{course.progressPercent}%</span>
                       </div>
@@ -197,7 +198,7 @@ export default function EnrolledCourses() {
                       href={`/student/courses/${course.id}`}
                       className="block w-full rounded-lg bg-slate-900 py-2.5 text-center text-[11px] font-extrabold uppercase tracking-widest text-white transition-colors hover:bg-primary"
                     >
-                      Xem khóa học
+                      {t('Xem khóa học', 'View course')}
                     </Link>
                   </div>
                 </div>
@@ -206,7 +207,7 @@ export default function EnrolledCourses() {
 
             <div className="flex items-center justify-between border-t border-slate-50 pt-10">
               <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                Trang {currentPage} / {totalPages}
+                {t('Trang', 'Page')} {currentPage} / {totalPages}
               </p>
               <div className="flex items-center gap-2">
                 {Array.from({ length: totalPages }, (_, index) => index + 1).map((num) => (

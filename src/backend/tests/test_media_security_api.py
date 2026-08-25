@@ -239,7 +239,11 @@ def test_presigned_s3_key_is_server_issued_for_user_and_video(
 
     response = media_env["owner"].post(
         "/api/videos/presign-upload",
-        json={"filename": "synthetic.mp4", "content_type": "video/mp4"},
+        json={
+            "filename": "synthetic.mp4",
+            "content_type": "video/mp4",
+            "output_language": "en",
+        },
     )
 
     assert response.status_code == 200
@@ -247,6 +251,14 @@ def test_presigned_s3_key_is_server_issued_for_user_and_video(
     assert body["s3_key"] == (
         f"uploads/users/{media_env['owner_id']}/videos/{body['video_id']}.mp4"
     )
+    assert body["output_language"] == "en"
+    with Session(media_env["engine"]) as session:
+        content = session.exec(
+            select(ContentMetadata).where(
+                ContentMetadata.lesson_id == uuid.UUID(body["video_id"])
+            )
+        ).one()
+        assert content.ai_analysis["output_language"] == "en"
 
 
 def test_upload_capabilities_select_local_filesystem_in_development(

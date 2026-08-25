@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 
 import { api } from '@/lib/api';
+import { useI18n } from '@/lib/i18n';
 import { useAppStore } from '@/store/useAppStore';
 import { AppSidebar, MobileAppSidebar } from './AppSidebar';
 import { TopBar } from './TopBar';
@@ -13,6 +14,7 @@ const Footer = dynamic(() => import('./Footer').then((mod) => mod.Footer), { ssr
 
 export function ClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { t } = useI18n();
   const router = useRouter();
   const login = useAppStore((state) => state.login);
   const logout = useAppStore((state) => state.logout);
@@ -55,7 +57,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
   if (!isPublicPage && (sessionCheck.pathname !== pathname || !sessionCheck.authenticated)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--lb-canvas)] px-6 text-sm font-semibold text-[var(--lb-muted)]" role="status" aria-live="polite">
-        Đang xác thực phiên…
+        {t('Đang xác thực phiên…', 'Checking your session…')}
       </div>
     );
   }
@@ -63,7 +65,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
   if (isPublicPage) {
     return (
       <div className="min-h-screen">
-        <a className="skip-link" href="#main-content">Bỏ qua đến nội dung chính</a>
+        <a className="skip-link" href="#main-content">{t('Bỏ qua đến nội dung chính', 'Skip to main content')}</a>
         {children}
       </div>
     );
@@ -71,7 +73,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={isAdminPage ? 'h-screen overflow-hidden' : 'flex min-h-dvh flex-col overflow-x-clip'}>
-      <a className="skip-link" href="#main-content">Bỏ qua đến nội dung chính</a>
+      <a className="skip-link" href="#main-content">{t('Bỏ qua đến nội dung chính', 'Skip to main content')}</a>
       <TopBar showNavigation={showNavigation} onOpenNavigation={openMobileNavigation} />
       {showNavigation && (
         <MobileAppSidebar open={mobileNavigationOpen} onClose={closeMobileNavigation} />

@@ -15,6 +15,7 @@ import React from 'react';
 
 import { cn } from '@/lib/utils';
 import { Drawer } from '@/components/ui/Drawer';
+import { useI18n } from '@/lib/i18n';
 
 type SidebarItem = {
   icon: React.ComponentType<{ size?: number; className?: string }>;
@@ -24,6 +25,7 @@ type SidebarItem = {
 
 function SidebarNavigation({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const { t } = useI18n();
   const [activeHash, setActiveHash] = React.useState('');
 
   React.useEffect(() => {
@@ -41,23 +43,23 @@ function SidebarNavigation({ onNavigate }: { onNavigate?: () => void }) {
   const isAdminArea = pathname.startsWith('/admin');
   const learningItems: SidebarItem[] = isAdminArea
     ? [
-        { icon: Grid2X2, label: 'Tổng quan admin', href: '/admin#overview' },
-        { icon: BookOpen, label: 'Quản lý khóa học', href: '/admin#courses' },
-        { icon: MessageSquare, label: 'Tiến độ xử lý', href: '/admin#jobs' },
-        { icon: History, label: 'Nhật ký xóa', href: '/admin#deletion-history' },
+        { icon: Grid2X2, label: t('Tổng quan admin', 'Admin overview'), href: '/admin#overview' },
+        { icon: BookOpen, label: t('Quản lý khóa học', 'Course management'), href: '/admin#courses' },
+        { icon: MessageSquare, label: t('Tiến độ xử lý', 'Processing status'), href: '/admin#jobs' },
+        { icon: History, label: t('Nhật ký xóa', 'Deletion history'), href: '/admin#deletion-history' },
       ]
     : [
-        { icon: Grid2X2, label: 'Thư viện', href: '/student/library' },
-        { icon: BookOpen, label: 'Khóa học đã đăng ký', href: '/student/documents' },
-        { icon: MessageSquare, label: 'Đánh giá', href: '/student/reviews' },
-        { icon: FileText, label: 'Lượt làm bài quiz', href: '/student/quiz-attempts' },
+        { icon: Grid2X2, label: t('Thư viện', 'Library'), href: '/student/library' },
+        { icon: BookOpen, label: t('Khóa học đã đăng ký', 'Enrolled courses'), href: '/student/documents' },
+        { icon: MessageSquare, label: t('Đánh giá', 'Reviews'), href: '/student/reviews' },
+        { icon: FileText, label: t('Lượt làm bài quiz', 'Quiz attempts'), href: '/student/quiz-attempts' },
       ];
   const toolItems: SidebarItem[] = isAdminArea
-    ? [{ icon: Upload, label: 'Đăng tải bài giảng', href: '/admin#upload' }]
-    : [{ icon: Upload, label: 'Tải video lên', href: '/student/upload' }];
+    ? [{ icon: Upload, label: t('Đăng tải bài giảng', 'Upload lecture'), href: '/admin#upload' }]
+    : [{ icon: Upload, label: t('Tải video lên', 'Upload video'), href: '/student/upload' }];
   const accountItems: SidebarItem[] = isAdminArea
-    ? [{ icon: Settings, label: 'Cài đặt hệ thống', href: '/admin#settings' }]
-    : [{ icon: Settings, label: 'Cài đặt và hồ sơ', href: '/student/settings' }];
+    ? [{ icon: Settings, label: t('Cài đặt hệ thống', 'System settings'), href: '/admin#settings' }]
+    : [{ icon: Settings, label: t('Cài đặt và hồ sơ', 'Settings and profile'), href: '/student/settings' }];
 
   const isItemActive = (href: string) => {
     const [baseHref, hash] = href.split('#');
@@ -119,24 +121,26 @@ function SidebarNavigation({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="px-3 py-5">
-      {renderSection('Học tập', learningItems)}
-      {renderSection('Công cụ', toolItems)}
-      {renderSection('Tài khoản', accountItems)}
+      {renderSection(t('Học tập', 'Learning'), learningItems)}
+      {renderSection(t('Công cụ', 'Tools'), toolItems)}
+      {renderSection(t('Tài khoản', 'Account'), accountItems)}
     </div>
   );
 }
 
 export function AppSidebar() {
+  const { t } = useI18n();
   return (
-    <aside className="sticky top-16 hidden h-[calc(100vh-64px)] w-56 min-w-56 shrink-0 self-start overflow-y-auto border-r border-[var(--lb-border)] bg-[var(--lb-surface)] lg:block" aria-label="Điều hướng chính">
+    <aside className="sticky top-16 hidden h-[calc(100vh-64px)] w-56 min-w-56 shrink-0 self-start overflow-y-auto border-r border-[var(--lb-border)] bg-[var(--lb-surface)] lg:block" aria-label={t('Điều hướng chính', 'Main navigation')}>
       <SidebarNavigation />
     </aside>
   );
 }
 
 export function MobileAppSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t } = useI18n();
   return (
-    <Drawer open={open} onClose={onClose} title="Điều hướng">
+    <Drawer open={open} onClose={onClose} title={t('Điều hướng', 'Navigation')}>
       <SidebarNavigation onNavigate={onClose} />
     </Drawer>
   );

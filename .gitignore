@@ -36,12 +36,16 @@ pnpm-debug.log*
 # Runtime and private output
 data/
 temp/
+tmp/
 provider-cache/
 manual-review-output/
 *.db
 *.sqlite
 *.sqlite3
 *.log
+
+# Machine-specific validation notes
+/LOCAL_RELEASE_VALIDATION.md
 
 # Terraform local state and secrets
 infra/terraform/terraform.tfvars

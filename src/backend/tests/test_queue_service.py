@@ -17,7 +17,7 @@ def test_enqueue_pipeline_job_uses_rq_when_available(monkeypatch):
     assert mode == "rq"
     assert len(dummy_queue.calls) == 1
     _, args, kwargs = dummy_queue.calls[0]
-    assert args == ("vid-1", "x.mp4")
+    assert args == ("vid-1", "x.mp4", "vi")
     assert kwargs["job_timeout"] == 60 * 60
 
 
@@ -32,7 +32,8 @@ def test_enqueue_pipeline_job_falls_back_to_background_tasks(monkeypatch):
     mode = queue_service.enqueue_pipeline_job(
         video_id="vid-2",
         video_path="y.mp4",
+        output_language="en",
         fallback_task_adder=fake_adder,
     )
     assert mode == "background_tasks"
-    assert received["args"] == ("vid-2", "y.mp4")
+    assert received["args"] == ("vid-2", "y.mp4", "en")

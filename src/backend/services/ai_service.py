@@ -32,6 +32,17 @@ class AIService:
         return "vi" if lang.startswith("vi") else "en"
 
     @staticmethod
+    def normalize_output_language(language: str | None) -> str:
+        lang = (language or "").strip().lower()
+        if lang not in {"vi", "en"}:
+            raise ValueError("output_language must be 'vi' or 'en'")
+        return lang
+
+    @classmethod
+    def output_language_name(cls, language: str | None) -> str:
+        return "English" if cls.normalize_output_language(language) == "en" else "Vietnamese"
+
+    @staticmethod
     def _normalize_segments(segments: list[dict]) -> list[dict[str, Any]]:
         return [
             {
@@ -64,6 +75,7 @@ class AIService:
         source_transcript: dict,
         translated_transcript: dict | None = None,
         translation_error: str | None = None,
+        preferred_language: str | None = None,
     ) -> dict:
         source_language = cls.normalize_caption_language(source_transcript.get("language"))
         source_segments = cls._normalize_segments(source_transcript.get("segments", []))
@@ -92,18 +104,29 @@ class AIService:
                     "Translated timeline does not match source transcript."
                 )
 
-        preferred_language = "vi" if "vi" in segments_by_language else source_language
+        requested_language = (
+            cls.normalize_output_language(preferred_language)
+            if preferred_language is not None
+            else None
+        )
+        selected_language = (
+            requested_language
+            if requested_language in segments_by_language
+            else "vi"
+            if "vi" in segments_by_language
+            else source_language
+        )
         return {
             "video_id": source_transcript.get("video_id")
             or (translated_transcript or {}).get("video_id"),
-            "language": preferred_language,
+            "language": selected_language,
             "source_language": source_language,
             "target_language": target_language,
             "available_languages": [
                 language for language in ("vi", "en") if language in segments_by_language
             ],
             "translation_status": translation_status,
-            "segments": segments_by_language[preferred_language],
+            "segments": segments_by_language[selected_language],
             "segments_by_language": segments_by_language,
         }
 
@@ -148,13 +171,18 @@ class AIService:
         return result
 
     @classmethod
-    async def summarize_full_lecture(cls, transcript_data: dict) -> list[str]:
+    async def summarize_full_lecture(
+        cls,
+        transcript_data: dict,
+        output_language: str = "vi",
+    ) -> list[str]:
         """Summarize every canonical transcript chunk, then synthesize all chunks."""
         if not config.GEMINI_API_KEY:
             return []
         chunks = cls._canonical_segment_chunks(transcript_data)
         if not chunks:
             return []
+        language_name = cls.output_language_name(output_language)
         client = cls._provider_client()
         try:
             partials: list[str] = []
@@ -165,7 +193,7 @@ class AIService:
                         {
                             "role": "system",
                             "content": (
-                                "Summarize only the supplied lecture evidence in Vietnamese. "
+                                f"Summarize only the supplied lecture evidence in {language_name}. "
                                 "Do not use outside knowledge."
                             ),
                         },
@@ -190,7 +218,7 @@ class AIService:
                         {
                             "role": "system",
                             "content": (
-                                "Synthesize all supplied chunk summaries in Vietnamese. "
+                                f"Synthesize all supplied chunk summaries in {language_name}. "
                                 "Preserve topics from the end of the lecture and add no facts."
                             ),
                         },
@@ -215,11 +243,16 @@ class AIService:
             return []
 
     @classmethod
-    async def generate_grounded_flashcards(cls, transcript_data: dict) -> list[dict[str, Any]]:
+    async def generate_grounded_flashcards(
+        cls,
+        transcript_data: dict,
+        output_language: str = "vi",
+    ) -> list[dict[str, Any]]:
         """Generate evidence-linked flashcards across every transcript chunk."""
         if not config.GEMINI_API_KEY:
             return []
         chunks = cls._canonical_segment_chunks(transcript_data)
+        language_name = cls.output_language_name(output_language)
         client = cls._provider_client()
         flashcards: list[dict[str, Any]] = []
         for chunk in chunks:
@@ -230,7 +263,7 @@ class AIService:
                         {
                             "role": "system",
                             "content": (
-                                "Create Vietnamese study flashcards using only the supplied lecture "
+                                f"Create {language_name} study flashcards using only the supplied lecture "
                                 "evidence. Never invent a fact or source identifier."
                             ),
                         },
@@ -255,11 +288,16 @@ class AIService:
         return flashcards[:10]
 
     @classmethod
-    async def generate_persistent_quizzes(cls, transcript_data: dict) -> list[dict[str, Any]]:
+    async def generate_persistent_quizzes(
+        cls,
+        transcript_data: dict,
+        output_language: str = "vi",
+    ) -> list[dict[str, Any]]:
         """Generate evidence-linked quiz items across every transcript chunk."""
         if not config.GEMINI_API_KEY:
             return []
         chunks = cls._canonical_segment_chunks(transcript_data)
+        language_name = cls.output_language_name(output_language)
         client = cls._provider_client()
         quizzes: list[dict[str, Any]] = []
         for chunk in chunks:
@@ -270,7 +308,7 @@ class AIService:
                         {
                             "role": "system",
                             "content": (
-                                "Create Vietnamese multiple-choice questions using only the supplied "
+                                f"Create {language_name} multiple-choice questions using only the supplied "
                                 "lecture evidence. Never invent a fact or source identifier."
                             ),
                         },

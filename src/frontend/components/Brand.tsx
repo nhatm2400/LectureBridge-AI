@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 
+import { useI18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export function BrandMark({ className }: { className?: string }) {
@@ -29,8 +32,9 @@ export function Brand({
   className?: string;
   wordmarkClassName?: string;
 }) {
+  const { t } = useI18n();
   return (
-    <Link href={href} className={cn('inline-flex min-h-11 shrink-0 items-center gap-2.5 rounded-md font-bold text-[var(--lb-ink)]', className)} aria-label="LectureBridge, trang chủ">
+    <Link href={href} className={cn('inline-flex min-h-11 shrink-0 items-center gap-2.5 rounded-md font-bold text-[var(--lb-ink)]', className)} aria-label={t('LectureBridge, trang chủ', 'LectureBridge, home')}>
       <BrandMark />
       {!compact && <span className={cn('text-[1.05rem] tracking-[-0.02em]', wordmarkClassName)}>LectureBridge</span>}
     </Link>

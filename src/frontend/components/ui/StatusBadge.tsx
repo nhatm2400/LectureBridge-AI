@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useI18n } from '@/lib/i18n';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -25,38 +26,41 @@ interface StatusBadgeProps {
 const statusConfig = {
   queued: {
     icon: <Loader2 className="h-3.5 w-3.5" />,
-    label: 'Chờ hàng đợi',
     className: 'bg-slate-100 text-slate-700 border-slate-200'
   },
   processing: {
     icon: <Loader2 className="h-3.5 w-3.5 animate-spin" />,
-    label: 'Đang xử lý',
     className: 'bg-amber-50 text-amber-700 border-amber-200'
   },
   ready: {
     icon: <CheckCircle2 className="h-3.5 w-3.5" />,
-    label: 'Sẵn sàng',
     className: 'bg-green-50 text-green-700 border-green-200'
   },
   error: {
     icon: <XCircle className="h-3.5 w-3.5" />,
-    label: 'Lỗi',
     className: 'bg-red-50 text-red-700 border-red-200'
   },
   live: {
     icon: <CircleDot className="h-3.5 w-3.5 animate-pulse" />,
-    label: 'LIVE',
     className: 'bg-red-600 text-white border-transparent'
   },
   ended: {
     icon: <StopCircle className="h-3.5 w-3.5" />,
-    label: 'Đã kết thúc',
     className: 'bg-slate-100 text-slate-600 border-slate-200'
   }
 };
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
+  const { t } = useI18n();
   const config = statusConfig[status];
+  const labels: Record<Status, string> = {
+    queued: t('Chờ hàng đợi', 'Queued'),
+    processing: t('Đang xử lý', 'Processing'),
+    ready: t('Sẵn sàng', 'Ready'),
+    error: t('Lỗi', 'Error'),
+    live: 'LIVE',
+    ended: t('Đã kết thúc', 'Ended'),
+  };
   
   return (
     <div className={cn(
@@ -65,7 +69,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
       className
     )}>
       {config.icon}
-      <span>{config.label}</span>
+      <span>{labels[status]}</span>
     </div>
   );
 }

@@ -4,8 +4,10 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ClipboardList, Trophy } from 'lucide-react';
 import { api, type StudentDashboard } from '@/lib/api';
+import { localeCode, useI18n } from '@/lib/i18n';
 
 export default function StudentQuizAttemptsPage() {
+  const { locale, t } = useI18n();
   const [dashboard, setDashboard] = useState<StudentDashboard | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,25 +29,25 @@ export default function StudentQuizAttemptsPage() {
     <div className="min-h-screen bg-bg-main">
       <div className="mx-auto max-w-6xl space-y-6 px-6 py-10 md:px-10">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 md:text-3xl">Lượt làm bài quiz</h1>
-          <p className="mt-2 text-sm font-semibold text-slate-600">Theo dõi lịch sử quiz gần đây và điểm số đạt được.</p>
+          <h1 className="text-2xl font-extrabold text-slate-900 md:text-3xl">{t('Lượt làm bài quiz', 'Quiz attempts')}</h1>
+          <p className="mt-2 text-sm font-semibold text-slate-600">{t('Theo dõi lịch sử quiz gần đây và điểm số đạt được.', 'Review your recent quiz history and scores.')}</p>
         </div>
 
         {loading ? (
-          <div className="rounded-2xl border border-slate-100 bg-white p-8 text-sm font-bold text-slate-400">Đang tải dữ liệu...</div>
+          <div className="rounded-2xl border border-slate-100 bg-white p-8 text-sm font-bold text-slate-400">{t('Đang tải dữ liệu...', 'Loading data...')}</div>
         ) : !dashboard || dashboard.quiz_scores.length === 0 ? (
           <div className="rounded-2xl border border-slate-100 bg-white p-10 text-center">
             <ClipboardList size={28} className="mx-auto mb-3 text-slate-300" />
-            <p className="text-sm font-bold text-slate-400">Chưa có lượt làm quiz nào.</p>
-            <p className="text-xs font-bold text-slate-400 mt-2">Vào trang video bài học để bắt đầu làm quiz.</p>
+            <p className="text-sm font-bold text-slate-400">{t('Chưa có lượt làm quiz nào.', 'No quiz attempts yet.')}</p>
+            <p className="text-xs font-bold text-slate-400 mt-2">{t('Vào trang video bài học để bắt đầu làm quiz.', 'Open a lesson video to start a quiz.')}</p>
           </div>
         ) : (
           <div className="rounded-2xl border border-slate-100 bg-white overflow-hidden shadow-sm">
             <div className="grid grid-cols-12 bg-slate-50 px-6 py-3 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
-              <div className="col-span-6">Quiz</div>
-              <div className="col-span-2">Trạng thái</div>
-              <div className="col-span-2">Điểm</div>
-              <div className="col-span-2 text-right">Thời gian</div>
+              <div className="col-span-6">{t('Bài kiểm tra', 'Quiz')}</div>
+              <div className="col-span-2">{t('Trạng thái', 'Status')}</div>
+              <div className="col-span-2">{t('Điểm', 'Score')}</div>
+              <div className="col-span-2 text-right">{t('Thời gian', 'Time')}</div>
             </div>
             <div className="divide-y divide-slate-100">
               {dashboard.quiz_scores.map((q, idx) => (
@@ -62,7 +64,7 @@ export default function StudentQuizAttemptsPage() {
                     </span>
                   </div>
                   <div className="col-span-2 text-right text-xs font-bold text-slate-400">
-                    {new Date(q.created_at).toLocaleString('vi-VN')}
+                    {new Date(q.created_at).toLocaleString(localeCode(locale))}
                   </div>
                 </div>
               ))}
@@ -72,7 +74,7 @@ export default function StudentQuizAttemptsPage() {
 
         <div>
           <Link href="/student/library" className="text-xs font-extrabold uppercase tracking-wider text-[#FF4F6E] hover:underline">
-            Quay lại tổng quan
+            {t('Quay lại tổng quan', 'Back to dashboard')}
           </Link>
         </div>
       </div>

@@ -101,6 +101,28 @@ def test_source_fingerprint_is_stable_and_changes_with_transcript():
     assert _transcript_fingerprint(first) != _transcript_fingerprint(changed)
 
 
+def test_bilingual_transcript_uses_requested_output_language_as_default():
+    source = {
+        "video_id": "video-1",
+        "language": "vi",
+        "segments": [{"index": 0, "start": 0, "end": 1, "text": "Xin chao"}],
+    }
+    translated = {
+        "video_id": "video-1",
+        "language": "en",
+        "segments": [{"index": 0, "start": 0, "end": 1, "text": "Hello"}],
+    }
+
+    result = AIService.build_bilingual_transcript(
+        source,
+        translated,
+        preferred_language="en",
+    )
+
+    assert result["language"] == "en"
+    assert result["segments"][0]["text"] == "Hello"
+
+
 @pytest.mark.asyncio
 async def test_full_summary_covers_last_chunk_without_prefix_truncation(monkeypatch):
     calls: list[str] = []
@@ -146,3 +168,108 @@ async def test_full_summary_covers_last_chunk_without_prefix_truncation(monkeypa
     }
     assert len(calls) == 4  # three chunks and one final synthesis
     assert any("marker-80" in call and '"segment_id": 80' in call for call in calls)
+
+
+@pytest.mark.asyncio
+async def test_full_summary_uses_requested_english_output_language(monkeypatch):
+    system_prompts: list[str] = []
+
+    class Message:
+        content = "- English summary"
+
+    class Choice:
+        message = Message()
+
+    class Response:
+        choices = [Choice()]
+
+    class Completions:
+        async def create(self, **kwargs):
+            system_prompts.append(kwargs["messages"][0]["content"])
+            return Response()
+
+    class Chat:
+        completions = Completions()
+
+    class FakeClient:
+        chat = Chat()
+
+    monkeypatch.setattr(
+        "src.backend.services.ai_service.AsyncOpenAI",
+        lambda **_kwargs: FakeClient(),
+    )
+    monkeypatch.setattr(
+        "src.backend.services.ai_service.config.GEMINI_API_KEY",
+        "test-key",
+    )
+
+    result = await AIService.summarize_full_lecture(
+        {
+            "segments": [
+                {"index": 0, "start": 0, "end": 1, "text": "Source evidence"}
+            ]
+        },
+        output_language="en",
+    )
+
+    assert result == ["- English summary"]
+    assert system_prompts == [
+        "Summarize only the supplied lecture evidence in English. Do not use outside knowledge."
+    ]
+
+
+@pytest.mark.asyncio
+async def test_flashcards_and_quizzes_use_requested_english_output_language(monkeypatch):
+    system_prompts: list[str] = []
+
+    class Message:
+        def __init__(self, content: str):
+            self.content = content
+
+    class Choice:
+        def __init__(self, content: str):
+            self.message = Message(content)
+
+    class Response:
+        def __init__(self, content: str):
+            self.choices = [Choice(content)]
+
+    class Completions:
+        async def create(self, **kwargs):
+            prompt = kwargs["messages"][0]["content"]
+            system_prompts.append(prompt)
+            if "flashcards" in prompt:
+                return Response('{"flashcards": []}')
+            return Response('{"quizzes": []}')
+
+    class Chat:
+        completions = Completions()
+
+    class FakeClient:
+        chat = Chat()
+
+    monkeypatch.setattr(
+        "src.backend.services.ai_service.AsyncOpenAI",
+        lambda **_kwargs: FakeClient(),
+    )
+    monkeypatch.setattr(
+        "src.backend.services.ai_service.config.GEMINI_API_KEY",
+        "test-key",
+    )
+    transcript = {
+        "segments": [
+            {"index": 0, "start": 0, "end": 1, "text": "Source evidence"}
+        ]
+    }
+
+    await AIService.generate_grounded_flashcards(
+        transcript,
+        output_language="en",
+    )
+    await AIService.generate_persistent_quizzes(
+        transcript,
+        output_language="en",
+    )
+
+    assert len(system_prompts) == 2
+    assert all("English" in prompt for prompt in system_prompts)

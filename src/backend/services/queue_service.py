@@ -26,46 +26,100 @@ def enqueue_pipeline_job(
     *,
     video_id: str,
     video_path: str,
+    output_language: str = "vi",
     fallback_task_adder: Callable[[Callable[..., Any], Any], None] | None = None,
 ):
     queue = _get_rq_queue()
     if queue is not None:
         try:
-            queue.enqueue(run_video_pipeline_sync, video_id, video_path, job_timeout=60 * 60)
+            queue.enqueue(
+                run_video_pipeline_sync,
+                video_id,
+                video_path,
+                output_language,
+                job_timeout=60 * 60,
+            )
             return "rq"
         except Exception:
             pass
     if fallback_task_adder is not None:
-        fallback_task_adder(run_video_pipeline, video_id, video_path)
+        fallback_task_adder(
+            run_video_pipeline,
+            video_id,
+            video_path,
+            output_language,
+        )
         return "background_tasks"
-    asyncio.create_task(run_video_pipeline(video_id, video_path))
+    asyncio.create_task(
+        run_video_pipeline(
+            video_id,
+            video_path,
+            output_language=output_language,
+        )
+    )
     return "in_process_asyncio"
 
 
-async def _download_and_run(video_id: str, url: str):
+async def _download_and_run(
+    video_id: str,
+    url: str,
+    output_language: str = "vi",
+):
     path = await VideoService.download_video(url, video_id)
-    await run_video_pipeline(video_id, path)
+    await run_video_pipeline(
+        video_id,
+        path,
+        output_language=output_language,
+    )
 
 
 def enqueue_download_and_pipeline(
     *,
     video_id: str,
     url: str,
+    output_language: str = "vi",
     fallback_task_adder: Callable[[Callable[..., Any], Any], None] | None = None,
 ):
     queue = _get_rq_queue()
     if queue is not None:
         try:
-            queue.enqueue(_download_and_run_sync, video_id, url, job_timeout=60 * 60)
+            queue.enqueue(
+                _download_and_run_sync,
+                video_id,
+                url,
+                output_language,
+                job_timeout=60 * 60,
+            )
             return "rq"
         except Exception:
             pass
     if fallback_task_adder is not None:
-        fallback_task_adder(_download_and_run, video_id, url)
+        fallback_task_adder(
+            _download_and_run,
+            video_id,
+            url,
+            output_language,
+        )
         return "background_tasks"
-    asyncio.create_task(_download_and_run(video_id, url))
+    asyncio.create_task(
+        _download_and_run(
+            video_id,
+            url,
+            output_language=output_language,
+        )
+    )
     return "in_process_asyncio"
 
 
-def _download_and_run_sync(video_id: str, url: str):
-    asyncio.run(_download_and_run(video_id, url))
+def _download_and_run_sync(
+    video_id: str,
+    url: str,
+    output_language: str = "vi",
+):
+    asyncio.run(
+        _download_and_run(
+            video_id,
+            url,
+            output_language=output_language,
+        )
+    )

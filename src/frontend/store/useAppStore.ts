@@ -6,6 +6,7 @@ import { persist } from 'zustand/middleware';
 type Role = 'teacher' | 'student' | 'admin';
 type FontSize = 'S' | 'M' | 'L' | 'XL';
 type Theme = 'light' | 'dark';
+export type Locale = 'vi' | 'en';
 
 interface User {
   name: string;
@@ -28,6 +29,9 @@ interface AppState {
   
   theme: Theme;
   setTheme: (theme: Theme) => void;
+
+  locale: Locale;
+  setLocale: (locale: Locale) => void;
   
   highContrast: boolean;
   setHighContrast: (val: boolean) => void;
@@ -61,6 +65,9 @@ export const useAppStore = create<AppState>()(
       
       theme: 'light',
       setTheme: (theme) => set({ theme }),
+
+      locale: 'vi',
+      setLocale: (locale) => set({ locale }),
       
       highContrast: true,
       setHighContrast: (highContrast) => set({ highContrast }),
@@ -70,12 +77,13 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'udl-app-storage',
-      version: 2,
+      version: 3,
       migrate: (persistedState: unknown) => {
-        const state = (persistedState as { state?: Record<string, unknown> })?.state || {};
+        const state = (persistedState || {}) as Partial<AppState>;
         return {
           ...state,
-        };
+          locale: state.locale === 'en' ? 'en' : 'vi',
+        } as AppState;
       },
     }
   )

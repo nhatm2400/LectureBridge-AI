@@ -12,6 +12,8 @@ export interface AuthUser {
   role: "student" | "admin" | "teacher";
 }
 
+export type OutputLanguage = "vi" | "en";
+
 export interface LoginResponse {
   role: "student" | "admin" | "teacher";
   user: AuthUser;
@@ -438,6 +440,7 @@ export interface UploadStartResponse {
   queue_mode: string;
   message: string;
   filename: string;
+  output_language: OutputLanguage;
 }
 
 const buildHeaders = (isMultipart = false): HeadersInit => {
@@ -574,8 +577,11 @@ export const api = {
       return res.json();
     },
 
-    async reprocessLectureEvents(videoId: string): Promise<LectureProcessingMetrics> {
-      const res = await apiFetch(`/api/videos/${videoId}/events/reprocess`, {
+    async reprocessLectureEvents(
+      videoId: string,
+      outputLanguage: OutputLanguage,
+    ): Promise<LectureProcessingMetrics> {
+      const res = await apiFetch(`/api/videos/${videoId}/events/reprocess?output_language=${outputLanguage}`, {
         method: "POST",
         headers: buildHeaders(),
       });
@@ -718,13 +724,15 @@ export const api = {
       params: {
         video_title?: string;
         module_id?: string;
+        output_language: OutputLanguage;
         onProgress?: (percent: number) => void;
-      } = {},
+      },
     ): Promise<UploadStartResponse> {
       const formData = new FormData();
       formData.append("file", file);
       if (params.video_title) formData.append("video_title", params.video_title);
       if (params.module_id) formData.append("module_id", params.module_id);
+      formData.append("output_language", params.output_language);
 
       return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
@@ -758,7 +766,8 @@ export const api = {
       content_type: string;
       video_title?: string;
       module_id?: string;
-    }): Promise<{ video_id: string; upload_url: string; s3_key: string; expires_in: number }> {
+      output_language: OutputLanguage;
+    }): Promise<{ video_id: string; upload_url: string; s3_key: string; expires_in: number; output_language: OutputLanguage }> {
       const res = await apiFetch("/api/videos/presign-upload", {
         method: "POST",
         headers: buildHeaders(),
@@ -783,12 +792,17 @@ export const api = {
       }
       return res.json();
     },
-    async uploadBatch(files: File[], moduleId?: string): Promise<BatchUploadResponse> {
+    async uploadBatch(
+      files: File[],
+      moduleId: string | undefined,
+      outputLanguage: OutputLanguage,
+    ): Promise<BatchUploadResponse> {
       const formData = new FormData();
       for (const file of files) {
         formData.append("files", file);
       }
       if (moduleId) formData.append("module_id", moduleId);
+      formData.append("output_language", outputLanguage);
       const res = await apiFetch("/api/videos/upload-batch", {
         method: "POST",
         headers: buildHeaders(true),

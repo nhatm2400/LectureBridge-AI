@@ -48,21 +48,41 @@ def _build_client():
 
 def test_upload_returns_queue_mode(monkeypatch):
     client = _build_client()
+    queued = {}
 
     async def fake_save_video_stream(upload_file, filename, max_size_bytes):
         return Path("data/uploads/videos") / filename
 
     monkeypatch.setattr("src.backend.api.videos_router.VideoService.save_video_stream", fake_save_video_stream)
+    def fake_enqueue(**kwargs):
+        queued.update(kwargs)
+        return "background_tasks"
+
     monkeypatch.setattr(
         "src.backend.api.videos_router.enqueue_pipeline_job",
-        lambda **kwargs: "background_tasks",
+        fake_enqueue,
     )
 
     response = client.post(
         "/api/videos/upload",
         files={"file": ("lesson.mp4", b"dummy-bytes", "video/mp4")},
+        data={"output_language": "en"},
     )
     assert response.status_code == 200, response.text
     body = response.json()
     assert body["queue_mode"] == "background_tasks"
     assert body["status"] == "processing"
+    assert body["output_language"] == "en"
+    assert queued["output_language"] == "en"
+
+
+def test_upload_rejects_unknown_output_language():
+    client = _build_client()
+
+    response = client.post(
+        "/api/videos/upload",
+        files={"file": ("lesson.mp4", b"dummy-bytes", "video/mp4")},
+        data={"output_language": "fr"},
+    )
+
+    assert response.status_code == 422

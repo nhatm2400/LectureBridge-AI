@@ -10,13 +10,14 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { StatePanel } from '@/components/ui/StatePanel';
 import { Surface } from '@/components/ui/Surface';
 import { api, type Course, type StudentDashboard } from '@/lib/api';
+import { type Translate, useI18n } from '@/lib/i18n';
 import { getFullImageUrl } from '@/lib/utils';
 
-function normalizeCourseDescription(description?: string | null): string {
+function normalizeCourseDescription(description: string | null | undefined, t: Translate): string {
   const raw = (description || '').trim();
   if (!raw) return '';
   if (raw.toLowerCase().includes('khu tự học cá nhân cho video học sinh tự tải lên')) {
-    return 'Không gian tự học cá nhân cho các video bạn tự tải lên.';
+    return t('Không gian tự học cá nhân cho các video bạn tự tải lên.', 'A personal learning space for videos you upload.');
   }
   return raw;
 }
@@ -33,6 +34,7 @@ function formatPosition(seconds: number) {
 }
 
 export default function StudentDashboardPage() {
+  const { t } = useI18n();
   const [dashboard, setDashboard] = useState<StudentDashboard | null>(null);
   const [publicCourses, setPublicCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,12 +60,12 @@ export default function StudentDashboardPage() {
   const stats = useMemo(() => {
     const summary = dashboard?.stats;
     return [
-      { label: 'Khóa đang học', value: summary?.active_courses ?? 0, icon: Library },
-      { label: 'Bài hoàn thành', value: summary?.completed_lessons ?? 0, icon: CheckCircle },
-      { label: 'Đã xem', value: formatHours(summary?.total_watch_seconds ?? 0), icon: Clock },
-      { label: 'Quiz trung bình', value: `${summary?.average_quiz_score ?? 0}%`, icon: Trophy },
+      { label: t('Khóa đang học', 'Active courses'), value: summary?.active_courses ?? 0, icon: Library },
+      { label: t('Bài hoàn thành', 'Lessons completed'), value: summary?.completed_lessons ?? 0, icon: CheckCircle },
+      { label: t('Đã xem', 'Watch time'), value: formatHours(summary?.total_watch_seconds ?? 0), icon: Clock },
+      { label: t('Quiz trung bình', 'Average quiz'), value: `${summary?.average_quiz_score ?? 0}%`, icon: Trophy },
     ];
-  }, [dashboard]);
+  }, [dashboard, t]);
 
   const availableCourses = useMemo(() => {
     const enrolledIds = new Set((dashboard?.courses ?? []).map((course) => course.course_id));
@@ -78,27 +80,27 @@ export default function StudentDashboardPage() {
     <div className="min-h-screen bg-[var(--lb-canvas)]">
       <div className="mx-auto max-w-[1440px] space-y-10 px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
         <PageHeader
-          eyebrow="Không gian học"
-          title="Tiếp tục từ nơi bạn dừng lại"
-          description="Mở lại bài đang học, theo dõi tiến độ và quay về đúng mạch bài giảng khi bạn bỏ lỡ một đoạn."
-          action={<Link href="/student/upload" className={buttonClassName({ variant: 'secondary' })}>Tải video lên</Link>}
+          eyebrow={t('Không gian học', 'Learning workspace')}
+          title={t('Tiếp tục từ nơi bạn dừng lại', 'Continue where you left off')}
+          description={t('Mở lại bài đang học, theo dõi tiến độ và quay về đúng mạch bài giảng khi bạn bỏ lỡ một đoạn.', 'Resume your current lesson, track progress, and recover the learning thread whenever you miss a section.')}
+          action={<Link href="/student/upload" className={buttonClassName({ variant: 'secondary' })}>{t('Tải video lên', 'Upload video')}</Link>}
         />
 
         {loading ? (
-          <StatePanel state="loading" title="Đang chuẩn bị thư viện" description="LectureBridge đang tải tiến độ và các bài giảng của bạn." />
+          <StatePanel state="loading" title={t('Đang chuẩn bị thư viện', 'Preparing your library')} description={t('LectureBridge đang tải tiến độ và các bài giảng của bạn.', 'LectureBridge is loading your progress and lectures.')} />
         ) : loadError || !dashboard ? (
-          <StatePanel state="error" title="Chưa thể tải tiến độ học" description="Vui lòng tải lại trang hoặc kiểm tra kết nối với máy chủ." action={<button type="button" onClick={() => window.location.reload()} className={buttonClassName()}>Tải lại</button>} />
+          <StatePanel state="error" title={t('Chưa thể tải tiến độ học', 'Could not load learning progress')} description={t('Vui lòng tải lại trang hoặc kiểm tra kết nối với máy chủ.', 'Reload the page or check the server connection.')} action={<button type="button" onClick={() => window.location.reload()} className={buttonClassName()}>{t('Tải lại', 'Reload')}</button>} />
         ) : (
           <>
             <section aria-labelledby="continue-heading">
               <div className="mb-4 flex items-end justify-between gap-4">
                 <div>
-                  <p className="text-xs font-bold tracking-[0.1em] text-[var(--lb-accent)]">ƯU TIÊN</p>
-                  <h2 id="continue-heading" className="mt-1 text-2xl">Học tiếp</h2>
+                  <p className="text-xs font-bold tracking-[0.1em] text-[var(--lb-accent)]">{t('ƯU TIÊN', 'UP NEXT')}</p>
+                  <h2 id="continue-heading" className="mt-1 text-2xl">{t('Học tiếp', 'Continue learning')}</h2>
                 </div>
                 {remainingLessons.length > 0 && (
                   <button type="button" onClick={() => setShowAllIncomplete((current) => !current)} className="min-h-11 rounded-md px-3 text-sm font-bold text-[var(--lb-accent)] hover:bg-[var(--lb-accent-soft)]">
-                    {showAllIncomplete ? 'Thu gọn' : `Xem thêm ${remainingLessons.length} bài`}
+                    {showAllIncomplete ? t('Thu gọn', 'Show less') : t(`Xem thêm ${remainingLessons.length} bài`, `Show ${remainingLessons.length} more lessons`)}
                   </button>
                 )}
               </div>
@@ -111,20 +113,20 @@ export default function StudentDashboardPage() {
                     </div>
                     <div className="flex flex-col justify-between p-6 sm:p-8">
                       <div>
-                        <span className="rounded-full border border-[var(--lb-border)] bg-[var(--lb-elevated)] px-3 py-1 text-xs font-bold text-[var(--lb-muted)]">Đang học · {primaryLesson.progress_percent}%</span>
+                        <span className="rounded-full border border-[var(--lb-border)] bg-[var(--lb-elevated)] px-3 py-1 text-xs font-bold text-[var(--lb-muted)]">{t('Đang học', 'In progress')} · {primaryLesson.progress_percent}%</span>
                         <h3 className="mt-5 text-2xl leading-tight">{primaryLesson.title}</h3>
-                        <p className="mt-3 text-sm text-[var(--lb-muted)]">Tiếp tục tại {formatPosition(primaryLesson.last_position_seconds)}</p>
+                        <p className="mt-3 text-sm text-[var(--lb-muted)]">{t('Tiếp tục tại', 'Resume at')} {formatPosition(primaryLesson.last_position_seconds)}</p>
                       </div>
                       <Link href={`/student/videos/${primaryLesson.lesson_id}`} className={buttonClassName({ className: 'mt-7 w-full sm:w-fit' })}>
-                        Mở bài giảng <ArrowRight size={18} aria-hidden="true" />
+                        {t('Mở bài giảng', 'Open lecture')} <ArrowRight size={18} aria-hidden="true" />
                       </Link>
                     </div>
                   </Surface>
 
                   <Surface className="p-5">
-                    <h3 className="text-base">Các bài đang dở</h3>
+                    <h3 className="text-base">{t('Các bài đang dở', 'Other lessons in progress')}</h3>
                     {remainingLessons.length === 0 ? (
-                      <p className="mt-4 text-sm leading-6 text-[var(--lb-muted)]">Chỉ còn bài hiện tại. Hoàn thành bài để cập nhật tiến độ.</p>
+                      <p className="mt-4 text-sm leading-6 text-[var(--lb-muted)]">{t('Chỉ còn bài hiện tại. Hoàn thành bài để cập nhật tiến độ.', 'Only the current lesson remains. Complete it to update your progress.')}</p>
                     ) : (
                       <div className="mt-3 divide-y divide-[var(--lb-border)]">
                         {(showAllIncomplete ? remainingLessons : remainingLessons.slice(0, 3)).map((lesson) => (
@@ -141,12 +143,12 @@ export default function StudentDashboardPage() {
                   </Surface>
                 </div>
               ) : (
-                <StatePanel state="empty" title="Không có bài đang dở" description="Chọn một khóa học bên dưới hoặc tải video của bạn lên để bắt đầu." action={<Link href="/student/upload" className={buttonClassName()}>Tải video lên</Link>} />
+                <StatePanel state="empty" title={t('Không có bài đang dở', 'No unfinished lessons')} description={t('Chọn một khóa học bên dưới hoặc tải video của bạn lên để bắt đầu.', 'Choose a course below or upload a video to get started.')} action={<Link href="/student/upload" className={buttonClassName()}>{t('Tải video lên', 'Upload video')}</Link>} />
               )}
             </section>
 
             <section aria-labelledby="overview-heading">
-              <h2 id="overview-heading" className="mb-4 text-lg">Tổng quan tiến độ</h2>
+              <h2 id="overview-heading" className="mb-4 text-lg">{t('Tổng quan tiến độ', 'Progress overview')}</h2>
               <div className="grid overflow-hidden rounded-[10px] border border-[var(--lb-border)] bg-[var(--lb-surface)] sm:grid-cols-2 lg:grid-cols-4">
                 {stats.map((stat, index) => (
                   <div key={stat.label} className={`flex items-center gap-4 p-5 ${index < stats.length - 1 ? 'border-b border-[var(--lb-border)] sm:border-r lg:border-b-0' : ''} ${index === 1 ? 'lg:border-b-0' : ''}`}>
@@ -163,11 +165,11 @@ export default function StudentDashboardPage() {
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
               <section aria-labelledby="my-courses-heading">
                 <div className="mb-4">
-                  <h2 id="my-courses-heading" className="text-2xl">Khóa học của tôi</h2>
-                  <p className="mt-1 text-sm text-[var(--lb-muted)]">Chọn một khóa để xem bài học và tiến độ chi tiết.</p>
+                  <h2 id="my-courses-heading" className="text-2xl">{t('Khóa học của tôi', 'My courses')}</h2>
+                  <p className="mt-1 text-sm text-[var(--lb-muted)]">{t('Chọn một khóa để xem bài học và tiến độ chi tiết.', 'Choose a course to view lessons and detailed progress.')}</p>
                 </div>
                 {dashboard.courses.length === 0 ? (
-                  <StatePanel state="empty" title="Bạn chưa có khóa học" description="Các khóa bạn đăng ký sẽ xuất hiện tại đây." />
+                  <StatePanel state="empty" title={t('Bạn chưa có khóa học', 'No courses yet')} description={t('Các khóa bạn đăng ký sẽ xuất hiện tại đây.', 'Courses you enroll in will appear here.')} />
                 ) : (
                   <div className="grid gap-5 md:grid-cols-2">
                     {dashboard.courses.map((course) => (
@@ -182,13 +184,13 @@ export default function StudentDashboardPage() {
                           </div>
                           <div className="mt-5">
                             <div className="mb-2 flex justify-between text-xs text-[var(--lb-muted)]">
-                              <span>{course.completed_lessons}/{course.total_lessons} bài</span><span>{course.progress_percent}%</span>
+                              <span>{course.completed_lessons}/{course.total_lessons} {t('bài', 'lessons')}</span><span>{course.progress_percent}%</span>
                             </div>
-                            <div className="h-1.5 overflow-hidden rounded-full bg-[var(--lb-border)]" role="progressbar" aria-label={`Tiến độ ${course.title}`} aria-valuenow={course.progress_percent} aria-valuemin={0} aria-valuemax={100}>
+                            <div className="h-1.5 overflow-hidden rounded-full bg-[var(--lb-border)]" role="progressbar" aria-label={t(`Tiến độ ${course.title}`, `${course.title} progress`)} aria-valuenow={course.progress_percent} aria-valuemin={0} aria-valuemax={100}>
                               <div className="h-full rounded-full bg-[var(--lb-accent)]" style={{ width: `${course.progress_percent}%` }} />
                             </div>
                           </div>
-                          <Link href={`/student/courses/${course.course_id}`} className={buttonClassName({ variant: 'secondary', className: 'mt-5 w-full' })}>Xem khóa học</Link>
+                          <Link href={`/student/courses/${course.course_id}`} className={buttonClassName({ variant: 'secondary', className: 'mt-5 w-full' })}>{t('Xem khóa học', 'View course')}</Link>
                         </div>
                       </Surface>
                     ))}
@@ -199,11 +201,11 @@ export default function StudentDashboardPage() {
               <aside aria-labelledby="quiz-heading">
                 <Surface className="p-5">
                   <div className="flex items-center justify-between gap-3">
-                    <h2 id="quiz-heading" className="text-lg">Quiz gần đây</h2>
+                    <h2 id="quiz-heading" className="text-lg">{t('Quiz gần đây', 'Recent quizzes')}</h2>
                     <BookOpen size={18} className="text-[var(--lb-accent)]" aria-hidden="true" />
                   </div>
                   {dashboard.quiz_scores.length === 0 ? (
-                    <p className="mt-4 text-sm text-[var(--lb-muted)]">Chưa có kết quả quiz.</p>
+                    <p className="mt-4 text-sm text-[var(--lb-muted)]">{t('Chưa có kết quả quiz.', 'No quiz results yet.')}</p>
                   ) : (
                     <div className="mt-3 divide-y divide-[var(--lb-border)]">
                       {(showAllQuizScores ? dashboard.quiz_scores : dashboard.quiz_scores.slice(0, 4)).map((quiz) => (
@@ -219,7 +221,7 @@ export default function StudentDashboardPage() {
                   )}
                   {dashboard.quiz_scores.length > 4 && (
                     <button type="button" onClick={() => setShowAllQuizScores((current) => !current)} className="mt-3 min-h-11 w-full rounded-md text-sm font-bold text-[var(--lb-accent)] hover:bg-[var(--lb-accent-soft)]">
-                      {showAllQuizScores ? 'Thu gọn' : `Xem thêm ${dashboard.quiz_scores.length - 4} kết quả`}
+                      {showAllQuizScores ? t('Thu gọn', 'Show less') : t(`Xem thêm ${dashboard.quiz_scores.length - 4} kết quả`, `Show ${dashboard.quiz_scores.length - 4} more results`)}
                     </button>
                   )}
                 </Surface>
@@ -228,8 +230,8 @@ export default function StudentDashboardPage() {
 
             {availableCourses.length > 0 && (
               <section className="border-t border-[var(--lb-border)] pt-9" aria-labelledby="catalog-heading">
-                <h2 id="catalog-heading" className="text-2xl">Khám phá khóa học</h2>
-                <p className="mt-1 text-sm text-[var(--lb-muted)]">Các khóa học đã xuất bản và sẵn sàng để đăng ký.</p>
+                <h2 id="catalog-heading" className="text-2xl">{t('Khám phá khóa học', 'Explore courses')}</h2>
+                <p className="mt-1 text-sm text-[var(--lb-muted)]">{t('Các khóa học đã xuất bản và sẵn sàng để đăng ký.', 'Published courses ready for enrollment.')}</p>
                 <div className="mt-5 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
                   {availableCourses.map((course) => (
                     <Surface key={course.id} as="article" className="overflow-hidden">
@@ -238,8 +240,8 @@ export default function StudentDashboardPage() {
                       </div>
                       <div className="p-5">
                         <h3 className="line-clamp-2 text-lg">{course.title}</h3>
-                        {course.description && <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--lb-muted)]">{normalizeCourseDescription(course.description)}</p>}
-                        <Link href={`/student/courses/${course.id}`} className={buttonClassName({ variant: 'secondary', className: 'mt-5 w-full' })}>Xem và đăng ký</Link>
+                        {course.description && <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--lb-muted)]">{normalizeCourseDescription(course.description, t)}</p>}
+                        <Link href={`/student/courses/${course.id}`} className={buttonClassName({ variant: 'secondary', className: 'mt-5 w-full' })}>{t('Xem và đăng ký', 'View and enroll')}</Link>
                       </div>
                     </Surface>
                   ))}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { LanguageController } from "@/components/LanguageController";
 import { ClientShell } from "@/components/layout/ClientShell";
 import { ThemeController } from "@/components/ThemeController";
 
@@ -20,6 +21,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col overflow-x-clip font-sans" suppressHydrationWarning>
+        <LanguageController />
         <ThemeController />
         <ClientShell>
           {children}

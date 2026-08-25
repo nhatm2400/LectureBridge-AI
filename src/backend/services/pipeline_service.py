@@ -10,11 +10,16 @@ from sqlalchemy import delete
 from sqlmodel import Session
 from sqlmodel import select
 
+from .. import config
 from ..database import engine
-from ..models import Flashcard, Lesson, ContentMetadata, Category, Course, Module, Quiz, Question, QuestionOption, QuizAttempt, UserFlashcardProgress
+from ..models import Flashcard, Lesson, ContentMetadata, Category, Course, Module, Quiz, Question, QuestionOption, QuizAttempt, UserFlashcardProgress, LectureEvent
 from .ai_service import AIService
 from .artifact_service import build_ai_analysis
 from .job_service import upsert_job_status
+from .question_answer_links.provider import get_question_answer_link_provider
+from .question_answer_links.service import process_question_answer_links
+from .semantic_events.provider import get_semantic_event_provider
+from .semantic_events.service import process_lecture_events
 from .video_service import VideoService
 
 logger = logging.getLogger(__name__)
@@ -49,9 +54,14 @@ async def _run_artifact_task(name: str, coro):
         logger.exception("Artifact generation failed: %s", name)
         return None, str(exc)
 
-async def run_video_pipeline(lesson_id: str, video_path: Path | str):
+async def run_video_pipeline(
+    lesson_id: str,
+    video_path: Path | str,
+    output_language: str = "vi",
+):
     video_path = Path(video_path)
     lesson_uuid = uuid.UUID(str(lesson_id))
+    output_language = AIService.normalize_output_language(output_language)
     try:
         with Session(engine) as session:
             def update_status(new_status: str):
@@ -96,12 +106,19 @@ async def run_video_pipeline(lesson_id: str, video_path: Path | str):
                 source_transcript=original_transcript,
                 translated_transcript=translated_transcript,
                 translation_error=None if translated_transcript else f"Khong the dich transcript sang {target_language}.",
+                preferred_language=output_language,
             )
-            vi_transcript = (
-                {"video_id": original_transcript.get("video_id"), "language": "vi", "segments": stored_transcript["segments_by_language"]["vi"]}
-                if "vi" in stored_transcript.get("segments_by_language", {})
-                else original_transcript
-            )
+            segments_by_language = stored_transcript.get("segments_by_language", {})
+            selected_segments = segments_by_language.get(output_language)
+            selected_transcript_language = output_language
+            if not isinstance(selected_segments, list):
+                selected_transcript_language = source_language
+                selected_segments = segments_by_language.get(source_language, original_transcript.get("segments", []))
+            artifact_transcript = {
+                **stored_transcript,
+                "language": selected_transcript_language,
+                "segments": selected_segments,
+            }
 
             source_fingerprint = _transcript_fingerprint(stored_transcript)
             cached_content = session.exec(
@@ -114,6 +131,7 @@ async def run_video_pipeline(lesson_id: str, video_path: Path | str):
             )
             reused_learning_artifacts = (
                 cached_analysis.get("source_fingerprint") == source_fingerprint
+                and cached_analysis.get("output_language") == output_language
             )
 
             update_status("ai_processing")
@@ -127,9 +145,27 @@ async def run_video_pipeline(lesson_id: str, video_path: Path | str):
                 logger.info("Reusing source-identical learning artifacts lesson_id=%s", lesson_id)
             else:
                 artifact_results = await asyncio.gather(
-                    _run_artifact_task("summary", AIService.summarize_full_lecture(vi_transcript)),
-                    _run_artifact_task("flashcards", AIService.generate_grounded_flashcards(vi_transcript)),
-                    _run_artifact_task("quizzes", AIService.generate_persistent_quizzes(vi_transcript)),
+                    _run_artifact_task(
+                        "summary",
+                        AIService.summarize_full_lecture(
+                            artifact_transcript,
+                            output_language=output_language,
+                        ),
+                    ),
+                    _run_artifact_task(
+                        "flashcards",
+                        AIService.generate_grounded_flashcards(
+                            artifact_transcript,
+                            output_language=output_language,
+                        ),
+                    ),
+                    _run_artifact_task(
+                        "quizzes",
+                        AIService.generate_persistent_quizzes(
+                            artifact_transcript,
+                            output_language=output_language,
+                        ),
+                    ),
                 )
                 artifact_names = ["summary", "flashcards", "quizzes"]
                 artifact_values = dict(zip(artifact_names, [result for result, _ in artifact_results]))
@@ -180,8 +216,15 @@ async def run_video_pipeline(lesson_id: str, video_path: Path | str):
                 quizzes=persistent_quizzes,
                 errors=artifact_errors,
                 require_source_evidence=True,
+                output_language=output_language,
             )
             ai_analysis["source_fingerprint"] = source_fingerprint
+            for metadata_key in (
+                "lecture_event_output_language",
+                "lecture_intelligence_status",
+            ):
+                if metadata_key in cached_analysis:
+                    ai_analysis[metadata_key] = cached_analysis[metadata_key]
 
             content_entry = session.exec(
                 select(ContentMetadata).where(ContentMetadata.lesson_id == lesson_uuid)
@@ -253,6 +296,60 @@ async def run_video_pipeline(lesson_id: str, video_path: Path | str):
                         )
                         session.add(option)
             session.commit()
+
+            existing_events = list(
+                session.exec(
+                    select(LectureEvent).where(LectureEvent.video_id == lesson_uuid)
+                ).all()
+            )
+            event_language_matches = (
+                cached_analysis.get("lecture_event_output_language") == output_language
+            )
+            should_process_events = not (
+                reused_learning_artifacts
+                and event_language_matches
+                and existing_events
+            )
+            if should_process_events and config.GEMINI_API_KEY:
+                try:
+                    event_result = await process_lecture_events(
+                        session,
+                        lesson_id,
+                        get_semantic_event_provider(),
+                        output_language=output_language,
+                    )
+                    relation_result = await process_question_answer_links(
+                        session,
+                        lesson_id,
+                        get_question_answer_link_provider(),
+                    )
+                    refreshed_content = session.exec(
+                        select(ContentMetadata).where(
+                            ContentMetadata.lesson_id == lesson_uuid
+                        )
+                    ).first()
+                    if refreshed_content and isinstance(refreshed_content.ai_analysis, dict):
+                        updated_analysis = dict(refreshed_content.ai_analysis)
+                        updated_analysis["lecture_event_output_language"] = output_language
+                        updated_analysis["lecture_intelligence_status"] = {
+                            "status": (
+                                "ready"
+                                if event_result.failed_chunks == 0
+                                else "partial"
+                            ),
+                            "events_created": event_result.events_created,
+                            "failed_chunks": event_result.failed_chunks,
+                            "relations_created": relation_result.relations_created,
+                        }
+                        refreshed_content.ai_analysis = updated_analysis
+                        session.add(refreshed_content)
+                        session.commit()
+                except Exception as exc:
+                    logger.warning(
+                        "Lecture intelligence generation failed lesson_id=%s error_code=%s",
+                        lesson_id,
+                        type(exc).__name__,
+                    )
             update_status("completed")
     except Exception as e:
         error_code = type(e).__name__
@@ -271,8 +368,18 @@ async def run_video_pipeline(lesson_id: str, video_path: Path | str):
             )
         logger.error("Pipeline failed for %s: %s", lesson_id, error_code)
 
-def run_video_pipeline_sync(lesson_id: str, video_path: str):
-    asyncio.run(run_video_pipeline(lesson_id, Path(video_path)))
+def run_video_pipeline_sync(
+    lesson_id: str,
+    video_path: str,
+    output_language: str = "vi",
+):
+    asyncio.run(
+        run_video_pipeline(
+            lesson_id,
+            Path(video_path),
+            output_language=output_language,
+        )
+    )
 
 def shutdown_pipeline_executor():
     executor.shutdown(wait=True)

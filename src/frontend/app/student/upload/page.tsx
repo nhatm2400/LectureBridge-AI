@@ -12,15 +12,16 @@ import {
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api, type MyVideo } from '@/lib/api';
+import { type Translate, useI18n } from '@/lib/i18n';
 import { selectUploadStrategy } from '@/lib/upload-strategy.mjs';
 
-function getVideoDisplayState(video: MyVideo) {
+function getVideoDisplayState(video: MyVideo, t: Translate) {
   const status = (video.status || '').toLowerCase();
   const completion = (video.completion_status || '').toLowerCase();
 
   if (status === 'completed') {
     return {
-      label: 'Hoàn thành',
+      label: t('Hoàn thành', 'Completed'),
       percent: 100,
       badgeClass: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
       barClass: 'bg-emerald-500',
@@ -29,7 +30,7 @@ function getVideoDisplayState(video: MyVideo) {
 
   if (status.includes('failed')) {
     return {
-      label: 'Xử lý lỗi',
+      label: t('Xử lý lỗi', 'Processing failed'),
       percent: Math.max(0, Math.min(100, video.progress_percent || 0)),
       badgeClass: 'bg-red-50 text-red-600 border border-red-100',
       barClass: 'bg-red-500',
@@ -38,7 +39,7 @@ function getVideoDisplayState(video: MyVideo) {
 
   if (status === 'queued' || status === 'pending_upload') {
     return {
-      label: 'Đang chờ xử lý',
+      label: t('Đang chờ xử lý', 'Queued'),
       percent: Math.max(5, Math.min(100, video.progress_percent || 5)),
       badgeClass: 'bg-amber-50 text-amber-600 border border-amber-100',
       barClass: 'bg-amber-500',
@@ -47,7 +48,7 @@ function getVideoDisplayState(video: MyVideo) {
 
   if (status && status !== 'completed') {
     return {
-      label: 'AI đang xử lý',
+      label: t('AI đang xử lý', 'AI processing'),
       percent: Math.max(10, Math.min(95, video.progress_percent || 10)),
       badgeClass: 'bg-rose-50 text-[#FF4F6E] border border-rose-100',
       barClass: 'bg-[#FF4F6E]',
@@ -56,7 +57,7 @@ function getVideoDisplayState(video: MyVideo) {
 
   if (completion === 'completed') {
     return {
-      label: 'Hoàn thành',
+      label: t('Hoàn thành', 'Completed'),
       percent: 100,
       badgeClass: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
       barClass: 'bg-emerald-500',
@@ -64,7 +65,7 @@ function getVideoDisplayState(video: MyVideo) {
   }
 
   return {
-    label: 'Chưa học',
+    label: t('Chưa học', 'Not started'),
     percent: Math.max(0, Math.min(100, video.progress_percent || 0)),
     badgeClass: 'bg-slate-100 text-slate-500 border border-slate-100',
     barClass: 'bg-slate-300',
@@ -73,6 +74,7 @@ function getVideoDisplayState(video: MyVideo) {
 
 export default function UploadVideo() {
   const router = useRouter();
+  const { locale, t } = useI18n();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -129,10 +131,10 @@ export default function UploadVideo() {
         if (xhr.status >= 200 && xhr.status < 300) {
           resolve();
         } else {
-          reject(new Error(`Tải video lên kho lưu trữ thất bại (HTTP ${xhr.status}). Liên hệ quản trị viên.`));
+          reject(new Error(t(`Tải video lên kho lưu trữ thất bại (HTTP ${xhr.status}). Liên hệ quản trị viên.`, `Uploading to storage failed (HTTP ${xhr.status}). Contact an administrator.`)));
         }
       };
-      xhr.onerror = () => reject(new Error('Không thể kết nối tới kho lưu trữ video. Vui lòng kiểm tra mạng hoặc liên hệ quản trị viên.'));
+      xhr.onerror = () => reject(new Error(t('Không thể kết nối tới kho lưu trữ video. Vui lòng kiểm tra mạng hoặc liên hệ quản trị viên.', 'Could not connect to video storage. Check your network or contact an administrator.')));
       xhr.open('PUT', url);
       xhr.setRequestHeader('Content-Type', contentType);
       xhr.send(file);
@@ -141,11 +143,12 @@ export default function UploadVideo() {
 
   const handleStartProcessing = async () => {
     if (!selectedFile) return;
+    const outputLanguage = locale;
 
     setIsUploading(true);
     setErrorMsg('');
     setUploadProgress(0);
-    setUploadStatusText('Đang kiểm tra cấu hình lưu trữ...');
+    setUploadStatusText(t('Đang kiểm tra cấu hình lưu trữ...', 'Checking storage configuration...'));
 
     try {
       const capabilities = await api.videos.getUploadCapabilities();
@@ -153,29 +156,31 @@ export default function UploadVideo() {
       let video_id: string;
 
       if (strategy === 'direct_object_storage') {
-        setUploadStatusText('Đang tải video trực tiếp lên kho lưu trữ...');
+        setUploadStatusText(t('Đang tải video trực tiếp lên kho lưu trữ...', 'Uploading video directly to storage...'));
         const contentType = selectedFile.type || 'video/mp4';
         const presigned = await api.videos.presignUpload({
           filename: selectedFile.name,
           content_type: contentType,
           video_title: videoTitle,
+          output_language: outputLanguage,
         });
         video_id = presigned.video_id;
         await uploadToObjectStorage(presigned.upload_url, selectedFile, contentType);
         setUploadProgress(85);
-        setUploadStatusText('Đang đăng ký video và khởi tạo xử lý...');
+        setUploadStatusText(t('Đang đăng ký video và khởi tạo xử lý...', 'Registering the video and starting processing...'));
         await api.videos.confirmUpload(video_id, presigned.s3_key);
       } else {
-        setUploadStatusText('Đang tải video lên máy chủ cục bộ...');
+        setUploadStatusText(t('Đang tải video lên máy chủ cục bộ...', 'Uploading video to the local server...'));
         const uploaded = await api.videos.uploadLocal(selectedFile, {
           video_title: videoTitle,
+          output_language: outputLanguage,
           onProgress: (percent) => setUploadProgress(Math.min(90, percent * 0.9)),
         });
         video_id = uploaded.video_id;
       }
 
       setUploadProgress(100);
-      setUploadStatusText('Đã tải lên và chuyển sang hàng đợi xử lý!');
+      setUploadStatusText(t('Đã tải lên và chuyển sang hàng đợi xử lý!', 'Uploaded and added to the processing queue!'));
 
       await loadMyVideos();
       setSelectedFile(null);
@@ -184,7 +189,7 @@ export default function UploadVideo() {
         router.push(`/student/videos/${video_id}/processing`);
       }, 800);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Upload thất bại. Vui lòng thử lại.';
+      const message = error instanceof Error ? error.message : t('Upload thất bại. Vui lòng thử lại.', 'Upload failed. Please try again.');
       setErrorMsg(message);
       setIsUploading(false);
       setUploadProgress(0);
@@ -199,10 +204,10 @@ export default function UploadVideo() {
         {/* Header Title */}
         <div className="space-y-2">
            <h1 className="text-4xl font-extrabold uppercase text-slate-900 tracking-tight">
-             CHIA SẺ <span className="text-[#FF4F6E]">BÀI GIẢNG</span> CỦA BẠN
+             {t('CHIA SẺ', 'SHARE YOUR')} <span className="text-[#FF4F6E]">{t('BÀI GIẢNG', 'LECTURE')}</span>{t(' CỦA BẠN', '')}
            </h1>
            <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px]">
-             Tải bài giảng để tạo phân tích AI và tính năng trợ năng
+             {t('Tải bài giảng để tạo phân tích AI và tính năng trợ năng', 'Upload a lecture to create AI analysis and accessibility resources')}
            </p>
         </div>
 
@@ -223,7 +228,7 @@ export default function UploadVideo() {
 
               {errorMsg && (
                 <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-xs font-extrabold animate-in fade-in slide-in-from-top-2">
-                  Lỗi: {errorMsg}
+                  {t('Lỗi', 'Error')}: {errorMsg}
                 </div>
               )}
 
@@ -243,26 +248,26 @@ export default function UploadVideo() {
                       {selectedFile ? <CheckCircle2 size={40} /> : <UploadCloud size={40} />}
                     </div>
                     <h3 className="text-xl font-extrabold text-slate-900 mb-2">
-                      {selectedFile ? 'Sẵn sàng xử lý!' : 'Kéo & thả video'}
+                      {selectedFile ? t('Sẵn sàng xử lý!', 'Ready to process!') : t('Kéo & thả video', 'Drag and drop a video')}
                     </h3>
                     <p className="text-sm font-bold text-slate-400 text-center max-w-[240px]">
-                      {selectedFile ? selectedFile.name : 'Hỗ trợ MP4, MOV, AVI. Dung lượng tối đa 500MB.'}
+                      {selectedFile ? selectedFile.name : t('Hỗ trợ MP4, MOV, AVI. Dung lượng tối đa 500MB.', 'Supports MP4, MOV, and AVI up to 500 MB.')}
                     </p>
 
                     {selectedFile && (
                       <div className="mt-4 px-4 py-1.5 bg-emerald-500/10 text-emerald-600 text-[10px] font-extrabold rounded-full uppercase tracking-widest">
-                        {(selectedFile.size / (1024 * 1024)).toFixed(1)} MB • Hợp lệ
+                        {(selectedFile.size / (1024 * 1024)).toFixed(1)} MB • {t('Hợp lệ', 'Valid')}
                       </div>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-extrabold uppercase tracking-widest text-slate-500">Tên video</label>
+                    <label className="text-xs font-extrabold uppercase tracking-widest text-slate-500">{t('Tên video', 'Video title')}</label>
                     <input
                       type="text"
                       value={videoTitle}
                       onChange={(e) => setVideoTitle(e.target.value)}
-                      placeholder="Nhập tên video hiển thị"
+                      placeholder={t('Nhập tên video hiển thị', 'Enter a display title')}
                       className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:border-[#FF4F6E]/40 focus:ring-2 focus:ring-[#FF4F6E]/10"
                     />
                   </div>
@@ -280,7 +285,7 @@ export default function UploadVideo() {
                   </div>
                   
                   <h3 className="text-xl font-extrabold text-slate-900 mb-2">
-                    {uploadStatusText || 'Hệ thống đang xử lý...'}
+                    {uploadStatusText || t('Hệ thống đang xử lý...', 'The system is processing...')}
                   </h3>
                   
                   <div className="w-full max-w-xs bg-slate-100 rounded-full h-3 mb-4 overflow-hidden">
@@ -303,7 +308,7 @@ export default function UploadVideo() {
                        : 'bg-[#FF4F6E] text-white shadow-xl shadow-[#FF4F6E]/20 hover:bg-[#e64663] hover:scale-[1.02] active:scale-95'
                    }`}
                  >
-                   {isUploading ? 'Hệ thống đang xử lý...' : 'Bắt đầu trích xuất AI'}
+                   {isUploading ? t('Hệ thống đang xử lý...', 'The system is processing...') : t('Bắt đầu trích xuất AI', 'Start AI extraction')}
                  </button>
                  
                  <div className="flex items-center gap-4 p-4 bg-[#FF4F6E]/5 rounded-2xl border border-[#FF4F6E]/10">
@@ -311,7 +316,7 @@ export default function UploadVideo() {
                        <Sparkles size={20} fill="currentColor" />
                     </div>
                     <div className="text-[11px] font-bold text-slate-500 leading-tight">
-                       Đang chép lời âm thanh và tạo <span className="text-[#FF4F6E]">tóm tắt trực quan</span> cho học tập toàn diện.
+                       {t('Đang chép lời âm thanh và tạo ', 'Transcribing audio and creating ')}<span className="text-[#FF4F6E]">{t('tóm tắt trực quan', 'visual notes')}</span>{t(' cho học tập toàn diện.', ' for an accessible learning experience.')}
                     </div>
                  </div>
               </div>
@@ -328,10 +333,10 @@ export default function UploadVideo() {
 
                <div className="grid grid-cols-2 gap-4">
                   {[
-                    { label: 'Phụ đề tự động', icon: FileVideo },
-                    { label: 'Ghi chú trực quan', icon: Sparkles },
-                    { label: 'Đồng bộ nhanh', icon: Zap },
-                    { label: 'Chất lượng HD', icon: Play },
+                    { label: t('Phụ đề tự động', 'Automatic captions'), icon: FileVideo },
+                    { label: t('Ghi chú trực quan', 'Visual notes'), icon: Sparkles },
+                    { label: t('Đồng bộ nhanh', 'Fast sync'), icon: Zap },
+                    { label: t('Chất lượng HD', 'HD quality'), icon: Play },
                   ].map((item, i) => (
                     <div key={i} className="p-4 bg-slate-50/50 border border-slate-100 rounded-2xl flex items-center gap-3">
                        <item.icon size={16} className="text-[#FF4F6E]" />
@@ -347,9 +352,9 @@ export default function UploadVideo() {
         <section className="bg-white rounded-[32px] border border-slate-100 p-8 shadow-sm">
           <div className="flex items-center justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-xl font-extrabold text-slate-900">Video tự học đã tải lên</h2>
+              <h2 className="text-xl font-extrabold text-slate-900">{t('Video tự học đã tải lên', 'Uploaded study videos')}</h2>
               <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                Truy xuất lại các video bạn đã upload để học tiếp
+                 {t('Truy xuất lại các video bạn đã upload để học tiếp', 'Return to your uploaded videos and continue learning')}
               </p>
             </div>
             <button
@@ -357,17 +362,17 @@ export default function UploadVideo() {
               onClick={loadMyVideos}
               className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-slate-600 hover:bg-slate-50"
             >
-              Tải lại
+               {t('Tải lại', 'Reload')}
             </button>
           </div>
           {myVideos.length === 0 ? (
             <div className="rounded-2xl bg-slate-50 p-8 text-center text-sm font-bold text-slate-400">
-              Chưa có video tự học nào.
+               {t('Chưa có video tự học nào.', 'No study videos have been uploaded yet.')}
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               {myVideos.map((video) => {
-                const display = getVideoDisplayState(video);
+                 const display = getVideoDisplayState(video, t);
                 return (
                   <Link
                     key={video.id}
