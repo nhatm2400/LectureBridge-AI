@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/Button';
 import { Surface } from '@/components/ui/Surface';
 import { api, type AskLectureResponse, type ContextRecoveryResponse } from '@/lib/api';
 import { type Translate, useI18n } from '@/lib/i18n';
+import { localizeLectureContent } from '@/lib/lecture-content-i18n';
 
 interface LectureGroundingPanelProps {
   videoId: string;
@@ -22,6 +23,9 @@ interface LectureGroundingPanelProps {
   outputLanguage: 'vi' | 'en';
   onSeek: (seconds: number) => void;
 }
+
+const MIN_RECOVERY_MINUTES = 2;
+const MAX_RECOVERY_MINUTES = 10;
 
 function formatTime(seconds: number): string {
   const safe = Math.max(0, Math.floor(seconds));
@@ -50,8 +54,10 @@ function eventLabel(type: string, t: Translate) {
 }
 
 export function LectureGroundingPanel({ videoId, currentTime, outputLanguage, onSeek }: LectureGroundingPanelProps) {
-  const { t } = useI18n();
-  const [windowSeconds, setWindowSeconds] = useState(300);
+  const { locale, t } = useI18n();
+  const [windowMinutes, setWindowMinutes] = useState('5');
+  const [recoveredWindowMinutes, setRecoveredWindowMinutes] = useState(5);
+  const [windowTouched, setWindowTouched] = useState(false);
   const [recovery, setRecovery] = useState<ContextRecoveryResponse | null>(null);
   const [isRecovering, setIsRecovering] = useState(false);
   const [recoveryError, setRecoveryError] = useState('');
@@ -60,16 +66,29 @@ export function LectureGroundingPanel({ videoId, currentTime, outputLanguage, on
   const [isAsking, setIsAsking] = useState(false);
   const [askError, setAskError] = useState('');
 
+  const parsedWindowMinutes = Number(windowMinutes);
+  const isWindowValid =
+    windowMinutes.trim() !== ''
+    && Number.isInteger(parsedWindowMinutes)
+    && parsedWindowMinutes >= MIN_RECOVERY_MINUTES
+    && parsedWindowMinutes <= MAX_RECOVERY_MINUTES;
+
   const recover = async () => {
+    setWindowTouched(true);
+    if (!isWindowValid) return;
+
+    const requestedWindowMinutes = parsedWindowMinutes;
     setIsRecovering(true);
     setRecoveryError('');
     setRecovery(null);
     try {
-      setRecovery(await api.videos.recoverContext(videoId, {
+      const result = await api.videos.recoverContext(videoId, {
         current_time: currentTime,
-        window_seconds: windowSeconds,
+        window_seconds: requestedWindowMinutes * 60,
         output_language: outputLanguage,
-      }));
+      });
+      setRecoveredWindowMinutes(requestedWindowMinutes);
+      setRecovery(result);
     } catch (error) {
       setRecoveryError(error instanceof Error ? error.message : t('Không thể phục hồi ngữ cảnh.', 'Could not recover context.'));
     } finally {
@@ -109,19 +128,45 @@ export function LectureGroundingPanel({ videoId, currentTime, outputLanguage, on
             </div>
           </div>
 
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
-            <label htmlFor="recovery-window" className="text-sm font-semibold text-[var(--lb-ink)]">
+          <div className="mt-5">
+            <label htmlFor="recovery-window" className="block text-sm font-semibold text-[var(--lb-ink)]">
               {t('Khoảng vừa bỏ lỡ', 'Missed window')}
-              <select id="recovery-window" value={windowSeconds} onChange={(event) => setWindowSeconds(Number(event.target.value))} className="lb-field mt-2 sm:w-40">
-                <option value={120}>{t('2 phút', '2 minutes')}</option>
-                <option value={300}>{t('5 phút', '5 minutes')}</option>
-                <option value={600}>{t('10 phút', '10 minutes')}</option>
-              </select>
             </label>
-            <Button onClick={recover} disabled={isRecovering} className="sm:mb-0">
+            <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex items-center gap-2 sm:w-48">
+                <input
+                  id="recovery-window"
+                  type="number"
+                  inputMode="numeric"
+                  min={MIN_RECOVERY_MINUTES}
+                  max={MAX_RECOVERY_MINUTES}
+                  step={1}
+                  value={windowMinutes}
+                  onChange={(event) => setWindowMinutes(event.target.value)}
+                  onBlur={() => setWindowTouched(true)}
+                  aria-invalid={windowTouched && !isWindowValid}
+                  aria-describedby="recovery-window-help"
+                  aria-label={t('Khoảng thời gian bỏ lỡ, tính bằng phút', 'Missed window in minutes')}
+                  className="lb-field min-w-0 flex-1"
+                />
+                <span className="shrink-0 text-sm font-semibold text-[var(--lb-muted)]">
+                  {t('phút', 'minutes')}
+                </span>
+              </div>
+              <Button onClick={recover} disabled={isRecovering || !isWindowValid}>
               {isRecovering ? <LoaderCircle className="animate-spin" size={18} /> : <Clock3 size={18} />}
               {isRecovering ? t('Đang phục hồi…', 'Recovering…') : t('Phục hồi ngữ cảnh', 'Recover context')}
-            </Button>
+              </Button>
+            </div>
+            <p
+              id="recovery-window-help"
+              aria-live="polite"
+              className={`mt-2 text-xs ${windowTouched && !isWindowValid ? 'font-semibold text-[var(--lb-danger)]' : 'text-[var(--lb-muted)]'}`}
+            >
+              {windowTouched && !isWindowValid
+                ? t('Nhập số nguyên từ 2 đến 10.', 'Enter a whole number from 2 to 10.')
+                : t('Chọn từ 2 đến 10 phút.', 'Choose 2 to 10 minutes.')}
+            </p>
           </div>
         </div>
 
@@ -133,12 +178,12 @@ export function LectureGroundingPanel({ videoId, currentTime, outputLanguage, on
           {recovery && (
             <div>
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="text-base">{t(`Trong ${windowSeconds / 60} phút vừa qua`, `In the last ${windowSeconds / 60} minutes`)}</h3>
+                <h3 className="text-base">{t(`Trong ${recoveredWindowMinutes} phút vừa qua`, `In the last ${recoveredWindowMinutes} minutes`)}</h3>
                 <span className="rounded-full bg-[var(--lb-success-soft)] px-3 py-1 text-xs font-semibold text-[var(--lb-success)]">
                   {recovery.metrics.validated_item_count} {t('mục đã xác thực', 'validated items')}
                 </span>
               </div>
-              <p className="mt-3 text-sm font-medium leading-7 text-[var(--lb-ink)]">{recovery.summary}</p>
+              <p className="mt-3 text-sm font-medium leading-7 text-[var(--lb-ink)]">{localizeLectureContent(recovery.summary, locale)}</p>
               {recovery.items.length > 0 && (
                 <ol className="mt-5 divide-y divide-[var(--lb-border)] border-y border-[var(--lb-border)]">
                   {recovery.items.map((item, index) => (
@@ -149,7 +194,7 @@ export function LectureGroundingPanel({ videoId, currentTime, outputLanguage, on
                           <Link2 size={15} aria-hidden="true" /> {formatTime(item.timestamp)}
                         </button>
                       </div>
-                      <p className="text-sm leading-6 text-[var(--lb-ink)]">{item.text}</p>
+                      <p className="text-sm leading-6 text-[var(--lb-ink)]">{localizeLectureContent(item.text, locale)}</p>
                     </li>
                   ))}
                 </ol>

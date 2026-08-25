@@ -269,6 +269,10 @@ const LEGACY_LECTURE_CONTENT_PAIRS: readonly ContentPair[] = [
 
 const viToEn = new Map<string, string>(LEGACY_LECTURE_CONTENT_PAIRS);
 const enToVi = new Map<string, string>(LEGACY_LECTURE_CONTENT_PAIRS.map(([vi, en]) => [en, vi]));
+const viToEnFragments = [...LEGACY_LECTURE_CONTENT_PAIRS].sort(([left], [right]) => right.length - left.length);
+const enToViFragments = LEGACY_LECTURE_CONTENT_PAIRS
+  .map(([vi, en]) => [en, vi] as const)
+  .sort(([left], [right]) => right.length - left.length);
 
 export function localizeLectureContent(value: string, locale: Locale): string {
   const normalized = value.trim();
@@ -277,5 +281,17 @@ export function localizeLectureContent(value: string, locale: Locale): string {
   const bulletPrefix = normalized.startsWith('- ') ? '- ' : '';
   const content = bulletPrefix ? normalized.slice(bulletPrefix.length).trim() : normalized;
   const translated = locale === 'en' ? viToEn.get(content) : enToVi.get(content);
-  return translated ? `${bulletPrefix}${translated}` : value;
+  if (translated) return `${bulletPrefix}${translated}`;
+
+  const fragments = locale === 'en' ? viToEnFragments : enToViFragments;
+  let localized = content;
+  let changed = false;
+
+  for (const [source, target] of fragments) {
+    if (!localized.includes(source)) continue;
+    localized = localized.replaceAll(source, target);
+    changed = true;
+  }
+
+  return changed ? `${bulletPrefix}${localized}` : value;
 }

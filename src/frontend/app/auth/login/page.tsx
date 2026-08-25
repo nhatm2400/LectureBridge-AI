@@ -57,7 +57,7 @@ export default function LoginPage() {
               autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="ban@example.com"
+              placeholder="user@gmail.com"
               className="lb-field pr-11"
             />
             <Mail className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--lb-subtle)]" size={18} aria-hidden="true" />

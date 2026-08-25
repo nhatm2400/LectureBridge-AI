@@ -109,7 +109,7 @@ export default function RegisterPage() {
         </Field>
 
         <Field label="Email" htmlFor="register-email" error={fieldErrors.email}>
-          <input id="register-email" required type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="ban@example.com" aria-invalid={Boolean(fieldErrors.email)} aria-describedby={fieldErrors.email ? 'register-email-error' : undefined} className="lb-field" />
+          <input id="register-email" required type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="user@gmail.com" aria-invalid={Boolean(fieldErrors.email)} aria-describedby={fieldErrors.email ? 'register-email-error' : undefined} className="lb-field" />
         </Field>
 
         <Field label={t('Mật khẩu', 'Password')} htmlFor="register-password" error={fieldErrors.password} hint={t('Ít nhất 8 ký tự, gồm chữ hoa, chữ thường và số.', 'At least 8 characters with uppercase, lowercase, and a number.')}>
